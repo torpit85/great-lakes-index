@@ -15,7 +15,35 @@
     .muted { color:#666; }
   </style>
 </head>
-<body>
+<body><!-- GLI Ticker Bar -->
+<div id="gli-ticker"
+     style="
+       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+       font-weight: 700;
+       font-size: 18px;
+       letter-spacing: 0.2px;
+       padding: 12px 16px;
+       margin-bottom: 18px;
+       border: 1px solid #ddd;
+       border-radius: 12px;
+       background: linear-gradient(180deg, #fafafa, #f0f0f0);
+       box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+     ">
+  <span id="gli-ticker-text">Loading GLI…</span>
+</div>
+
+<script>
+fetch("ticker.txt", { cache: "no-store" })
+  .then(r => r.text())
+  .then(t => {
+    document.getElementById("gli-ticker-text").textContent = t.trim();
+  })
+  .catch(() => {
+    document.getElementById("gli-ticker-text").textContent =
+      "GLI ticker unavailable";
+  });
+</script>
+
   <div class="card">
     <h1>The Great Lakes Index (GLI)</h1>
     <div class="muted">Price-weighted • Base 100.00 on 2024-12-31</div>
