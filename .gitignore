@@ -1,0 +1,7 @@
+GitHub token.txt
+gli.sqlite
+gli_levels.csv
+gli_prices.csv
+.~lock.*
+*.log
+__pycache__/
