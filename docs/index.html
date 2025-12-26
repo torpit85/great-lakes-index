@@ -9,135 +9,18 @@ table { border-collapse:collapse; width:100%; }
 th,td { border:1px solid #ddd; padding:8px; text-align:right; }
 th:first-child,td:first-child { text-align:left; }
 .muted { color:#666; }
-</style>
-<style>
-#gli-tickerbar{
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-weight: 800;
-  font-size: 18px;
-  letter-spacing: 0.2px;
-  padding: 12px 16px;
-  margin: 0 0 14px 0;
-  border: 1px solid #ddd;
-  border-radius: 12px;
-  background: linear-gradient(180deg, #fafafa, #f0f0f0);
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:16px;
-  flex-wrap:wrap;
-}
-#gltxt .up{ color:#0a7a2f; }
-#gltxt .down{ color:#b00020; }
-#gltxt .flat{ color:#444; }
-
-.gli-pill{
-  font-size: 12px;
-  font-weight: 800;
-  border:1px solid #ddd;
-  border-radius: 999px;
-  padding: 6px 10px;
-  background:#fff;
-}
-
-.gli-symbolbox{
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  border: 1px solid #ddd;
-  border-radius: 14px;
-  padding: 14px 16px;
-  margin: 0 0 18px 0;
-  background:#fff;
-}
-.gli-grid{
-  display:grid;
-  grid-template-columns: repeat(5, minmax(140px, 1fr));
-  gap: 10px 18px;
-}
-@media (max-width: 920px){
-  .gli-grid{ grid-template-columns: repeat(2, minmax(140px, 1fr)); }
-}
-
-.gli-k{ color:#666; font-size: 12px; font-weight:800; text-transform:uppercase; letter-spacing:0.6px; }
-.gli-v{ font-size: 18px; font-weight: 900; margin-top:2px; }
-
-.gli-mini{ color:#666; font-size: 13px; margin-top:6px; line-height:1.25; }
-
-.gli-linkbar{
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  margin: 8px 0 18px 0;
-}
-.gli-linkbar a{ text-decoration:none; font-weight:800; }
-
-table{ border-collapse: collapse; width:100%; }
-th,td{ border:1px solid #ddd; padding:8px; text-align:right; }
-th:first-child,td:first-child{ text-align:left; }
-</style>
-
-</head>
-<body>
-<!-- GLI_TICKER_BAR -->
-<div id="gli-tickerbar">
-  <div id="gltxt">Loading GLI…</div>
-  <div class="gli-pill">The Great Lakes Index (GLI)</div>
-</div>
-<script>
-fetch("ticker.txt", { cache: "no-store" })
-  .then(r => r.text())
-  .then(t => {
-    const s = t.trim();
-    let cls = "flat";
-    if (s.includes("▲")) cls = "up";
-    else if (s.includes("▼")) cls = "down";
-    document.getElementById("gltxt").innerHTML =
-      "<span class='" + cls + "'>" +
-      s.replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;") +
-      "</span>";
-  })
-  .catch(() => {
-    document.getElementById("gltxt").textContent = "GLI ticker unavailable";
-  });
-</script>
-
-
-<!-- GLI_SYMBOL_BOX -->
-<div class="gli-symbolbox">
-  <div style="display:flex; justify-content:space-between; align-items:flex-end; gap:12px; flex-wrap:wrap;">
-    <div>
-      <div class="gli-k">Symbol</div>
-      <div class="gli-v">GLI</div>
-      <div class="gli-mini">Price-weighted • Base 100.00 on 2024-12-31</div>
-    </div>
-    <div style="text-align:right;">
-      <div class="gli-k">As of</div>
-      <div class="gli-v" style="font-size:16px;">2025-12-24</div>
-      <div class="gli-mini">Change: +0.41 (+0.37%)</div>
-    </div>
-  </div>
-  <div style="margin-top:12px;" class="gli-grid">
-    <div><div class="gli-k">Open</div><div class="gli-v">111.06</div></div>
-    <div><div class="gli-k">High</div><div class="gli-v">111.95</div></div>
-    <div><div class="gli-k">Low</div><div class="gli-v">110.63</div></div>
-    <div><div class="gli-k">Close</div><div class="gli-v">111.45</div></div>
-    <div><div class="gli-k">Total Volume</div><div class="gli-v">74,440,400</div></div>
-  </div>
-</div>
-
-
-<!-- GLI_HISTORY_LINK -->
-<div class="gli-linkbar"><a href="./history.html">View full history →</a></div>
-
-<div class="card">
+</style></head>
+<body><div class="card">
 <h1>The Great Lakes Index (GLI)</h1>
 <div class="muted">Price-weighted • Base 100.00 on 2024-12-31</div>
 
 <div class="kpi" style="margin-top:16px;">
   <div><b>Latest Date</b><br/>2025-12-24</div>
-  <div><b>Close</b><br/>111.45</div>
-  <div><b>High</b><br/>111.95</div>
-  <div><b>Low</b><br/>110.63</div>
-  <div><b>Total Volume</b><br/>74,440,400</div>
-  <div><b>Day Change</b><br/>+0.41 (+0.37%)</div>
+  <div><b>Close</b><br/>112.98</div>
+  <div><b>High</b><br/>113.49</div>
+  <div><b>Low</b><br/>112.15</div>
+  <div><b>Total Volume</b><br/>82,554,700</div>
+  <div><b>Day Change</b><br/>+0.42 (+0.37%)</div>
 </div>
 
 <div style="margin-top:16px;">
@@ -160,183 +43,183 @@ fetch("ticker.txt", { cache: "no-store" })
   <tbody>
     <tr>
       <td>2025-11-26</td>
-      <td>109.85</td>
-      <td>111.59</td>
-      <td>109.31</td>
-      <td>110.51</td>
-      <td>231,239,616</td>
-      <td>106.531651</td>
+      <td>109.97</td>
+      <td>111.72</td>
+      <td>109.42</td>
+      <td>110.64</td>
+      <td>253,679,668</td>
+      <td>105.834551</td>
     </tr>
     <tr>
       <td>2025-11-28</td>
-      <td>110.54</td>
-      <td>111.39</td>
-      <td>109.63</td>
-      <td>110.37</td>
-      <td>117,418,294</td>
-      <td>106.531651</td>
+      <td>110.67</td>
+      <td>111.53</td>
+      <td>109.75</td>
+      <td>110.50</td>
+      <td>124,045,578</td>
+      <td>105.834551</td>
     </tr>
     <tr>
       <td>2025-12-01</td>
-      <td>109.80</td>
-      <td>111.47</td>
-      <td>108.90</td>
-      <td>109.88</td>
-      <td>238,887,325</td>
-      <td>106.531651</td>
+      <td>109.92</td>
+      <td>111.61</td>
+      <td>109.01</td>
+      <td>110.01</td>
+      <td>272,219,834</td>
+      <td>105.834551</td>
     </tr>
     <tr>
       <td>2025-12-02</td>
-      <td>110.23</td>
-      <td>111.16</td>
-      <td>108.72</td>
-      <td>109.98</td>
-      <td>263,700,049</td>
-      <td>106.531651</td>
+      <td>110.36</td>
+      <td>111.31</td>
+      <td>108.84</td>
+      <td>110.11</td>
+      <td>287,052,898</td>
+      <td>105.834551</td>
     </tr>
     <tr>
       <td>2025-12-03</td>
-      <td>110.16</td>
-      <td>111.67</td>
-      <td>108.78</td>
-      <td>110.52</td>
-      <td>245,934,311</td>
-      <td>106.531651</td>
+      <td>110.29</td>
+      <td>111.81</td>
+      <td>108.90</td>
+      <td>110.64</td>
+      <td>267,573,687</td>
+      <td>105.834551</td>
     </tr>
     <tr>
       <td>2025-12-04</td>
-      <td>110.49</td>
-      <td>111.57</td>
-      <td>108.93</td>
-      <td>110.01</td>
-      <td>261,858,667</td>
-      <td>106.531651</td>
+      <td>110.61</td>
+      <td>111.70</td>
+      <td>109.05</td>
+      <td>110.13</td>
+      <td>285,713,516</td>
+      <td>105.834551</td>
     </tr>
     <tr>
       <td>2025-12-05</td>
-      <td>110.48</td>
-      <td>111.94</td>
-      <td>109.42</td>
-      <td>110.59</td>
-      <td>239,401,358</td>
-      <td>106.531651</td>
+      <td>110.60</td>
+      <td>112.08</td>
+      <td>109.54</td>
+      <td>110.71</td>
+      <td>255,085,437</td>
+      <td>105.834551</td>
     </tr>
     <tr>
       <td>2025-12-08</td>
-      <td>110.79</td>
-      <td>111.60</td>
-      <td>108.68</td>
-      <td>109.56</td>
-      <td>251,598,838</td>
-      <td>106.531651</td>
+      <td>110.91</td>
+      <td>111.73</td>
+      <td>108.78</td>
+      <td>109.67</td>
+      <td>263,260,100</td>
+      <td>105.834551</td>
     </tr>
     <tr>
       <td>2025-12-09</td>
-      <td>109.49</td>
-      <td>110.88</td>
-      <td>108.33</td>
-      <td>109.10</td>
-      <td>195,663,457</td>
-      <td>106.531651</td>
+      <td>109.60</td>
+      <td>111.00</td>
+      <td>108.43</td>
+      <td>109.21</td>
+      <td>206,442,900</td>
+      <td>105.834551</td>
     </tr>
     <tr>
       <td>2025-12-10</td>
-      <td>109.32</td>
-      <td>111.83</td>
-      <td>108.54</td>
-      <td>111.11</td>
-      <td>337,754,466</td>
-      <td>106.531651</td>
+      <td>109.43</td>
+      <td>111.96</td>
+      <td>108.64</td>
+      <td>111.23</td>
+      <td>318,886,800</td>
+      <td>105.834551</td>
     </tr>
     <tr>
       <td>2025-12-11</td>
-      <td>110.66</td>
-      <td>112.63</td>
-      <td>109.58</td>
-      <td>111.46</td>
-      <td>243,389,000</td>
-      <td>106.531651</td>
+      <td>112.19</td>
+      <td>114.18</td>
+      <td>111.09</td>
+      <td>112.99</td>
+      <td>257,749,300</td>
+      <td>105.257378</td>
     </tr>
     <tr>
       <td>2025-12-12</td>
-      <td>111.79</td>
-      <td>112.72</td>
-      <td>109.79</td>
-      <td>110.94</td>
-      <td>220,996,900</td>
-      <td>106.531651</td>
+      <td>113.33</td>
+      <td>114.27</td>
+      <td>111.29</td>
+      <td>112.46</td>
+      <td>235,316,000</td>
+      <td>105.257378</td>
     </tr>
     <tr>
       <td>2025-12-15</td>
-      <td>111.35</td>
-      <td>112.50</td>
-      <td>109.99</td>
-      <td>111.40</td>
-      <td>255,119,100</td>
-      <td>106.531651</td>
+      <td>112.88</td>
+      <td>114.04</td>
+      <td>111.50</td>
+      <td>112.92</td>
+      <td>283,657,800</td>
+      <td>105.257378</td>
     </tr>
     <tr>
       <td>2025-12-16</td>
-      <td>111.40</td>
-      <td>112.19</td>
-      <td>109.69</td>
-      <td>110.66</td>
-      <td>256,772,100</td>
-      <td>106.531651</td>
+      <td>112.92</td>
+      <td>113.72</td>
+      <td>111.18</td>
+      <td>112.17</td>
+      <td>274,052,800</td>
+      <td>105.257378</td>
     </tr>
     <tr>
       <td>2025-12-17</td>
-      <td>110.74</td>
-      <td>111.99</td>
-      <td>109.12</td>
-      <td>110.00</td>
-      <td>236,525,200</td>
-      <td>106.531651</td>
+      <td>112.25</td>
+      <td>113.52</td>
+      <td>110.61</td>
+      <td>111.51</td>
+      <td>251,450,000</td>
+      <td>105.257378</td>
     </tr>
     <tr>
       <td>2025-12-18</td>
-      <td>110.58</td>
-      <td>111.92</td>
-      <td>109.36</td>
-      <td>110.19</td>
-      <td>232,723,400</td>
-      <td>106.531651</td>
+      <td>112.10</td>
+      <td>113.45</td>
+      <td>110.86</td>
+      <td>111.70</td>
+      <td>251,444,000</td>
+      <td>105.257378</td>
     </tr>
     <tr>
       <td>2025-12-19</td>
-      <td>110.31</td>
-      <td>111.51</td>
-      <td>109.51</td>
-      <td>110.51</td>
-      <td>401,652,600</td>
-      <td>106.531651</td>
+      <td>111.83</td>
+      <td>113.04</td>
+      <td>111.02</td>
+      <td>112.03</td>
+      <td>421,252,300</td>
+      <td>105.257378</td>
     </tr>
     <tr>
       <td>2025-12-22</td>
-      <td>110.83</td>
-      <td>112.08</td>
-      <td>109.90</td>
-      <td>111.28</td>
-      <td>187,084,300</td>
-      <td>106.531651</td>
+      <td>112.35</td>
+      <td>113.62</td>
+      <td>111.41</td>
+      <td>112.81</td>
+      <td>202,619,000</td>
+      <td>105.257378</td>
     </tr>
     <tr>
       <td>2025-12-23</td>
-      <td>111.07</td>
-      <td>112.04</td>
-      <td>110.25</td>
-      <td>111.04</td>
-      <td>158,434,000</td>
-      <td>106.531651</td>
+      <td>112.60</td>
+      <td>113.58</td>
+      <td>111.76</td>
+      <td>112.57</td>
+      <td>171,843,100</td>
+      <td>105.257378</td>
     </tr>
     <tr>
       <td>2025-12-24</td>
-      <td>111.06</td>
-      <td>111.95</td>
-      <td>110.63</td>
-      <td>111.45</td>
-      <td>74,440,400</td>
-      <td>106.531651</td>
+      <td>112.58</td>
+      <td>113.49</td>
+      <td>112.15</td>
+      <td>112.98</td>
+      <td>82,554,700</td>
+      <td>105.257378</td>
     </tr>
   </tbody>
 </table>
