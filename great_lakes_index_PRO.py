@@ -517,15 +517,13 @@ def main() -> int:
     args = parse_args()
     tickers = read_tickers(args.tickers)
 
-    end = args.end or pd.Timestamp.today().date().isoformat()
+    # Interpret --end as an INCLUSIVE date (human-friendly).
+    # yfinance end is end-EXCLUSIVE, so add +1 day when fetching.
+    end_inclusive = args.end or pd.Timestamp.today().date().isoformat()
+    end_fetch = (pd.to_datetime(end_inclusive) + pd.Timedelta(days=1)).date().isoformat()
 
     if args.fetch == "yfinance":
         prices_df = fetch_yahoo_daily(tickers, args.start, end_fetch, auto_adjust=args.auto_adjust)
-
-# Interpret --end as an inclusive date (human-friendly).
-# yfinance's end parameter is end-exclusive, so add +1 day when fetching.
-end_inclusive = args.end or pd.Timestamp.today().date().isoformat()
-end_fetch = (pd.to_datetime(end_inclusive) + pd.Timedelta(days=1)).date().isoformat()
         prices_df = normalize_prices_df(prices_df)
         if args.prices_out:
             prices_df.to_csv(args.prices_out, index=False)
@@ -561,7 +559,6 @@ end_fetch = (pd.to_datetime(end_inclusive) + pd.Timedelta(days=1)).date().isofor
     if args.report_dir:
         print(f"Wrote report: {args.report_dir/'index.html'}")
     return 0
-
 
 if __name__ == "__main__":
     raise SystemExit(main())
