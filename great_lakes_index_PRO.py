@@ -462,11 +462,16 @@ table {{ border-collapse:collapse; width:100%; }}
 th,td {{ border:1px solid #ddd; padding:8px; text-align:right; }}
 th:first-child,td:first-child {{ text-align:left; }}
 .muted {{ color:#666; }}
+.nav {{ margin-top: 10px; padding: 10px 12px; background:#f6f6f6; border:1px solid #ddd; border-radius:10px; }}
+.nav a {{ margin-right: 14px; text-decoration: none; }}
+.nav a:hover {{ text-decoration: underline; }}
 </style></head>
 <body><div class="card">
 <h1>The Great Lakes Index (GLI)</h1>
 <div class="muted">Price-weighted • Base {BASE_VALUE:.2f} on {BASE_DATE}</div>
-<div class="muted" style="margin-top:8px;">
+<div class="nav">
+  <a href="./index.html"><b>Home</b></a>
+  <a href="./history.html">Historical Values</a>
   <a href="./ohlcv.html">Component OHLCV</a>
 </div>
 
@@ -512,13 +517,15 @@ def main() -> int:
     args = parse_args()
     tickers = read_tickers(args.tickers)
 
-    # Interpret --end as an INCLUSIVE date (human-friendly).
-    # yfinance's end parameter is end-EXCLUSIVE, so add +1 day when fetching.
-    end_inclusive = args.end or pd.Timestamp.today().date().isoformat()
-    end_fetch = (pd.to_datetime(end_inclusive) + pd.Timedelta(days=1)).date().isoformat()
+    end = args.end or pd.Timestamp.today().date().isoformat()
 
     if args.fetch == "yfinance":
         prices_df = fetch_yahoo_daily(tickers, args.start, end_fetch, auto_adjust=args.auto_adjust)
+
+# Interpret --end as an inclusive date (human-friendly).
+# yfinance's end parameter is end-exclusive, so add +1 day when fetching.
+end_inclusive = args.end or pd.Timestamp.today().date().isoformat()
+end_fetch = (pd.to_datetime(end_inclusive) + pd.Timedelta(days=1)).date().isoformat()
         prices_df = normalize_prices_df(prices_df)
         if args.prices_out:
             prices_df.to_csv(args.prices_out, index=False)
