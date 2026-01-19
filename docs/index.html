@@ -9,125 +9,8 @@ table { border-collapse:collapse; width:100%; }
 th,td { border:1px solid #ddd; padding:8px; text-align:right; }
 th:first-child,td:first-child { text-align:left; }
 .muted { color:#666; }
-</style>
-<style>
-#gli-tickerbar{
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-weight: 800;
-  font-size: 18px;
-  letter-spacing: 0.2px;
-  padding: 12px 16px;
-  margin: 0 0 14px 0;
-  border: 1px solid #ddd;
-  border-radius: 12px;
-  background: linear-gradient(180deg, #fafafa, #f0f0f0);
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:16px;
-  flex-wrap:wrap;
-}
-#gltxt .up{ color:#0a7a2f; }
-#gltxt .down{ color:#b00020; }
-#gltxt .flat{ color:#444; }
-
-.gli-pill{
-  font-size: 12px;
-  font-weight: 800;
-  border:1px solid #ddd;
-  border-radius: 999px;
-  padding: 6px 10px;
-  background:#fff;
-}
-
-.gli-symbolbox{
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  border: 1px solid #ddd;
-  border-radius: 14px;
-  padding: 14px 16px;
-  margin: 0 0 18px 0;
-  background:#fff;
-}
-.gli-grid{
-  display:grid;
-  grid-template-columns: repeat(5, minmax(140px, 1fr));
-  gap: 10px 18px;
-}
-@media (max-width: 920px){
-  .gli-grid{ grid-template-columns: repeat(2, minmax(140px, 1fr)); }
-}
-
-.gli-k{ color:#666; font-size: 12px; font-weight:800; text-transform:uppercase; letter-spacing:0.6px; }
-.gli-v{ font-size: 18px; font-weight: 900; margin-top:2px; }
-
-.gli-mini{ color:#666; font-size: 13px; margin-top:6px; line-height:1.25; }
-
-.gli-linkbar{
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  margin: 8px 0 18px 0;
-}
-.gli-linkbar a{ text-decoration:none; font-weight:800; }
-
-table{ border-collapse: collapse; width:100%; }
-th,td{ border:1px solid #ddd; padding:8px; text-align:right; }
-th:first-child,td:first-child{ text-align:left; }
-</style>
-
-</head>
-<body>
-<!-- GLI_TICKER_BAR -->
-<div id="gli-tickerbar">
-  <div id="gltxt">Loading GLI…</div>
-  <div class="gli-pill">The Great Lakes Index (GLI)</div>
-</div>
-<script>
-fetch("ticker.txt", { cache: "no-store" })
-  .then(r => r.text())
-  .then(t => {
-    const s = t.trim();
-    let cls = "flat";
-    if (s.includes("▲")) cls = "up";
-    else if (s.includes("▼")) cls = "down";
-    document.getElementById("gltxt").innerHTML =
-      "<span class='" + cls + "'>" +
-      s.replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;") +
-      "</span>";
-  })
-  .catch(() => {
-    document.getElementById("gltxt").textContent = "GLI ticker unavailable";
-  });
-</script>
-
-
-<!-- GLI_SYMBOL_BOX -->
-<div class="gli-symbolbox">
-  <div style="display:flex; justify-content:space-between; align-items:flex-end; gap:12px; flex-wrap:wrap;">
-    <div>
-      <div class="gli-k">Symbol</div>
-      <div class="gli-v">GLI</div>
-      <div class="gli-mini">Price-weighted • Base 100.00 on 2024-12-31</div>
-    </div>
-    <div style="text-align:right;">
-      <div class="gli-k">As of</div>
-      <div class="gli-v" style="font-size:16px;">2026-01-15</div>
-      <div class="gli-mini">Change: +0.74 (+0.63%)</div>
-    </div>
-  </div>
-  <div style="margin-top:12px;" class="gli-grid">
-    <div><div class="gli-k">Open</div><div class="gli-v">117.16</div></div>
-    <div><div class="gli-k">High</div><div class="gli-v">118.74</div></div>
-    <div><div class="gli-k">Low</div><div class="gli-v">115.88</div></div>
-    <div><div class="gli-k">Close</div><div class="gli-v">117.56</div></div>
-    <div><div class="gli-k">Total Volume</div><div class="gli-v">246,735,100</div></div>
-  </div>
-</div>
-
-
-<!-- GLI_HISTORY_LINK -->
-<div class="gli-linkbar"><a href="./history.html">View full history →</a></div>
-
-<div class="card">
+</style></head>
+<body><div class="card">
 <h1>The Great Lakes Index (GLI)</h1>
 <div class="muted">Price-weighted • Base 100.00 on 2024-12-31</div>
 <div class="muted" style="margin-top:8px;">
@@ -135,12 +18,12 @@ fetch("ticker.txt", { cache: "no-store" })
 </div>
 
 <div class="kpi" style="margin-top:16px;">
-  <div><b>Latest Date</b><br/>2026-01-15</div>
-  <div><b>Close</b><br/>117.56</div>
-  <div><b>High</b><br/>118.74</div>
-  <div><b>Low</b><br/>115.88</div>
-  <div><b>Total Volume</b><br/>246,735,100</div>
-  <div><b>Day Change</b><br/>+0.74 (+0.63%)</div>
+  <div><b>Latest Date</b><br/>2026-01-16</div>
+  <div><b>Close</b><br/>117.44</div>
+  <div><b>High</b><br/>118.61</div>
+  <div><b>Low</b><br/>116.13</div>
+  <div><b>Total Volume</b><br/>298,720,200</div>
+  <div><b>Day Change</b><br/>-0.12 (-0.10%)</div>
 </div>
 
 <div style="margin-top:16px;">
@@ -161,15 +44,6 @@ fetch("ticker.txt", { cache: "no-store" })
     </tr>
   </thead>
   <tbody>
-    <tr>
-      <td>2025-12-17</td>
-      <td>112.25</td>
-      <td>113.52</td>
-      <td>110.61</td>
-      <td>111.51</td>
-      <td>251,450,000</td>
-      <td>105.257378</td>
-    </tr>
     <tr>
       <td>2025-12-18</td>
       <td>112.10</td>
@@ -338,7 +212,16 @@ fetch("ticker.txt", { cache: "no-store" })
       <td>118.74</td>
       <td>115.88</td>
       <td>117.56</td>
-      <td>246,735,100</td>
+      <td>246,821,600</td>
+      <td>105.257378</td>
+    </tr>
+    <tr>
+      <td>2026-01-16</td>
+      <td>117.41</td>
+      <td>118.61</td>
+      <td>116.13</td>
+      <td>117.44</td>
+      <td>298,720,200</td>
       <td>105.257378</td>
     </tr>
   </tbody>
