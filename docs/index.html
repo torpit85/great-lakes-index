@@ -9,11 +9,152 @@ table { border-collapse:collapse; width:100%; }
 th,td { border:1px solid #ddd; padding:8px; text-align:right; }
 th:first-child,td:first-child { text-align:left; }
 .muted { color:#666; }
-</style></head>
-<body><div class="card">
+.nav { margin-top: 10px; padding: 10px 12px; background:#f6f6f6; border:1px solid #ddd; border-radius:10px; }
+.nav a { margin-right: 14px; text-decoration: none; }
+.nav a:hover { text-decoration: underline; }
+</style>
+<style>
+#gli-tickerbar{
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: 0.2px;
+  padding: 12px 16px;
+  margin: 0 0 14px 0;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #fafafa, #f0f0f0);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:16px;
+  flex-wrap:wrap;
+}
+#gltxt .up{ color:#0a7a2f; }
+#gltxt .down{ color:#b00020; }
+#gltxt .flat{ color:#444; }
+
+.gli-pill{
+  font-size: 12px;
+  font-weight: 800;
+  border:1px solid #ddd;
+  border-radius: 999px;
+  padding: 6px 10px;
+  background:#fff;
+}
+
+.gli-symbolbox{
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  border: 1px solid #ddd;
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin: 0 0 18px 0;
+  background:#fff;
+}
+.gli-grid{
+  display:grid;
+  grid-template-columns: repeat(5, minmax(140px, 1fr));
+  gap: 10px 18px;
+}
+@media (max-width: 920px){
+  .gli-grid{ grid-template-columns: repeat(2, minmax(140px, 1fr)); }
+}
+
+.gli-k{ color:#666; font-size: 12px; font-weight:800; text-transform:uppercase; letter-spacing:0.6px; }
+.gli-v{ font-size: 18px; font-weight: 900; margin-top:2px; }
+
+.gli-mini{ color:#666; font-size: 13px; margin-top:6px; line-height:1.25; }
+
+.gli-linkbar{
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  margin: 8px 0 18px 0;
+}
+.gli-linkbar a{ text-decoration:none; font-weight:800; }
+
+.gli-nav{
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  margin: 0 0 14px 0;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  background: #f6f6f6;
+}
+.gli-nav a{ text-decoration:none; font-weight:800; margin-right:14px; }
+.gli-nav a:hover{ text-decoration:underline; }
+
+table{ border-collapse: collapse; width:100%; }
+th,td{ border:1px solid #ddd; padding:8px; text-align:right; }
+th:first-child,td:first-child{ text-align:left; }
+</style>
+
+</head>
+<body>
+<!-- GLI_NAV_BAR -->
+<div class="gli-nav">
+  <a href="./index.html"><b>Home</b></a>
+  <a href="./history.html">Historical Values</a>
+  <a href="./ohlcv.html">Component OHLCV</a>
+</div>
+
+
+<!-- GLI_TICKER_BAR -->
+<div id="gli-tickerbar">
+  <div id="gltxt">Loading GLI…</div>
+  <div class="gli-pill">The Great Lakes Index (GLI)</div>
+</div>
+<script>
+fetch("ticker.txt", { cache: "no-store" })
+  .then(r => r.text())
+  .then(t => {
+    const s = t.trim();
+    let cls = "flat";
+    if (s.includes("▲")) cls = "up";
+    else if (s.includes("▼")) cls = "down";
+    document.getElementById("gltxt").innerHTML =
+      "<span class='" + cls + "'>" +
+      s.replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;") +
+      "</span>";
+  })
+  .catch(() => {
+    document.getElementById("gltxt").textContent = "GLI ticker unavailable";
+  });
+</script>
+
+
+<!-- GLI_SYMBOL_BOX -->
+<div class="gli-symbolbox">
+  <div style="display:flex; justify-content:space-between; align-items:flex-end; gap:12px; flex-wrap:wrap;">
+    <div>
+      <div class="gli-k">Symbol</div>
+      <div class="gli-v">GLI</div>
+      <div class="gli-mini">Price-weighted • Base 100.00 on 2024-12-31</div>
+    </div>
+    <div style="text-align:right;">
+      <div class="gli-k">As of</div>
+      <div class="gli-v" style="font-size:16px;">2026-01-16</div>
+      <div class="gli-mini">Change: -0.12 (-0.10%)</div>
+    </div>
+  </div>
+  <div style="margin-top:12px;" class="gli-grid">
+    <div><div class="gli-k">Open</div><div class="gli-v">117.41</div></div>
+    <div><div class="gli-k">High</div><div class="gli-v">118.61</div></div>
+    <div><div class="gli-k">Low</div><div class="gli-v">116.13</div></div>
+    <div><div class="gli-k">Close</div><div class="gli-v">117.44</div></div>
+    <div><div class="gli-k">Total Volume</div><div class="gli-v">298,720,200</div></div>
+  </div>
+</div>
+
+
+<!-- GLI_HISTORY_LINK -->
+<div class="gli-linkbar"><a href="./history.html">View full history →</a></div>
+
+<div class="card">
 <h1>The Great Lakes Index (GLI)</h1>
 <div class="muted">Price-weighted • Base 100.00 on 2024-12-31</div>
-<div class="muted" style="margin-top:8px;">
+<div class="nav">
+  <a href="./index.html"><b>Home</b></a>
+  <a href="./history.html">Historical Values</a>
   <a href="./ohlcv.html">Component OHLCV</a>
 </div>
 
