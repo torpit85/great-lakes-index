@@ -1,990 +1,1130 @@
 <!doctype html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Component OHLCV (Most Recent Session)</title>
-  <style>
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, sans-serif; margin: 24px; }
-    header { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
-    h1 { margin: 0 0 6px 0; font-size: 22px; }
-    .meta { color: #555; font-size: 14px; }
-    .nav a { margin-right: 12px; }
-    .wrap { overflow-x: auto; }
-    .warn { margin-top: 12px; padding: 10px 12px; background: #fff6d6; border: 1px solid #f2d184; border-radius: 10px; }
-    table.table { border-collapse: collapse; width: 100%; margin-top: 16px; }
-    table.table th, table.table td { border: 1px solid #ddd; padding: 8px; text-align: right; }
-    table.table th:first-child, table.table td:first-child { text-align: left; }
-    table.table th { background: #f6f6f6; position: sticky; top: 0; }
-  </style>
-</head>
-<body>
-  <header>
-    <div>
-      <h1>Component OHLCV (Most Recent Session)</h1>
-      <div class="meta">As of: 2026-02-02</div>
-    </div>
-    <div class="nav">
-      <a href="./index.html">Home</a>
-      <a href="./ohlcv.html">Component OHLCV</a>
-    </div>
-  </header>
-
+  <meta charset="utf-8"/>
+  <title>Component OHLCV</title>
   
+<style>
+#gli-tickerbar{
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: 0.2px;
+  padding: 12px 16px;
+  margin: 0 0 14px 0;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #fafafa, #f0f0f0);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:16px;
+  flex-wrap:wrap;
+}
+#gltxt .up{ color:#0a7a2f; }
+#gltxt .down{ color:#b00020; }
+#gltxt .flat{ color:#444; }
 
-  <div class="wrap">
-    <table class="dataframe table">
+.gli-pill{
+  font-size: 12px;
+  font-weight: 800;
+  border:1px solid #ddd;
+  border-radius: 999px;
+  padding: 6px 10px;
+  background:#fff;
+}
+
+.gli-symbolbox{
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  border: 1px solid #ddd;
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin: 0 0 18px 0;
+  background:#fff;
+}
+.gli-grid{
+  display:grid;
+  grid-template-columns: repeat(5, minmax(140px, 1fr));
+  gap: 10px 18px;
+}
+@media (max-width: 920px){
+  .gli-grid{ grid-template-columns: repeat(2, minmax(140px, 1fr)); }
+}
+
+.gli-k{ color:#666; font-size: 12px; font-weight:800; text-transform:uppercase; letter-spacing:0.6px; }
+.gli-v{ font-size: 18px; font-weight: 900; margin-top:2px; }
+
+.gli-mini{ color:#666; font-size: 13px; margin-top:6px; line-height:1.25; }
+
+.gli-linkbar{
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  margin: 8px 0 18px 0;
+}
+.gli-linkbar a{ text-decoration:none; font-weight:800; }
+
+.gli-nav{
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  margin: 0 0 14px 0;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  background: #f6f6f6;
+}
+.gli-nav a{ text-decoration:none; font-weight:800; margin-right:14px; }
+.gli-nav a:hover{ text-decoration:underline; }
+
+table{ border-collapse: collapse; width:100%; }
+th,td{ border:1px solid #ddd; padding:8px; text-align:right; }
+th:first-child,td:first-child{ text-align:left; }
+</style>
+
+</head>
+<body style="margin:24px;">
+  <div class="gli-nav">
+    <a href="./index.html"><b>Home</b></a>
+    <a href="./history.html">Historical Values</a>
+    <a href="./ohlcv.html">Component OHLCV</a>
+  </div>
+  <h1 style="margin:0; font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;">Component OHLCV</h1>
+  <div class="gli-mini">Latest snapshot per ticker • Price = Close • % Change vs prior close</div>
+  <div style="margin-top:14px;"><table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
-      <th>Ticker</th>
-      <th>Date</th>
+      <th>Company</th>
+      <th>Symbol</th>
       <th>Open</th>
       <th>High</th>
       <th>Low</th>
-      <th>Close</th>
-      <th>Adj Close</th>
-      <th>Volume</th>
+      <th>Price</th>
+      <th>Change</th>
+      <th>% Change</th>
+      <th>Date</th>
       <th>Source</th>
     </tr>
   </thead>
   <tbody>
     <tr>
+      <td>Archer-Daniels-Midland Company</td>
       <td>ADM</td>
+      <td>67.18</td>
+      <td>68.37</td>
+      <td>66.77</td>
+      <td>68.08</td>
+      <td>+0.77</td>
+      <td>+1.14%</td>
       <td>2026-02-02</td>
-      <td>67.1800</td>
-      <td>68.3700</td>
-      <td>66.7708</td>
-      <td>68.08</td>
-      <td>68.08</td>
-      <td>4688763</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>American Electric Power Company</td>
       <td>AEP</td>
+      <td>119.98</td>
+      <td>120.38</td>
+      <td>118.06</td>
+      <td>118.33</td>
+      <td>-1.45</td>
+      <td>-1.21%</td>
       <td>2026-02-02</td>
-      <td>119.0150</td>
-      <td>120.3800</td>
-      <td>118.0600</td>
-      <td>118.33</td>
-      <td>118.33</td>
-      <td>3928703</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Allstate Corporation (The)</td>
       <td>ALL</td>
+      <td>199.95</td>
+      <td>202.35</td>
+      <td>198.22</td>
+      <td>200.76</td>
+      <td>+1.77</td>
+      <td>+0.89%</td>
       <td>2026-02-02</td>
-      <td>199.9500</td>
-      <td>202.3500</td>
-      <td>198.2200</td>
-      <td>200.76</td>
-      <td>200.76</td>
-      <td>1457758</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Ally Financial Inc.</td>
       <td>ALLY</td>
+      <td>41.94</td>
+      <td>42.42</td>
+      <td>41.25</td>
+      <td>42.16</td>
+      <td>-0.12</td>
+      <td>-0.28%</td>
       <td>2026-02-02</td>
-      <td>41.9400</td>
-      <td>42.4200</td>
-      <td>41.2500</td>
-      <td>42.16</td>
-      <td>42.16</td>
-      <td>2863828</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Abercrombie &amp; Fitch Company</td>
       <td>ANF</td>
+      <td>98.15</td>
+      <td>102.38</td>
+      <td>98.14</td>
+      <td>101.45</td>
+      <td>+3.82</td>
+      <td>+3.91%</td>
       <td>2026-02-02</td>
-      <td>98.1500</td>
-      <td>102.3800</td>
-      <td>98.1400</td>
-      <td>101.45</td>
-      <td>101.45</td>
-      <td>1366451</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Angi Inc.</td>
       <td>ANGI</td>
+      <td>12.86</td>
+      <td>13.09</td>
+      <td>12.71</td>
+      <td>12.75</td>
+      <td>-0.23</td>
+      <td>-1.77%</td>
       <td>2026-02-02</td>
-      <td>12.8600</td>
-      <td>13.0700</td>
-      <td>12.7100</td>
-      <td>12.75</td>
-      <td>12.75</td>
-      <td>440245</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>A.O. Smith Corporation</td>
       <td>AOS</td>
+      <td>73.27</td>
+      <td>74.89</td>
+      <td>72.77</td>
+      <td>74.71</td>
+      <td>+1.22</td>
+      <td>+1.66%</td>
       <td>2026-02-02</td>
-      <td>73.2700</td>
-      <td>74.8850</td>
-      <td>72.7700</td>
-      <td>74.71</td>
-      <td>74.71</td>
-      <td>1410620</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Boeing Company (The)</td>
       <td>BA</td>
+      <td>232.64</td>
+      <td>236.29</td>
+      <td>230.33</td>
+      <td>233.02</td>
+      <td>-0.70</td>
+      <td>-0.30%</td>
       <td>2026-02-02</td>
-      <td>232.6400</td>
-      <td>236.2900</td>
-      <td>230.3300</td>
-      <td>233.02</td>
-      <td>233.02</td>
-      <td>6088895</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Baxter International Inc.</td>
       <td>BAX</td>
+      <td>19.89</td>
+      <td>20.11</td>
+      <td>19.74</td>
+      <td>19.87</td>
+      <td>-0.20</td>
+      <td>-1.00%</td>
       <td>2026-02-02</td>
-      <td>19.8900</td>
-      <td>20.1063</td>
-      <td>19.7350</td>
-      <td>19.87</td>
-      <td>19.87</td>
-      <td>5616372</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Badger Meter, Inc.</td>
       <td>BMI</td>
+      <td>145.01</td>
+      <td>151.90</td>
+      <td>144.57</td>
+      <td>151.83</td>
+      <td>+5.25</td>
+      <td>+3.58%</td>
       <td>2026-02-02</td>
-      <td>145.0100</td>
-      <td>151.8300</td>
-      <td>144.5650</td>
-      <td>151.83</td>
-      <td>151.83</td>
-      <td>580358</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Cars.com Inc.</td>
       <td>CARS</td>
+      <td>11.40</td>
+      <td>11.51</td>
+      <td>11.32</td>
+      <td>11.40</td>
+      <td>+0.04</td>
+      <td>+0.35%</td>
       <td>2026-02-02</td>
-      <td>11.4000</td>
-      <td>11.5050</td>
-      <td>11.3250</td>
-      <td>11.40</td>
-      <td>11.40</td>
-      <td>469303</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Caterpillar, Inc.</td>
       <td>CAT</td>
+      <td>659.82</td>
+      <td>691.38</td>
+      <td>657.43</td>
+      <td>690.91</td>
+      <td>+33.55</td>
+      <td>+5.10%</td>
       <td>2026-02-02</td>
-      <td>659.8200</td>
-      <td>691.3750</td>
-      <td>657.4305</td>
-      <td>690.91</td>
-      <td>690.91</td>
-      <td>4388583</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>CF Industries Holdings, Inc.</td>
       <td>CF</td>
+      <td>91.48</td>
+      <td>92.14</td>
+      <td>88.78</td>
+      <td>89.84</td>
+      <td>-3.39</td>
+      <td>-3.64%</td>
       <td>2026-02-02</td>
-      <td>91.4800</td>
-      <td>92.1400</td>
-      <td>88.7800</td>
-      <td>89.84</td>
-      <td>89.84</td>
-      <td>1966761</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>CME Group Inc.</td>
       <td>CME</td>
+      <td>289.47</td>
+      <td>293.78</td>
+      <td>288.29</td>
+      <td>290.77</td>
+      <td>+1.71</td>
+      <td>+0.59%</td>
       <td>2026-02-02</td>
-      <td>289.5000</td>
-      <td>293.7800</td>
-      <td>288.2850</td>
-      <td>290.77</td>
-      <td>290.77</td>
-      <td>1967947</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Cummins Inc.</td>
       <td>CMI</td>
+      <td>577.83</td>
+      <td>595.25</td>
+      <td>576.00</td>
+      <td>595.13</td>
+      <td>+16.31</td>
+      <td>+2.82%</td>
       <td>2026-02-02</td>
-      <td>577.8300</td>
-      <td>595.2400</td>
-      <td>576.0000</td>
-      <td>595.13</td>
-      <td>595.13</td>
-      <td>959877</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>CTS Corporation</td>
       <td>CTS</td>
+      <td>51.24</td>
+      <td>53.54</td>
+      <td>51.24</td>
+      <td>53.12</td>
+      <td>+1.71</td>
+      <td>+3.33%</td>
       <td>2026-02-02</td>
-      <td>51.2400</td>
-      <td>53.5200</td>
-      <td>51.3400</td>
-      <td>53.12</td>
-      <td>53.12</td>
-      <td>165479</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Deere &amp; Company</td>
       <td>DE</td>
+      <td>527.25</td>
+      <td>534.70</td>
+      <td>522.39</td>
+      <td>532.25</td>
+      <td>+4.25</td>
+      <td>+0.80%</td>
       <td>2026-02-02</td>
-      <td>527.2500</td>
-      <td>534.7000</td>
-      <td>522.3900</td>
-      <td>532.25</td>
-      <td>532.25</td>
-      <td>1176800</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Dow Inc.</td>
       <td>DOW</td>
+      <td>27.50</td>
+      <td>29.02</td>
+      <td>27.10</td>
+      <td>28.88</td>
+      <td>+1.33</td>
+      <td>+4.83%</td>
       <td>2026-02-02</td>
-      <td>27.5000</td>
-      <td>29.0250</td>
-      <td>27.1000</td>
-      <td>28.88</td>
-      <td>28.88</td>
-      <td>17066294</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Domino's Pizza Inc</td>
       <td>DPZ</td>
+      <td>411.60</td>
+      <td>413.00</td>
+      <td>403.76</td>
+      <td>409.22</td>
+      <td>-1.11</td>
+      <td>-0.27%</td>
       <td>2026-02-02</td>
-      <td>408.1000</td>
-      <td>413.0000</td>
-      <td>403.7600</td>
-      <td>409.22</td>
-      <td>409.22</td>
-      <td>902623</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Exelon Corporation</td>
       <td>EXC</td>
+      <td>45.00</td>
+      <td>45.07</td>
+      <td>43.61</td>
+      <td>43.91</td>
+      <td>-0.87</td>
+      <td>-1.94%</td>
       <td>2026-02-02</td>
-      <td>45.0400</td>
-      <td>45.0500</td>
-      <td>43.6100</td>
-      <td>43.91</td>
-      <td>43.91</td>
-      <td>6524984</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Ford Motor Company</td>
       <td>F</td>
+      <td>13.86</td>
+      <td>13.90</td>
+      <td>13.75</td>
+      <td>13.81</td>
+      <td>-0.07</td>
+      <td>-0.50%</td>
       <td>2026-02-02</td>
-      <td>13.8600</td>
-      <td>13.8950</td>
-      <td>13.7450</td>
-      <td>13.81</td>
-      <td>13.81</td>
-      <td>46870714</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Fidelity National Information S</td>
       <td>FIS</td>
+      <td>55.62</td>
+      <td>56.29</td>
+      <td>55.04</td>
+      <td>56.08</td>
+      <td>+0.83</td>
+      <td>+1.50%</td>
       <td>2026-02-02</td>
-      <td>55.6200</td>
-      <td>56.2900</td>
-      <td>55.0400</td>
-      <td>56.08</td>
-      <td>56.08</td>
-      <td>3406698</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Fifth Third Bancorp</td>
       <td>FITB</td>
+      <td>49.42</td>
+      <td>52.02</td>
+      <td>49.42</td>
+      <td>51.95</td>
+      <td>+1.73</td>
+      <td>+3.44%</td>
       <td>2026-02-02</td>
-      <td>49.4800</td>
-      <td>52.0200</td>
-      <td>49.4550</td>
-      <td>51.95</td>
-      <td>51.95</td>
-      <td>21843973</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Federal Signal Corporation</td>
       <td>FSS</td>
+      <td>108.64</td>
+      <td>112.14</td>
+      <td>107.91</td>
+      <td>112.03</td>
+      <td>+3.94</td>
+      <td>+3.65%</td>
       <td>2026-02-02</td>
-      <td>108.6400</td>
-      <td>112.1350</td>
-      <td>107.9100</td>
-      <td>112.03</td>
-      <td>112.03</td>
-      <td>383557</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Six Flags Entertainment Corpora</td>
       <td>FUN</td>
+      <td>17.98</td>
+      <td>18.62</td>
+      <td>17.64</td>
+      <td>18.24</td>
+      <td>+0.23</td>
+      <td>+1.28%</td>
       <td>2026-02-02</td>
-      <td>17.9800</td>
-      <td>18.6200</td>
-      <td>17.6550</td>
-      <td>18.24</td>
-      <td>18.24</td>
-      <td>1857495</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Great Lakes Dredge &amp; Dock Corpo</td>
       <td>GLDD</td>
+      <td>14.94</td>
+      <td>15.30</td>
+      <td>14.82</td>
+      <td>15.12</td>
+      <td>+0.14</td>
+      <td>+0.93%</td>
       <td>2026-02-02</td>
-      <td>15.0700</td>
-      <td>15.3000</td>
-      <td>14.8450</td>
-      <td>15.12</td>
-      <td>15.12</td>
-      <td>761559</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>General Motors Company</td>
       <td>GM</td>
+      <td>84.25</td>
+      <td>84.53</td>
+      <td>83.10</td>
+      <td>84.27</td>
+      <td>+0.27</td>
+      <td>+0.32%</td>
       <td>2026-02-02</td>
-      <td>84.2500</td>
-      <td>84.5300</td>
-      <td>83.1000</td>
-      <td>84.27</td>
-      <td>84.27</td>
-      <td>5006516</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>The Goodyear Tire &amp; Rubber Comp</td>
       <td>GT</td>
+      <td>9.35</td>
+      <td>9.56</td>
+      <td>9.29</td>
+      <td>9.33</td>
+      <td>-0.08</td>
+      <td>-0.85%</td>
       <td>2026-02-02</td>
-      <td>9.5200</td>
-      <td>9.5500</td>
-      <td>9.2900</td>
-      <td>9.33</td>
-      <td>9.33</td>
-      <td>5333887</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Hyatt Hotels Corporation</td>
       <td>H</td>
+      <td>156.75</td>
+      <td>157.27</td>
+      <td>154.20</td>
+      <td>154.90</td>
+      <td>-1.47</td>
+      <td>-0.94%</td>
       <td>2026-02-02</td>
-      <td>156.7500</td>
-      <td>157.2700</td>
-      <td>154.2000</td>
-      <td>154.90</td>
-      <td>154.90</td>
-      <td>840089</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Harley-Davidson, Inc.</td>
       <td>HOG</td>
+      <td>19.52</td>
+      <td>19.75</td>
+      <td>19.33</td>
+      <td>19.56</td>
+      <td>-0.24</td>
+      <td>-1.21%</td>
       <td>2026-02-02</td>
-      <td>19.5200</td>
-      <td>19.7500</td>
-      <td>19.3300</td>
-      <td>19.56</td>
-      <td>19.56</td>
-      <td>3309287</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Hurco Companies, Inc.</td>
       <td>HURC</td>
+      <td>16.82</td>
+      <td>16.96</td>
+      <td>16.59</td>
+      <td>16.60</td>
+      <td>+0.06</td>
+      <td>+0.36%</td>
       <td>2026-02-02</td>
-      <td>17.2100</td>
-      <td>16.9600</td>
-      <td>16.5850</td>
-      <td>16.60</td>
-      <td>16.60</td>
-      <td>32216</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Ingredion Incorporated</td>
       <td>INGR</td>
+      <td>117.41</td>
+      <td>118.51</td>
+      <td>116.41</td>
+      <td>117.31</td>
+      <td>-0.79</td>
+      <td>-0.67%</td>
       <td>2026-02-02</td>
-      <td>117.4100</td>
-      <td>118.5100</td>
-      <td>116.4100</td>
-      <td>117.31</td>
-      <td>117.31</td>
-      <td>1102886</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Illinois Tool Works Inc.</td>
       <td>ITW</td>
+      <td>261.28</td>
+      <td>265.00</td>
+      <td>260.06</td>
+      <td>264.21</td>
+      <td>+2.95</td>
+      <td>+1.13%</td>
       <td>2026-02-02</td>
-      <td>261.2800</td>
-      <td>265.0000</td>
-      <td>260.0600</td>
-      <td>264.21</td>
-      <td>264.21</td>
-      <td>1684600</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Jones Lang LaSalle Incorporated</td>
       <td>JLL</td>
+      <td>357.00</td>
+      <td>360.77</td>
+      <td>353.69</td>
+      <td>353.93</td>
+      <td>-3.98</td>
+      <td>-1.11%</td>
       <td>2026-02-02</td>
-      <td>357.0000</td>
-      <td>360.5300</td>
-      <td>353.7850</td>
-      <td>353.93</td>
-      <td>353.93</td>
-      <td>350715</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Kelly Services, Inc.</td>
       <td>KELYA</td>
+      <td>11.09</td>
+      <td>11.39</td>
+      <td>10.81</td>
+      <td>11.19</td>
+      <td>+0.40</td>
+      <td>+3.71%</td>
       <td>2026-02-02</td>
-      <td>10.9200</td>
-      <td>11.3850</td>
-      <td>10.8100</td>
-      <td>11.19</td>
-      <td>11.19</td>
-      <td>774127</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Kroger Company (The)</td>
       <td>KR</td>
+      <td>63.02</td>
+      <td>63.64</td>
+      <td>61.71</td>
+      <td>63.06</td>
+      <td>+0.21</td>
+      <td>+0.33%</td>
       <td>2026-02-02</td>
-      <td>63.0200</td>
-      <td>63.6400</td>
-      <td>61.7100</td>
-      <td>63.06</td>
-      <td>63.06</td>
-      <td>4717464</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Kohl's Corporation</td>
       <td>KSS</td>
+      <td>17.47</td>
+      <td>18.45</td>
+      <td>17.47</td>
+      <td>17.97</td>
+      <td>+0.50</td>
+      <td>+2.86%</td>
       <td>2026-02-02</td>
-      <td>17.4700</td>
-      <td>18.4500</td>
-      <td>17.4650</td>
-      <td>17.97</td>
-      <td>17.97</td>
-      <td>3187630</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Lakeland Financial Corporation</td>
       <td>LKFN</td>
+      <td>60.00</td>
+      <td>60.96</td>
+      <td>59.28</td>
+      <td>60.76</td>
+      <td>+1.16</td>
+      <td>+1.95%</td>
       <td>2026-02-02</td>
-      <td>60.1000</td>
-      <td>60.9600</td>
-      <td>59.2800</td>
-      <td>60.76</td>
-      <td>60.76</td>
-      <td>164192</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Eli Lilly and Company</td>
       <td>LLY</td>
+      <td>1,037.57</td>
+      <td>1,057.41</td>
+      <td>1,037.57</td>
+      <td>1,044.13</td>
+      <td>+6.98</td>
+      <td>+0.67%</td>
       <td>2026-02-02</td>
-      <td>1037.5699</td>
-      <td>1057.4100</td>
-      <td>1037.5699</td>
-      <td>1044.13</td>
-      <td>1044.13</td>
-      <td>2751911</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>La-Z-Boy Incorporated</td>
       <td>LZB</td>
+      <td>36.77</td>
+      <td>37.27</td>
+      <td>36.32</td>
+      <td>37.24</td>
+      <td>+0.83</td>
+      <td>+2.28%</td>
       <td>2026-02-02</td>
-      <td>36.7700</td>
-      <td>37.2700</td>
-      <td>36.3200</td>
-      <td>37.24</td>
-      <td>37.24</td>
-      <td>448924</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Macy's Inc</td>
       <td>M</td>
+      <td>20.30</td>
+      <td>21.24</td>
+      <td>20.28</td>
+      <td>21.19</td>
+      <td>+1.17</td>
+      <td>+5.84%</td>
       <td>2026-02-02</td>
-      <td>20.3000</td>
-      <td>21.2300</td>
-      <td>20.2900</td>
-      <td>21.19</td>
-      <td>21.19</td>
-      <td>7999696</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Masco Corporation</td>
       <td>MAS</td>
+      <td>66.30</td>
+      <td>67.12</td>
+      <td>65.99</td>
+      <td>66.57</td>
+      <td>+0.48</td>
+      <td>+0.73%</td>
       <td>2026-02-02</td>
-      <td>66.3000</td>
-      <td>67.1200</td>
-      <td>65.9850</td>
-      <td>66.57</td>
-      <td>66.57</td>
-      <td>1859140</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>McDonald's Corporation</td>
       <td>MCD</td>
+      <td>319.00</td>
+      <td>319.52</td>
+      <td>315.21</td>
+      <td>318.53</td>
+      <td>+3.53</td>
+      <td>+1.12%</td>
       <td>2026-02-02</td>
-      <td>319.0000</td>
-      <td>319.5200</td>
-      <td>315.2100</td>
-      <td>318.53</td>
-      <td>318.53</td>
-      <td>3307205</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Modine Manufacturing Company</td>
       <td>MOD</td>
+      <td>185.00</td>
+      <td>199.54</td>
+      <td>184.00</td>
+      <td>196.07</td>
+      <td>+11.41</td>
+      <td>+6.18%</td>
       <td>2026-02-02</td>
-      <td>185.0000</td>
-      <td>199.5400</td>
-      <td>184.0025</td>
-      <td>196.07</td>
-      <td>196.07</td>
-      <td>2612684</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Marathon Petroleum Corporation</td>
       <td>MPC</td>
+      <td>172.74</td>
+      <td>177.32</td>
+      <td>171.74</td>
+      <td>176.91</td>
+      <td>+0.72</td>
+      <td>+0.41%</td>
       <td>2026-02-02</td>
-      <td>172.7400</td>
-      <td>177.3200</td>
-      <td>171.7350</td>
-      <td>176.91</td>
-      <td>176.91</td>
-      <td>2319376</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Marten Transport, Ltd.</td>
       <td>MRTN</td>
+      <td>12.33</td>
+      <td>13.37</td>
+      <td>12.22</td>
+      <td>13.33</td>
+      <td>+1.03</td>
+      <td>+8.37%</td>
       <td>2026-02-02</td>
-      <td>12.5100</td>
-      <td>13.3650</td>
-      <td>12.2200</td>
-      <td>13.33</td>
-      <td>13.33</td>
-      <td>1294342</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Motorola Solutions, Inc.</td>
       <td>MSI</td>
+      <td>401.85</td>
+      <td>407.21</td>
+      <td>398.58</td>
+      <td>403.68</td>
+      <td>+1.14</td>
+      <td>+0.28%</td>
       <td>2026-02-02</td>
-      <td>401.8500</td>
-      <td>407.2100</td>
-      <td>398.5800</td>
-      <td>403.68</td>
-      <td>403.68</td>
-      <td>715696</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>NiSource Inc</td>
       <td>NI</td>
+      <td>44.42</td>
+      <td>44.79</td>
+      <td>43.93</td>
+      <td>44.03</td>
+      <td>-0.26</td>
+      <td>-0.59%</td>
       <td>2026-02-02</td>
-      <td>44.4200</td>
-      <td>44.7850</td>
-      <td>43.9300</td>
-      <td>44.03</td>
-      <td>44.03</td>
-      <td>3890807</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>National Presto Industries, Inc</td>
       <td>NPK</td>
+      <td>127.40</td>
+      <td>133.09</td>
+      <td>126.24</td>
+      <td>131.95</td>
+      <td>+4.55</td>
+      <td>+3.57%</td>
       <td>2026-02-02</td>
-      <td>127.4000</td>
-      <td>133.0900</td>
-      <td>126.2400</td>
-      <td>131.95</td>
-      <td>131.95</td>
-      <td>103455</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Northern Trust Corporation</td>
       <td>NTRS</td>
+      <td>149.37</td>
+      <td>152.10</td>
+      <td>149.04</td>
+      <td>151.62</td>
+      <td>+2.19</td>
+      <td>+1.47%</td>
       <td>2026-02-02</td>
-      <td>149.6700</td>
-      <td>152.1000</td>
-      <td>149.0400</td>
-      <td>151.62</td>
-      <td>151.62</td>
-      <td>984604</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>O-I Glass, Inc.</td>
       <td>OI</td>
+      <td>15.25</td>
+      <td>15.84</td>
+      <td>15.16</td>
+      <td>15.60</td>
+      <td>+0.32</td>
+      <td>+2.09%</td>
       <td>2026-02-02</td>
-      <td>15.2500</td>
-      <td>15.7900</td>
-      <td>15.1600</td>
-      <td>15.60</td>
-      <td>15.60</td>
-      <td>1265918</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Oshkosh Corporation (Holding Co</td>
       <td>OSK</td>
+      <td>143.79</td>
+      <td>150.34</td>
+      <td>143.31</td>
+      <td>149.48</td>
+      <td>+5.66</td>
+      <td>+3.94%</td>
       <td>2026-02-02</td>
-      <td>143.7900</td>
-      <td>150.3400</td>
-      <td>143.3050</td>
-      <td>149.48</td>
-      <td>149.48</td>
-      <td>840370</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Penske Automotive Group, Inc.</td>
       <td>PAG</td>
+      <td>156.29</td>
+      <td>158.22</td>
+      <td>155.74</td>
+      <td>157.53</td>
+      <td>+0.74</td>
+      <td>+0.47%</td>
       <td>2026-02-02</td>
-      <td>156.2900</td>
-      <td>158.2200</td>
-      <td>155.7401</td>
-      <td>157.53</td>
-      <td>157.53</td>
-      <td>194648</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Patrick Industries, Inc.</td>
       <td>PATK</td>
+      <td>126.97</td>
+      <td>128.17</td>
+      <td>125.99</td>
+      <td>126.72</td>
+      <td>+0.55</td>
+      <td>+0.44%</td>
       <td>2026-02-02</td>
-      <td>126.9700</td>
-      <td>128.1700</td>
-      <td>125.9900</td>
-      <td>126.72</td>
-      <td>126.72</td>
-      <td>280615</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Procter &amp; Gamble Company (The)</td>
       <td>PG</td>
+      <td>152.42</td>
+      <td>153.73</td>
+      <td>151.25</td>
+      <td>153.19</td>
+      <td>+1.42</td>
+      <td>+0.94%</td>
       <td>2026-02-02</td>
-      <td>152.4200</td>
-      <td>153.7250</td>
-      <td>151.2500</td>
-      <td>153.19</td>
-      <td>153.19</td>
-      <td>10552241</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Parker-Hannifin Corporation</td>
       <td>PH</td>
+      <td>935.75</td>
+      <td>954.00</td>
+      <td>933.40</td>
+      <td>952.00</td>
+      <td>+16.16</td>
+      <td>+1.73%</td>
       <td>2026-02-02</td>
-      <td>935.7500</td>
-      <td>954.0000</td>
-      <td>933.4000</td>
-      <td>952.00</td>
-      <td>952.00</td>
-      <td>870117</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>PulteGroup, Inc.</td>
       <td>PHM</td>
+      <td>124.61</td>
+      <td>127.43</td>
+      <td>123.75</td>
+      <td>127.07</td>
+      <td>+1.98</td>
+      <td>+1.58%</td>
       <td>2026-02-02</td>
-      <td>124.6100</td>
-      <td>127.4300</td>
-      <td>123.7500</td>
-      <td>127.07</td>
-      <td>127.07</td>
-      <td>2345105</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Packaging Corporation of Americ</td>
       <td>PKG</td>
+      <td>221.52</td>
+      <td>224.76</td>
+      <td>220.15</td>
+      <td>223.72</td>
+      <td>+1.17</td>
+      <td>+0.53%</td>
       <td>2026-02-02</td>
-      <td>221.5200</td>
-      <td>224.7550</td>
-      <td>220.1450</td>
-      <td>223.72</td>
-      <td>223.72</td>
-      <td>784644</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Freightcar America, Inc.</td>
       <td>RAIL</td>
+      <td>11.45</td>
+      <td>12.25</td>
+      <td>11.35</td>
+      <td>11.94</td>
+      <td>+0.43</td>
+      <td>+3.74%</td>
       <td>2026-02-02</td>
-      <td>11.5400</td>
-      <td>12.2499</td>
-      <td>11.3500</td>
-      <td>11.94</td>
-      <td>11.94</td>
-      <td>133717</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>REX American Resources Corporat</td>
       <td>REX</td>
+      <td>33.48</td>
+      <td>34.74</td>
+      <td>33.48</td>
+      <td>34.31</td>
+      <td>+0.50</td>
+      <td>+1.48%</td>
       <td>2026-02-02</td>
-      <td>33.4800</td>
-      <td>34.7000</td>
-      <td>33.5100</td>
-      <td>34.31</td>
-      <td>34.31</td>
-      <td>116044</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Rocket Companies, Inc.</td>
       <td>RKT</td>
+      <td>17.73</td>
+      <td>19.27</td>
+      <td>17.66</td>
+      <td>18.77</td>
+      <td>+0.84</td>
+      <td>+4.68%</td>
       <td>2026-02-02</td>
-      <td>17.7250</td>
-      <td>19.2650</td>
-      <td>17.6600</td>
-      <td>18.77</td>
-      <td>18.77</td>
-      <td>42809279</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Stepan Company</td>
       <td>SCL</td>
+      <td>57.51</td>
+      <td>59.00</td>
+      <td>56.97</td>
+      <td>58.64</td>
+      <td>+1.03</td>
+      <td>+1.79%</td>
       <td>2026-02-02</td>
-      <td>57.5100</td>
-      <td>59.0000</td>
-      <td>56.9740</td>
-      <td>58.64</td>
-      <td>58.64</td>
-      <td>113460</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Shoe Carnival, Inc.</td>
       <td>SCVL</td>
+      <td>18.86</td>
+      <td>19.44</td>
+      <td>18.86</td>
+      <td>19.42</td>
+      <td>+0.36</td>
+      <td>+1.89%</td>
       <td>2026-02-02</td>
-      <td>18.2600</td>
-      <td>19.4400</td>
-      <td>18.8600</td>
-      <td>19.42</td>
-      <td>19.42</td>
-      <td>265724</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Saga Communications, Inc.</td>
       <td>SGA</td>
+      <td>11.40</td>
+      <td>11.48</td>
+      <td>11.36</td>
+      <td>11.44</td>
+      <td>+0.06</td>
+      <td>+0.53%</td>
       <td>2026-02-02</td>
-      <td>11.4800</td>
-      <td>11.4800</td>
-      <td>11.3600</td>
-      <td>11.44</td>
-      <td>11.44</td>
-      <td>5915</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>The J.M. Smucker Company</td>
       <td>SJM</td>
+      <td>104.96</td>
+      <td>105.75</td>
+      <td>103.52</td>
+      <td>104.79</td>
+      <td>-0.07</td>
+      <td>-0.07%</td>
       <td>2026-02-02</td>
-      <td>104.9600</td>
-      <td>105.7500</td>
-      <td>103.5150</td>
-      <td>104.79</td>
-      <td>104.79</td>
-      <td>1593681</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Champion Homes, Inc.</td>
       <td>SKY</td>
+      <td>78.31</td>
+      <td>78.87</td>
+      <td>75.35</td>
+      <td>75.90</td>
+      <td>-2.48</td>
+      <td>-3.16%</td>
       <td>2026-02-02</td>
-      <td>78.3100</td>
-      <td>78.8700</td>
-      <td>75.3700</td>
-      <td>75.90</td>
-      <td>75.90</td>
-      <td>1223512</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Snap-On Incorporated</td>
       <td>SNA</td>
+      <td>365.43</td>
+      <td>371.79</td>
+      <td>364.91</td>
+      <td>371.52</td>
+      <td>+5.41</td>
+      <td>+1.48%</td>
       <td>2026-02-02</td>
-      <td>365.4300</td>
-      <td>371.7900</td>
-      <td>364.9150</td>
-      <td>371.52</td>
-      <td>371.52</td>
-      <td>289880</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Spectrum Brands Holdings, Inc.</td>
       <td>SPB</td>
+      <td>64.28</td>
+      <td>65.85</td>
+      <td>63.85</td>
+      <td>65.63</td>
+      <td>+1.92</td>
+      <td>+3.01%</td>
       <td>2026-02-02</td>
-      <td>64.2800</td>
-      <td>65.8500</td>
-      <td>63.8500</td>
-      <td>65.63</td>
-      <td>65.63</td>
-      <td>342559</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>1st Source Corporation</td>
       <td>SRCE</td>
+      <td>67.55</td>
+      <td>69.01</td>
+      <td>67.55</td>
+      <td>68.47</td>
+      <td>+1.14</td>
+      <td>+1.69%</td>
       <td>2026-02-02</td>
-      <td>66.0150</td>
-      <td>69.0100</td>
-      <td>67.5500</td>
-      <td>68.47</td>
-      <td>68.47</td>
-      <td>103719</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>E.W. Scripps Company (The)</td>
       <td>SSP</td>
+      <td>3.35</td>
+      <td>3.73</td>
+      <td>3.31</td>
+      <td>3.51</td>
+      <td>+0.16</td>
+      <td>+4.78%</td>
       <td>2026-02-02</td>
-      <td>3.4300</td>
-      <td>3.7300</td>
-      <td>3.3100</td>
-      <td>3.51</td>
-      <td>3.51</td>
-      <td>966257</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Sun Communities, Inc.</td>
       <td>SUI</td>
+      <td>125.86</td>
+      <td>127.81</td>
+      <td>125.47</td>
+      <td>125.85</td>
+      <td>-1.58</td>
+      <td>-1.24%</td>
       <td>2026-02-02</td>
-      <td>125.8600</td>
-      <td>127.7650</td>
-      <td>125.4700</td>
-      <td>125.85</td>
-      <td>125.85</td>
-      <td>495097</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Stryker Corporation</td>
       <td>SYK</td>
+      <td>367.93</td>
+      <td>369.61</td>
+      <td>363.92</td>
+      <td>368.14</td>
+      <td>-1.42</td>
+      <td>-0.38%</td>
       <td>2026-02-02</td>
-      <td>367.9300</td>
-      <td>369.6000</td>
-      <td>363.9200</td>
-      <td>368.14</td>
-      <td>368.14</td>
-      <td>1510278</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Teradata Corporation</td>
       <td>TDC</td>
+      <td>28.47</td>
+      <td>29.23</td>
+      <td>27.83</td>
+      <td>28.02</td>
+      <td>-0.50</td>
+      <td>-1.75%</td>
       <td>2026-02-02</td>
-      <td>28.4700</td>
-      <td>29.2300</td>
-      <td>27.8300</td>
-      <td>28.02</td>
-      <td>28.02</td>
-      <td>1549527</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Telephone and Data Systems, Inc</td>
       <td>TDS</td>
+      <td>45.08</td>
+      <td>45.55</td>
+      <td>44.97</td>
+      <td>45.40</td>
+      <td>+0.27</td>
+      <td>+0.60%</td>
       <td>2026-02-02</td>
-      <td>45.0800</td>
-      <td>45.5500</td>
-      <td>44.9700</td>
-      <td>45.40</td>
-      <td>45.40</td>
-      <td>595579</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Thor Industries, Inc.</td>
       <td>THO</td>
+      <td>112.98</td>
+      <td>114.52</td>
+      <td>111.88</td>
+      <td>113.00</td>
+      <td>+1.13</td>
+      <td>+1.01%</td>
       <td>2026-02-02</td>
-      <td>112.9800</td>
-      <td>114.5200</td>
-      <td>111.8800</td>
-      <td>113.00</td>
-      <td>113.00</td>
-      <td>416308</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Tootsie Roll Industries, Inc.</td>
       <td>TR</td>
+      <td>37.88</td>
+      <td>38.66</td>
+      <td>37.88</td>
+      <td>38.66</td>
+      <td>+0.78</td>
+      <td>+2.06%</td>
       <td>2026-02-02</td>
-      <td>37.8800</td>
-      <td>38.6600</td>
-      <td>38.0150</td>
-      <td>38.66</td>
-      <td>38.66</td>
-      <td>86695</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>United Airlines Holdings, Inc.</td>
       <td>UAL</td>
+      <td>104.20</td>
+      <td>108.32</td>
+      <td>103.99</td>
+      <td>107.35</td>
+      <td>+5.03</td>
+      <td>+4.92%</td>
       <td>2026-02-02</td>
-      <td>103.9900</td>
-      <td>108.3200</td>
-      <td>103.9900</td>
-      <td>107.35</td>
-      <td>107.35</td>
-      <td>5582811</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>UFP Industries, Inc.</td>
       <td>UFPI</td>
+      <td>103.28</td>
+      <td>105.68</td>
+      <td>102.74</td>
+      <td>104.90</td>
+      <td>+1.62</td>
+      <td>+1.57%</td>
       <td>2026-02-02</td>
-      <td>102.0800</td>
-      <td>105.6800</td>
-      <td>102.7400</td>
-      <td>104.90</td>
-      <td>104.90</td>
-      <td>277088</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Ulta Beauty, Inc.</td>
       <td>ULTA</td>
+      <td>647.04</td>
+      <td>666.05</td>
+      <td>643.43</td>
+      <td>665.57</td>
+      <td>+18.21</td>
+      <td>+2.81%</td>
       <td>2026-02-02</td>
-      <td>646.5000</td>
-      <td>666.0500</td>
-      <td>643.4275</td>
-      <td>665.57</td>
-      <td>665.57</td>
-      <td>704387</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>WEC Energy Group, Inc.</td>
       <td>WEC</td>
+      <td>110.81</td>
+      <td>111.38</td>
+      <td>109.10</td>
+      <td>109.84</td>
+      <td>-0.83</td>
+      <td>-0.75%</td>
       <td>2026-02-02</td>
-      <td>110.8100</td>
-      <td>111.3800</td>
-      <td>109.1000</td>
-      <td>109.84</td>
-      <td>109.84</td>
-      <td>2235296</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Whirlpool Corporation</td>
       <td>WHR</td>
+      <td>79.10</td>
+      <td>80.18</td>
+      <td>77.61</td>
+      <td>79.94</td>
+      <td>-0.05</td>
+      <td>-0.06%</td>
       <td>2026-02-02</td>
-      <td>79.1000</td>
-      <td>80.1768</td>
-      <td>77.6100</td>
-      <td>79.94</td>
-      <td>79.94</td>
-      <td>1635059</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Wabash National Corporation</td>
       <td>WNC</td>
+      <td>10.17</td>
+      <td>10.97</td>
+      <td>10.07</td>
+      <td>10.90</td>
+      <td>+0.77</td>
+      <td>+7.60%</td>
       <td>2026-02-02</td>
-      <td>10.1700</td>
-      <td>10.9700</td>
-      <td>10.0950</td>
-      <td>10.90</td>
-      <td>10.90</td>
-      <td>452766</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Wolverine World Wide, Inc.</td>
       <td>WWW</td>
+      <td>17.54</td>
+      <td>18.45</td>
+      <td>17.54</td>
+      <td>18.19</td>
+      <td>+0.47</td>
+      <td>+2.65%</td>
       <td>2026-02-02</td>
-      <td>17.5400</td>
-      <td>18.4450</td>
-      <td>17.6150</td>
-      <td>18.19</td>
-      <td>18.19</td>
-      <td>1139716</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Zimmer Biomet Holdings, Inc.</td>
       <td>ZBH</td>
+      <td>86.69</td>
+      <td>87.86</td>
+      <td>86.02</td>
+      <td>86.22</td>
+      <td>-0.85</td>
+      <td>-0.98%</td>
       <td>2026-02-02</td>
-      <td>86.6900</td>
-      <td>87.8500</td>
-      <td>86.0200</td>
-      <td>86.22</td>
-      <td>86.22</td>
-      <td>1836381</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
     <tr>
+      <td>Olympic Steel, Inc.</td>
       <td>ZEUS</td>
+      <td>48.12</td>
+      <td>50.43</td>
+      <td>47.99</td>
+      <td>49.94</td>
+      <td>+1.85</td>
+      <td>+3.85%</td>
       <td>2026-02-02</td>
-      <td>47.9900</td>
-      <td>50.4000</td>
-      <td>47.9900</td>
-      <td>49.94</td>
-      <td>49.94</td>
-      <td>123530</td>
-      <td>yahoo</td>
+      <td></td>
     </tr>
   </tbody>
-</table>
-  </div>
+</table></div>
 </body>
 </html>
