@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-
 # --- NYSE market-holiday / weekend detection ---
 # Skip run if today is NOT a NYSE trading session.
 if ! /home/torrey/gli-venv/bin/python - <<'PY'
@@ -26,29 +25,28 @@ fi
 
 LOG="/home/torrey/GLI/gli_cron.log"
 
+# Heartbeat so we can tell cron fired even if something fails later
+echo "$(date -Is) run_gli_publish.sh fired" >> "$LOG"
+
+# Use tomorrow so the script still pulls "today" after the market close
 END_DATE="$(date -d 'tomorrow' +%F)"
 
 cd /home/torrey/GLI
 
-/home/torrey/gli-venv/bin/python great_lakes_index_PRO.py \
-  --tickers constituents_great_lakes.csv \
-  --fetch yfinance \
-  --start 2024-12-31 \
-  --end "$END_DATE" \
-  --events divisor_events.csv \
-  --prices-out gli_prices.csv \
-  --out gli_levels.csv \
-  --db gli.sqlite \
-  --report-dir report >> "$LOG" 2>&1
+/home/torrey/gli-venv/bin/python great_lakes_index_PRO.py   --tickers constituents_great_lakes.csv   --fetch yfinance   --start 2024-12-31   --end "$END_DATE"   --events divisor_events.csv   --prices-out gli_prices.csv   --out gli_levels.csv   --db gli.sqlite   --report-dir report >> "$LOG" 2>&1
 
-/home/torrey/gli-venv/bin/python /home/torrey/GLI/gli_site_build.py >> "$LOG" 2>&1
+# This builder generates the *new* OHLCV layout (Company/Symbol/Price/Change/% Change)
+# and should be the last writer of report/ohlcv.html.
+HOME=/home/torrey /home/torrey/gli-venv/bin/python /home/torrey/GLI/gli_site_build.py >> "$LOG" 2>&1
 
-/home/torrey/gli-venv/bin/python /home/torrey/GLI/build_component_ohlcv_page.py \
-  --tickers /home/torrey/GLI/constituents_great_lakes.csv \
-  --out /home/torrey/GLI/report/ohlcv.html >> "$LOG" 2>&1
+# HARD GUARD: never publish if the OHLCV page isn't the new layout
+grep -q "<th>Company</th>" /home/torrey/GLI/report/ohlcv.html
 
-rsync -a --delete /home/torrey/GLI/report/ /home/torrey/GLI/docs/ >> "$LOG" 2>&1
+rsync -av --delete /home/torrey/GLI/report/ /home/torrey/GLI/docs/ >> "$LOG" 2>&1
 
-git add docs
+# Guard again after rsync (belt + suspenders)
+grep -q "<th>Company</th>" /home/torrey/GLI/docs/ohlcv.html
+
+git add docs >> "$LOG" 2>&1
 git commit -m "GLI site update $(date +%F)" >> "$LOG" 2>&1 || true
 git push >> "$LOG" 2>&1
