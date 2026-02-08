@@ -18,8 +18,8 @@ date_str = ny_now.date().isoformat()  # 'YYYY-MM-DD'
 sys.exit(0 if cal.is_session(date_str) else 1)
 PY
 then
-  echo "$(date -Is) NYSE closed today (weekend/holiday). Skipping." >> /home/torrey/GLI/gli_cron.log
-  exit 0
+  echo "$(date -Is) NYSE closed today (weekend/holiday). Publishing latest available session anyway." >> /home/torrey/GLI/gli_cron.log
+# do NOT exit
 fi
 # --- end detection ---
 
