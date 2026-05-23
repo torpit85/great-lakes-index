@@ -555,14 +555,54 @@ def write_ticker_txt(df: pd.DataFrame) -> None:
 def write_history_html(df: pd.DataFrame) -> None:
     REPORT.mkdir(parents=True, exist_ok=True)
 
-    out = df.copy()
+    out = df.copy().sort_values("Date")
     out["Date"] = out["Date"].dt.date.astype(str)
 
-    keep = ["Date", "GLI_Open", "GLI_High", "GLI_Low", "GLI_Close", "TotalVolume"]
+    # Daily GLI change based on close-to-prior-close.
+    out["Point Change"] = out["GLI_Close"] - out["GLI_Close"].shift(1)
+    out["% Change"] = (out["Point Change"] / out["GLI_Close"].shift(1)) * 100
+
+    keep = [
+        "Date",
+        "GLI_Open",
+        "GLI_High",
+        "GLI_Low",
+        "GLI_Close",
+        "Point Change",
+        "% Change",
+        "TotalVolume",
+    ]
     out = out[keep].copy()
 
+    def fmt_price(x) -> str:
+        try:
+            if pd.isna(x):
+                return ""
+            return f"{float(x):,.2f}"
+        except Exception:
+            return ""
+
+    def fmt_change(x) -> str:
+        try:
+            if pd.isna(x):
+                return ""
+            return f"{float(x):+,.2f}"
+        except Exception:
+            return ""
+
+    def fmt_pct(x) -> str:
+        try:
+            if pd.isna(x):
+                return ""
+            return f"{float(x):+.2f}%"
+        except Exception:
+            return ""
+
     for c in ["GLI_Open", "GLI_High", "GLI_Low", "GLI_Close"]:
-        out[c] = out[c].map(lambda x: f"{float(x):,.2f}")
+        out[c] = out[c].map(fmt_price)
+
+    out["Point Change"] = out["Point Change"].map(fmt_change)
+    out["% Change"] = out["% Change"].map(fmt_pct)
     out["TotalVolume"] = out["TotalVolume"].map(fmt_int)
 
     table = out.to_html(index=False, escape=True)
@@ -583,6 +623,7 @@ def write_history_html(df: pd.DataFrame) -> None:
 </html>
 """
     (REPORT / "history.html").write_text(html, encoding="utf-8")
+
 
 def ensure_css_in_head(html: str) -> str:
     if CSS_BLOCK.strip() in html:
