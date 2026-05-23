@@ -30,20 +30,63 @@ except Exception:
     yf = None
 
 
-def read_tickers(path: Path) -> list[str]:
+def read_constituents(path: Path) -> pd.DataFrame:
+    """Read constituent membership, including optional StartDate/EndDate columns.
+
+    If StartDate/EndDate are present, the engine treats membership as date-aware:
+    a ticker is included only on dates between StartDate and EndDate, inclusive.
+    If the columns are absent, all tickers are treated as active from BASE_DATE.
+    """
     df = pd.read_csv(path)
-    if "Ticker" in df.columns:
-        tickers = df["Ticker"].astype(str).tolist()
-    else:
-        tickers = df.iloc[:, 0].astype(str).tolist()
-    tickers = [t.strip().upper() for t in tickers if str(t).strip()]
+    if "Ticker" not in df.columns:
+        df = df.rename(columns={df.columns[0]: "Ticker"})
+
+    df["Ticker"] = df["Ticker"].astype(str).str.upper().str.strip()
+    df = df[df["Ticker"].ne("") & df["Ticker"].str.lower().ne("nan")].copy()
+
+    if "Active" not in df.columns:
+        df["Active"] = "Y"
+    if "StartDate" not in df.columns:
+        df["StartDate"] = BASE_DATE
+    if "EndDate" not in df.columns:
+        df["EndDate"] = ""
+
+    df["Active"] = df["Active"].fillna("Y").astype(str).str.upper().str.strip()
+    df["StartDate"] = df["StartDate"].fillna(BASE_DATE).astype(str).str.strip().replace({"": BASE_DATE, "nan": BASE_DATE})
+    df["EndDate"] = df["EndDate"].fillna("").astype(str).str.strip().replace({"nan": "", "NaT": ""})
+
+    return df.drop_duplicates(subset=["Ticker"], keep="last").reset_index(drop=True)
+
+
+def read_tickers(path: Path) -> list[str]:
+    """Return all tickers that may be needed for any membership period."""
+    constituents = read_constituents(path)
     seen = set()
     out: list[str] = []
-    for t in tickers:
+    for t in constituents["Ticker"].tolist():
         if t not in seen:
             out.append(t)
             seen.add(t)
     return out
+
+
+def active_tickers_for_date(constituents: pd.DataFrame, date_str: str) -> list[str]:
+    d = str(pd.to_datetime(date_str).date())
+    c = constituents.copy()
+    starts = c["StartDate"].fillna(BASE_DATE).astype(str).replace({"": BASE_DATE, "nan": BASE_DATE})
+    ends = c["EndDate"].fillna("").astype(str).replace({"nan": "", "NaT": ""})
+    mask = (starts <= d) & ((ends == "") | (ends >= d))
+    return c.loc[mask, "Ticker"].astype(str).str.upper().str.strip().tolist()
+
+
+def current_active_tickers(constituents: pd.DataFrame) -> list[str]:
+    c = constituents.copy()
+    if "Active" in c.columns:
+        mask = c["Active"].fillna("Y").astype(str).str.upper().str.strip().isin(["Y", "YES", "TRUE", "1"])
+        tickers = c.loc[mask, "Ticker"].astype(str).str.upper().str.strip().tolist()
+    else:
+        tickers = active_tickers_for_date(c, pd.Timestamp.today().date().isoformat())
+    return list(dict.fromkeys(tickers))
 
 
 def normalize_prices_df(df: pd.DataFrame) -> pd.DataFrame:
@@ -88,27 +131,27 @@ def normalize_prices_df(df: pd.DataFrame) -> pd.DataFrame:
     return out[["Date", "Ticker", "Open", "High", "Low", "Close", "Volume"]]
 
 
-def validate_completeness(prices_df: pd.DataFrame, tickers: list[str]) -> None:
-    expected = set(tickers)
+def validate_completeness(prices_df: pd.DataFrame, constituents: pd.DataFrame) -> None:
+    """Fail when any date is missing a ticker that was active on that date.
+
+    Extra rows for inactive/historical tickers are allowed because Yahoo fetches every
+    ticker across the full requested date range. The aggregation step filters them
+    out date-by-date.
+    """
     problems = []
     for d, g in prices_df.groupby("Date"):
+        expected = set(active_tickers_for_date(constituents, str(d)))
         found = set(g["Ticker"].unique())
         missing = sorted(expected - found)
-        extra = sorted(found - expected)
-        if missing or extra:
-            problems.append((d, missing, extra))
+        if missing:
+            problems.append((d, missing))
     if problems:
         lines = []
-        for d, missing, extra in problems[:50]:
-            if missing:
-                lines.append(
-                    f"{d}: missing {len(missing)} tickers (e.g., {', '.join(missing[:12])}{'...' if len(missing) > 12 else ''})"
-                )
-            if extra:
-                lines.append(
-                    f"{d}: unexpected {len(extra)} tickers (e.g., {', '.join(extra[:12])}{'...' if len(extra) > 12 else ''})"
-                )
-        raise ValueError("Strict mode: incomplete/invalid daily coverage detected.\n" + "\n".join(lines))
+        for d, missing in problems[:50]:
+            lines.append(
+                f"{d}: missing {len(missing)} active tickers (e.g., {', '.join(missing[:12])}{'...' if len(missing) > 12 else ''})"
+            )
+        raise ValueError("Strict mode: incomplete active constituent coverage detected.\n" + "\n".join(lines))
 
 
 def fetch_yahoo_daily(tickers: list[str], start: str, end: str, auto_adjust: bool) -> pd.DataFrame:
@@ -185,10 +228,12 @@ def read_divisor_events(path: Optional[Path]) -> list[DivisorEvent]:
     return events
 
 
-def compute_base_divisor(prices_df: pd.DataFrame) -> float:
-    base = prices_df.loc[prices_df["Date"] == BASE_DATE]
-    if base.empty:
-        raise ValueError(f"No prices found for base date {BASE_DATE}.")
+def compute_base_divisor(prices_df: pd.DataFrame, constituents: pd.DataFrame) -> float:
+    base_tickers = set(active_tickers_for_date(constituents, BASE_DATE))
+    base = prices_df.loc[(prices_df["Date"] == BASE_DATE) & (prices_df["Ticker"].isin(base_tickers))]
+    missing = sorted(base_tickers - set(base["Ticker"].unique()))
+    if missing:
+        raise ValueError(f"No base-date prices found for active tickers on {BASE_DATE}: {missing}")
     s = float(base["Close"].sum())
     if s <= 0:
         raise ValueError("Base sum of closes not positive.")
@@ -200,14 +245,24 @@ def apply_divisor_events(prev_sum_close: float, events_for_date: list[DivisorEve
     return (prev_sum_close + delta) / prev_index_close
 
 
-def aggregate_index(prices_df: pd.DataFrame, tickers: list[str], events: list[DivisorEvent]) -> pd.DataFrame:
+def aggregate_index(prices_df: pd.DataFrame, constituents: pd.DataFrame, events: list[DivisorEvent]) -> pd.DataFrame:
     prices_df = normalize_prices_df(prices_df)
-    prices_df = prices_df[prices_df["Ticker"].isin(set(tickers))].copy()
+    all_tickers = set(constituents["Ticker"].astype(str).str.upper().str.strip())
+    prices_df = prices_df[prices_df["Ticker"].isin(all_tickers)].copy()
 
-    divisor = compute_base_divisor(prices_df)
+    # Filter to the date-appropriate basket before summing. This lets historical
+    # replacements use the old ticker before the effective date and the new ticker
+    # starting on the effective date.
+    frames = []
+    for d, g in prices_df.groupby("Date", sort=True):
+        active = set(active_tickers_for_date(constituents, str(d)))
+        frames.append(g[g["Ticker"].isin(active)])
+    prices_active = pd.concat(frames, ignore_index=True) if frames else prices_df.iloc[0:0].copy()
+
+    divisor = compute_base_divisor(prices_df, constituents)
 
     grouped = (
-        prices_df.groupby("Date", as_index=False)
+        prices_active.groupby("Date", as_index=False)
         .agg(
             SumOpen=("Open", "sum"),
             SumHigh=("High", "sum"),
@@ -515,6 +570,7 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
+    constituents = read_constituents(args.tickers)
     tickers = read_tickers(args.tickers)
 
     # Interpret --end as an INCLUSIVE date (human-friendly).
@@ -533,10 +589,10 @@ def main() -> int:
         raise ValueError("Provide either --prices (CSV) or --fetch yfinance.")
 
     if args.strict:
-        validate_completeness(prices_df, tickers)
+        validate_completeness(prices_df, constituents)
 
     events = read_divisor_events(args.events)
-    idx_df = aggregate_index(prices_df, tickers, events)
+    idx_df = aggregate_index(prices_df, constituents, events)
     idx_df.to_csv(args.out, index=False)
 
     if args.db:

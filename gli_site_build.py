@@ -151,6 +151,29 @@ def load_prices_optional() -> pd.DataFrame | None:
 
 
 
+
+
+def load_current_constituent_tickers() -> list[str] | None:
+    """Return current Active=Y tickers from constituents_great_lakes.csv, if available."""
+    if not CONSTITUENTS.exists():
+        return None
+    try:
+        c = pd.read_csv(CONSTITUENTS)
+    except Exception:
+        return None
+    sym_col = None
+    for cand in ["Ticker", "Symbol", "ticker", "symbol"]:
+        if cand in c.columns:
+            sym_col = cand
+            break
+    if sym_col is None:
+        return None
+    if "Active" in c.columns:
+        active = c["Active"].fillna("Y").astype(str).str.upper().str.strip()
+        c = c[active.isin(["Y", "YES", "TRUE", "1"])]
+    tickers = c[sym_col].astype(str).str.upper().str.strip().tolist()
+    return list(dict.fromkeys([t for t in tickers if t and t.lower() != "nan"]))
+
 def load_company_map_optional() -> dict[str, str] | None:
     """Try to load a mapping of ticker/symbol -> company name from CONSTITUENTS.
 
@@ -409,6 +432,10 @@ def build_component_ohlcv_from_prices() -> bool:
 
     latest_date = df["Date"].max()
     latest = df[df["Date"] == latest_date].copy()
+
+    current_tickers = load_current_constituent_tickers()
+    if current_tickers:
+        latest = latest[latest["Ticker"].astype(str).str.upper().str.strip().isin(set(current_tickers))].copy()
 
     # Price + change fields (Price = Close)
     latest["Price"] = latest["Close"]

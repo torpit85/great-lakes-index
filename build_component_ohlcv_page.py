@@ -67,15 +67,21 @@ def sanitize_ticker(raw: str) -> str:
 
 def read_tickers(csv_path: Path) -> list[str]:
     df = pd.read_csv(csv_path)
+
+    # For current component pages, respect Active=N when present.
+    if "Active" in df.columns:
+        active = df["Active"].fillna("Y").astype(str).str.upper().str.strip()
+        df = df[active.isin(["Y", "YES", "TRUE", "1"])]
+
     # Common column names; else first column
-    for col in ("ticker", "Tickers", "TICKER", "symbol", "Symbol", "SYMBOL"):
+    for col in ("ticker", "Ticker", "Tickers", "TICKER", "symbol", "Symbol", "SYMBOL"):
         if col in df.columns:
             raw = df[col].astype(str).tolist()
             break
     else:
         raw = df.iloc[:, 0].astype(str).tolist()
 
-    tickers = [sanitize_ticker(x) for x in raw]
+    tickers = [sanitize_ticker(x).upper() for x in raw]
     tickers = [t for t in tickers if t]
     return _dedupe_keep_order(tickers)
 
