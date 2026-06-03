@@ -404,7 +404,7 @@ def build_component_ohlcv_from_prices() -> bool:
     """Build report/ohlcv.html directly from gli_prices.csv with Company + Price + % Change.
 
     Column order:
-      Company, Symbol, Open, High, Low, Price, Change, % Change, Date, Source
+      Company, Symbol, Open, High, Low, Price, Change, % Change, Volume, Date, Source
 
     Company name lookup order:
       1) constituents_great_lakes.csv if it contains a name column (often it won't)
@@ -493,10 +493,11 @@ def build_component_ohlcv_from_prices() -> bool:
         latest[c] = latest[c].map(f2)
     latest["Change"] = latest["Change"].map(fchg)
     latest["% Change"] = latest["% Change"].map(fpct)
+    latest["Volume"] = latest["Volume"].map(f0)
     latest["Source"] = latest["Source"].fillna("").astype(str)
 
     # Final column order
-    cols = ["Company", "Symbol", "Open", "High", "Low", "Price", "Change", "% Change", "Date", "Source"]
+    cols = ["Company", "Symbol", "Open", "High", "Low", "Price", "Change", "% Change", "Volume", "Date", "Source"]
     for col in cols:
         if col not in latest.columns:
             latest[col] = ""
