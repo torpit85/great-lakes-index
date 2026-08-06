@@ -1,17 +1,10 @@
 <!doctype html>
-<html><head><meta charset="utf-8"/><title>The Great Lakes Index (GLI)</title>
-<style>
-body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin:24px; }
-.card { border:1px solid #ddd; border-radius:12px; padding:16px; max-width:980px; }
-.kpi { display:flex; gap:24px; flex-wrap:wrap; }
-.kpi div { min-width:170px; }
-table { border-collapse:collapse; width:100%; }
-th,td { border:1px solid #ddd; padding:8px; text-align:right; }
-th:first-child,td:first-child { text-align:left; }
-.muted { color:#666; }
-.nav { margin-top:10px; padding:10px 12px; background:#f6f6f6; border:1px solid #ddd; border-radius:10px; }
-.nav a { margin-right:14px; text-decoration:none; }
-</style>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>The Great Lakes Index (GLI)</title>
+
 <style>
 :root{
   --ink:#172033; --muted:#667085; --line:#d9dee8; --panel:#ffffff;
@@ -62,229 +55,18 @@ th:first-child,td:first-child{text-align:left} tbody tr:hover{background:#f8fbff
 @media(max-width:560px){body{margin:14px}.metric-cards{grid-template-columns:1fr}.component-grid{grid-template-columns:1fr}.heatmap{grid-template-columns:repeat(2,minmax(0,1fr))}th,td{padding:8px 7px}}
 </style>
 
+
 </head>
 <body>
-<!-- GLI_NAV_V2 --><nav class="gli-nav" aria-label="Site navigation"><a href="./index.html" class="active">Home</a><a href="./history.html">Historical Values</a><a href="./market-moves.html">Market Moves</a><a href="./milestones.html">Closing Milestones</a><a href="./weights.html">Component Weights</a><a href="./components.html">Component History</a><a href="./ohlcv.html">Component OHLCV</a></nav>
+<nav class="gli-nav" aria-label="Site navigation"><a href="./index.html" class="active">Home</a><a href="./history.html">Historical Values</a><a href="./market-moves.html">Market Moves</a><a href="./milestones.html">Closing Milestones</a><a href="./weights.html">Component Weights</a><a href="./components.html">Component History</a><a href="./ohlcv.html">Component OHLCV</a></nav>
 
 <!-- GLI_TICKER_V2 --><div id="gli-tickerbar"><div id="gltxt">Loading GLI…</div><div class="gli-pill">The Great Lakes Index (GLI)</div></div><script>fetch('ticker.txt',{cache:'no-store'}).then(r=>r.text()).then(t=>{const s=t.trim();const cls=s.includes('▲')?'up':s.includes('▼')?'down':'flat';document.getElementById('gltxt').innerHTML=`<span class="${cls}">${s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;')}</span>`;}).catch(()=>document.getElementById('gltxt').textContent='GLI ticker unavailable');</script>
-
 <!-- GLI_SYMBOL_V2 --><section class="gli-symbolbox"><div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap"><div><div class="gli-k">Symbol</div><div class="gli-v">GLI</div><div class="gli-mini">Price-weighted • Original base 100.00 on 2005-08-01</div></div><div style="text-align:right"><div class="gli-k">As of</div><div class="gli-v" style="font-size:16px">2026-08-04</div><div class="gli-mini">Change: +2.62 (+0.65%)</div></div></div><div style="margin-top:12px" class="gli-grid"><div><div class="gli-k">Open</div><div class="gli-v">400.04</div></div><div><div class="gli-k">High</div><div class="gli-v">408.74</div></div><div><div class="gli-k">Low</div><div class="gli-v">394.60</div></div><div><div class="gli-k">Close</div><div class="gli-v">405.01</div></div><div><div class="gli-k">Total Volume</div><div class="gli-v">287,379,624</div></div></div></section>
+<div class="page-head"><div><h1>The Great Lakes Index (GLI)</h1><div class="muted">Price-weighted • Original base 100.00 on 2005-08-01</div></div><a href="./history.html" style="font-weight:800;text-decoration:none">View full history →</a></div>
+<div class="source-note">Accepted close and OHLCV chains are immutable through 2026-08-04. Later completed sessions roll forward live; unfinished sessions are withheld until a valid close is available.</div>
+<!-- GLI_INTERACTIVE_CHART_V2 --><div class="chart-shell"><div id="gli-candlestick" style="height:560px"><div class="chart-status">Loading interactive chart…</div></div><div id="gli-chart-fallback" style="display:none"><img src="gli_close.png" alt="Great Lakes Index close chart" style="max-width:100%"></div></div><script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script><script>fetch('./data/gli_history.json',{cache:'no-store'}).then(r=>r.json()).then(d=>{const rows=d.rows;const trace={type:'candlestick',name:'GLI',x:rows.map(r=>r.date),open:rows.map(r=>r.open),high:rows.map(r=>r.high),low:rows.map(r=>r.low),close:rows.map(r=>r.close),increasing:{line:{color:'#087443'}},decreasing:{line:{color:'#b42318'}}};const layout={margin:{l:55,r:25,t:35,b:45},paper_bgcolor:'#fff',plot_bgcolor:'#fff',hovermode:'x unified',xaxis:{type:'date',rangeslider:{visible:true},rangeselector:{buttons:[{count:1,label:'1M',step:'month',stepmode:'backward'},{count:3,label:'3M',step:'month',stepmode:'backward'},{count:6,label:'6M',step:'month',stepmode:'backward'},{count:1,label:'YTD',step:'year',stepmode:'todate'},{count:1,label:'1Y',step:'year',stepmode:'backward'},{count:5,label:'5Y',step:'year',stepmode:'backward'},{step:'all',label:'All'}]}},yaxis:{title:'Index Level',fixedrange:false},showlegend:false};return Plotly.newPlot('gli-candlestick',[trace],layout,{responsive:true,displaylogo:false,scrollZoom:true});}).catch(()=>{document.getElementById('gli-candlestick').style.display='none';document.getElementById('gli-chart-fallback').style.display='block';});</script>
+<h2>Recent Levels</h2>
+<div class="table-wrap"><table aria-label="Recent Great Lakes Index levels"><thead><tr><th>Date</th><th>Open</th><th>High</th><th>Low</th><th>Close</th><th>Point Change</th><th>% Change</th><th>Total Volume</th></tr></thead><tbody><tr><td>2026-08-04</td><td>400.04</td><td>408.74</td><td>394.60</td><td><b>405.01</b></td><td class="positive">+2.62</td><td class="positive">+0.65%</td><td>287,379,624</td></tr><tr><td>2026-08-03</td><td>399.94</td><td>408.25</td><td>395.07</td><td><b>402.39</b></td><td class="positive">+4.64</td><td class="positive">+1.17%</td><td>253,250,986</td></tr><tr><td>2026-07-31</td><td>398.35</td><td>402.19</td><td>391.93</td><td><b>397.75</b></td><td class="negative">-0.78</td><td class="negative">-0.20%</td><td>271,985,624</td></tr><tr><td>2026-07-30</td><td>400.03</td><td>404.87</td><td>391.23</td><td><b>398.53</b></td><td class="negative">-1.10</td><td class="negative">-0.27%</td><td>313,794,988</td></tr><tr><td>2026-07-29</td><td>404.73</td><td>409.56</td><td>394.85</td><td><b>399.63</b></td><td class="negative">-6.48</td><td class="negative">-1.60%</td><td>369,567,467</td></tr><tr><td>2026-07-28</td><td>404.04</td><td>411.33</td><td>398.51</td><td><b>406.11</b></td><td class="positive">+5.33</td><td class="positive">+1.33%</td><td>313,203,669</td></tr><tr><td>2026-07-27</td><td>400.83</td><td>405.65</td><td>394.85</td><td><b>400.78</b></td><td class="positive">+1.95</td><td class="positive">+0.49%</td><td>255,086,336</td></tr><tr><td>2026-07-24</td><td>395.81</td><td>403.20</td><td>392.40</td><td><b>398.83</b></td><td class="positive">+4.39</td><td class="positive">+1.11%</td><td>257,520,527</td></tr><tr><td>2026-07-23</td><td>391.94</td><td>399.01</td><td>387.78</td><td><b>394.44</b></td><td class="positive">+0.16</td><td class="positive">+0.04%</td><td>279,650,930</td></tr><tr><td>2026-07-22</td><td>395.20</td><td>399.79</td><td>390.03</td><td><b>394.28</b></td><td class="positive">+0.79</td><td class="positive">+0.20%</td><td>250,914,649</td></tr><tr><td>2026-07-21</td><td>392.86</td><td>397.70</td><td>387.56</td><td><b>393.49</b></td><td class="positive">+2.33</td><td class="positive">+0.60%</td><td>248,406,084</td></tr></tbody></table></div>
 
-<!-- GLI_LINKS_V2 --><div class="gli-linkbar"><a href="./history.html">View full history →</a></div>
-<div class="card">
-<h1>The Great Lakes Index (GLI)</h1>
-<div class="muted">Price-weighted • Original base 100.00 on 2005-08-01</div>
-<div class="muted">Accepted close chain through 2026-08-04; later sessions roll forward live.</div>
-<div class="nav">
-  <a href="./index.html"><b>Home</b></a>
-  <a href="./history.html">Historical Values</a>
-  <a href="./ohlcv.html">Component OHLCV</a>
-</div>
-<div class="kpi" style="margin-top:16px;">
-  <div><b>Latest Date</b><br/>2026-08-05</div>
-  <div><b>Close</b><br/>0.00</div>
-  <div><b>High</b><br/>414.43</div>
-  <div><b>Low</b><br/>0.00</div>
-  <div><b>Total Volume</b><br/>232,993,793</div>
-  <div><b>Day Change</b><br/>-405.01 (-100.00%)</div>
-</div>
-<div style="margin-top:16px;">
-  <!-- GLI_INTERACTIVE_CHART_V2 --><div class="chart-shell"><div id="gli-candlestick" style="height:560px"><div class="chart-status">Loading interactive chart…</div></div><div id="gli-chart-fallback" style="display:none"><img src="gli_close.png" alt="Great Lakes Index close chart" style="max-width:100%"></div></div><script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script><script>Promise.all([fetch('./data/gli_history.json',{cache:'no-store'}).then(r=>r.json())]).then(([d])=>{const rows=d.rows;const trace={type:'candlestick',name:'GLI',x:rows.map(r=>r.date),open:rows.map(r=>r.open),high:rows.map(r=>r.high),low:rows.map(r=>r.low),close:rows.map(r=>r.close),increasing:{line:{color:'#087443'}},decreasing:{line:{color:'#b42318'}}};const layout={margin:{l:55,r:25,t:35,b:45},paper_bgcolor:'#fff',plot_bgcolor:'#fff',hovermode:'x unified',xaxis:{type:'date',rangeslider:{visible:true},rangeselector:{buttons:[{count:1,label:'1M',step:'month',stepmode:'backward'},{count:3,label:'3M',step:'month',stepmode:'backward'},{count:6,label:'6M',step:'month',stepmode:'backward'},{count:1,label:'YTD',step:'year',stepmode:'todate'},{count:1,label:'1Y',step:'year',stepmode:'backward'},{count:5,label:'5Y',step:'year',stepmode:'backward'},{step:'all',label:'All'}]}},yaxis:{title:'Index Level',fixedrange:false},showlegend:false};return Plotly.newPlot('gli-candlestick',[trace],layout,{responsive:true,displaylogo:false,scrollZoom:true});}).catch(()=>{document.getElementById('gli-candlestick').style.display='none';document.getElementById('gli-chart-fallback').style.display='block';});</script>
-</div>
-<h2 style="margin-top:20px;">Recent Levels</h2>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th>Date</th>
-      <th>GLI_Open</th>
-      <th>GLI_High</th>
-      <th>GLI_Low</th>
-      <th>GLI_Close</th>
-      <th>TotalVolume</th>
-      <th>Divisor</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>2026-07-09</td>
-      <td>394.18</td>
-      <td>399.26</td>
-      <td>388.60</td>
-      <td>393.22</td>
-      <td>235,420,493</td>
-      <td>34.207561</td>
-    </tr>
-    <tr>
-      <td>2026-07-10</td>
-      <td>393.71</td>
-      <td>398.90</td>
-      <td>389.47</td>
-      <td>394.27</td>
-      <td>222,774,631</td>
-      <td>33.840290</td>
-    </tr>
-    <tr>
-      <td>2026-07-13</td>
-      <td>394.52</td>
-      <td>399.41</td>
-      <td>389.63</td>
-      <td>393.14</td>
-      <td>243,984,361</td>
-      <td>33.840290</td>
-    </tr>
-    <tr>
-      <td>2026-07-14</td>
-      <td>394.74</td>
-      <td>397.85</td>
-      <td>387.85</td>
-      <td>392.06</td>
-      <td>240,018,946</td>
-      <td>33.840290</td>
-    </tr>
-    <tr>
-      <td>2026-07-15</td>
-      <td>390.64</td>
-      <td>396.14</td>
-      <td>384.75</td>
-      <td>391.52</td>
-      <td>289,763,409</td>
-      <td>33.840290</td>
-    </tr>
-    <tr>
-      <td>2026-07-16</td>
-      <td>390.96</td>
-      <td>401.07</td>
-      <td>386.62</td>
-      <td>396.01</td>
-      <td>279,953,052</td>
-      <td>33.840290</td>
-    </tr>
-    <tr>
-      <td>2026-07-17</td>
-      <td>393.30</td>
-      <td>401.99</td>
-      <td>387.70</td>
-      <td>393.83</td>
-      <td>268,666,624</td>
-      <td>33.840290</td>
-    </tr>
-    <tr>
-      <td>2026-07-20</td>
-      <td>396.04</td>
-      <td>399.43</td>
-      <td>387.94</td>
-      <td>391.16</td>
-      <td>240,717,451</td>
-      <td>33.840290</td>
-    </tr>
-    <tr>
-      <td>2026-07-21</td>
-      <td>392.86</td>
-      <td>397.70</td>
-      <td>387.56</td>
-      <td>393.49</td>
-      <td>248,406,084</td>
-      <td>33.840290</td>
-    </tr>
-    <tr>
-      <td>2026-07-22</td>
-      <td>395.20</td>
-      <td>399.79</td>
-      <td>390.03</td>
-      <td>394.28</td>
-      <td>250,914,649</td>
-      <td>33.840290</td>
-    </tr>
-    <tr>
-      <td>2026-07-23</td>
-      <td>391.94</td>
-      <td>399.01</td>
-      <td>387.78</td>
-      <td>394.44</td>
-      <td>279,650,930</td>
-      <td>33.840290</td>
-    </tr>
-    <tr>
-      <td>2026-07-24</td>
-      <td>395.81</td>
-      <td>403.20</td>
-      <td>392.40</td>
-      <td>398.83</td>
-      <td>257,520,527</td>
-      <td>33.840290</td>
-    </tr>
-    <tr>
-      <td>2026-07-27</td>
-      <td>400.83</td>
-      <td>405.65</td>
-      <td>394.85</td>
-      <td>400.78</td>
-      <td>255,086,336</td>
-      <td>33.840290</td>
-    </tr>
-    <tr>
-      <td>2026-07-28</td>
-      <td>404.04</td>
-      <td>411.33</td>
-      <td>398.51</td>
-      <td>406.11</td>
-      <td>313,203,669</td>
-      <td>33.840290</td>
-    </tr>
-    <tr>
-      <td>2026-07-29</td>
-      <td>404.73</td>
-      <td>409.56</td>
-      <td>394.85</td>
-      <td>399.63</td>
-      <td>369,567,467</td>
-      <td>33.840290</td>
-    </tr>
-    <tr>
-      <td>2026-07-30</td>
-      <td>400.03</td>
-      <td>404.87</td>
-      <td>391.23</td>
-      <td>398.53</td>
-      <td>313,794,988</td>
-      <td>33.840290</td>
-    </tr>
-    <tr>
-      <td>2026-07-31</td>
-      <td>398.35</td>
-      <td>402.19</td>
-      <td>391.93</td>
-      <td>397.75</td>
-      <td>271,985,624</td>
-      <td>33.840290</td>
-    </tr>
-    <tr>
-      <td>2026-08-03</td>
-      <td>399.94</td>
-      <td>408.25</td>
-      <td>395.07</td>
-      <td>402.39</td>
-      <td>253,250,986</td>
-      <td>33.840290</td>
-    </tr>
-    <tr>
-      <td>2026-08-04</td>
-      <td>400.04</td>
-      <td>408.74</td>
-      <td>394.60</td>
-      <td>405.01</td>
-      <td>287,379,624</td>
-      <td>33.840290</td>
-    </tr>
-    <tr>
-      <td>2026-08-05</td>
-      <td>407.79</td>
-      <td>414.43</td>
-      <td>0.00</td>
-      <td>0.00</td>
-      <td>232,993,793</td>
-      <td>33.840290</td>
-    </tr>
-  </tbody>
-</table>
-</div></body></html>
+</body>
+</html>

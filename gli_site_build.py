@@ -614,29 +614,83 @@ def insert_after_body(html_text: str, block: str) -> str:
 
 
 def inject_home(full_rows: list[dict[str, str]]) -> None:
-    index_path = REPORT / "index.html"
-    if not index_path.exists():
-        raise SystemExit("report/index.html not found. Run the GLI engine with --report-dir report.")
-    text = ensure_css(index_path.read_text(encoding="utf-8"))
-    last, previous = full_rows[-1], full_rows[-2]
-    close, prev_close = dec(last["GLI_Close"]), dec(previous["GLI_Close"])
-    change, pct = close - prev_close, (close - prev_close) / prev_close * Decimal(100)
-    nav = "<!-- GLI_NAV_V2 -->" + nav_html("index.html")
-    ticker = f"""<!-- GLI_TICKER_V2 --><div id="gli-tickerbar"><div id="gltxt">Loading GLI…</div><div class="gli-pill">The Great Lakes Index (GLI)</div></div><script>fetch('ticker.txt',{{cache:'no-store'}}).then(r=>r.text()).then(t=>{{const s=t.trim();const cls=s.includes('▲')?'up':s.includes('▼')?'down':'flat';document.getElementById('gltxt').innerHTML=`<span class="${{cls}}">${{s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;')}}</span>`;}}).catch(()=>document.getElementById('gltxt').textContent='GLI ticker unavailable');</script>"""
-    symbol = f"""<!-- GLI_SYMBOL_V2 --><section class="gli-symbolbox"><div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap"><div><div class="gli-k">Symbol</div><div class="gli-v">GLI</div><div class="gli-mini">Price-weighted • Original base {BASE_VALUE:.2f} on {BASE_DATE}</div></div><div style="text-align:right"><div class="gli-k">As of</div><div class="gli-v" style="font-size:16px">{last['Date']}</div><div class="gli-mini">Change: {change:+.2f} ({pct:+.2f}%)</div></div></div><div style="margin-top:12px" class="gli-grid"><div><div class="gli-k">Open</div><div class="gli-v">{dec(last['GLI_Open']):,.2f}</div></div><div><div class="gli-k">High</div><div class="gli-v">{dec(last['GLI_High']):,.2f}</div></div><div><div class="gli-k">Low</div><div class="gli-v">{dec(last['GLI_Low']):,.2f}</div></div><div><div class="gli-k">Close</div><div class="gli-v">{close:,.2f}</div></div><div><div class="gli-k">Total Volume</div><div class="gli-v">{fmt_int(last['TotalVolume'])}</div></div></div></section>"""
-    links = '<!-- GLI_LINKS_V2 --><div class="gli-linkbar"><a href="./history.html">View full history →</a></div>'
-    if "GLI_NAV_V2" not in text:
-        text = insert_after_body(text, links)
-        text = insert_after_body(text, symbol)
-        text = insert_after_body(text, ticker)
-        text = insert_after_body(text, nav)
-    chart = """<!-- GLI_INTERACTIVE_CHART_V2 --><div class="chart-shell"><div id="gli-candlestick" style="height:560px"><div class="chart-status">Loading interactive chart…</div></div><div id="gli-chart-fallback" style="display:none"><img src="gli_close.png" alt="Great Lakes Index close chart" style="max-width:100%"></div></div><script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script><script>Promise.all([fetch('./data/gli_history.json',{cache:'no-store'}).then(r=>r.json())]).then(([d])=>{const rows=d.rows;const trace={type:'candlestick',name:'GLI',x:rows.map(r=>r.date),open:rows.map(r=>r.open),high:rows.map(r=>r.high),low:rows.map(r=>r.low),close:rows.map(r=>r.close),increasing:{line:{color:'#087443'}},decreasing:{line:{color:'#b42318'}}};const layout={margin:{l:55,r:25,t:35,b:45},paper_bgcolor:'#fff',plot_bgcolor:'#fff',hovermode:'x unified',xaxis:{type:'date',rangeslider:{visible:true},rangeselector:{buttons:[{count:1,label:'1M',step:'month',stepmode:'backward'},{count:3,label:'3M',step:'month',stepmode:'backward'},{count:6,label:'6M',step:'month',stepmode:'backward'},{count:1,label:'YTD',step:'year',stepmode:'todate'},{count:1,label:'1Y',step:'year',stepmode:'backward'},{count:5,label:'5Y',step:'year',stepmode:'backward'},{step:'all',label:'All'}]}},yaxis:{title:'Index Level',fixedrange:false},showlegend:false};return Plotly.newPlot('gli-candlestick',[trace],layout,{responsive:true,displaylogo:false,scrollZoom:true});}).catch(()=>{document.getElementById('gli-candlestick').style.display='none';document.getElementById('gli-chart-fallback').style.display='block';});</script>"""
-    if "GLI_INTERACTIVE_CHART_V2" not in text:
-        text, count = re.subn(r'<img\s+src=["\']gli_close\.png["\'][^>]*?/?>', chart, text, count=1, flags=re.I)
-        if count == 0:
-            text = text.replace("</body>", chart + "\n</body>", 1)
-    index_path.write_text(text, encoding="utf-8")
+    """Write a clean home page from the latest completed-session history.
 
+    The engine may emit an in-progress session with a zero close and may also
+    leave an older injected shell in ``report/index.html``. Rebuilding the home
+    page from scratch avoids stale duplicate blocks and ensures every displayed
+    home-page value comes from the same completed row used by the ticker,
+    history, rankings, milestones, and interactive chart.
+    """
+    if not full_rows:
+        raise SystemExit("Cannot build the home page without completed GLI rows.")
+
+    last = full_rows[-1]
+    previous = full_rows[-2] if len(full_rows) > 1 else None
+    close = dec(last["GLI_Close"])
+    prev_close = dec(previous["GLI_Close"]) if previous else close
+    change = close - prev_close if previous else Decimal(0)
+    pct = change / prev_close * Decimal(100) if previous and prev_close else Decimal(0)
+
+    accepted_through = "2026-08-04"
+    if LIVE_ANCHOR.exists():
+        try:
+            anchor = json.loads(LIVE_ANCHOR.read_text(encoding="utf-8"))
+            accepted_through = str(anchor.get("accepted_through") or accepted_through)
+        except (OSError, json.JSONDecodeError, TypeError):
+            pass
+
+    ticker = f"""<!-- GLI_TICKER_V2 --><div id="gli-tickerbar"><div id="gltxt">Loading GLI…</div><div class="gli-pill">The Great Lakes Index (GLI)</div></div><script>fetch('ticker.txt',{{cache:'no-store'}}).then(r=>r.text()).then(t=>{{const s=t.trim();const cls=s.includes('▲')?'up':s.includes('▼')?'down':'flat';document.getElementById('gltxt').innerHTML=`<span class="${{cls}}">${{s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;')}}</span>`;}}).catch(()=>document.getElementById('gltxt').textContent='GLI ticker unavailable');</script>"""
+
+    symbol = f"""<!-- GLI_SYMBOL_V2 --><section class="gli-symbolbox"><div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap"><div><div class="gli-k">Symbol</div><div class="gli-v">GLI</div><div class="gli-mini">Price-weighted • Original base {BASE_VALUE:.2f} on {BASE_DATE}</div></div><div style="text-align:right"><div class="gli-k">As of</div><div class="gli-v" style="font-size:16px">{last['Date']}</div><div class="gli-mini">Change: {change:+.2f} ({pct:+.2f}%)</div></div></div><div style="margin-top:12px" class="gli-grid"><div><div class="gli-k">Open</div><div class="gli-v">{dec(last['GLI_Open']):,.2f}</div></div><div><div class="gli-k">High</div><div class="gli-v">{dec(last['GLI_High']):,.2f}</div></div><div><div class="gli-k">Low</div><div class="gli-v">{dec(last['GLI_Low']):,.2f}</div></div><div><div class="gli-k">Close</div><div class="gli-v">{close:,.2f}</div></div><div><div class="gli-k">Total Volume</div><div class="gli-v">{fmt_int(last['TotalVolume'])}</div></div></div></section>"""
+
+    recent_rows = []
+    previous_recent: Decimal | None = None
+    # Calculate changes in chronological order, then display newest first.
+    recent_calculated: list[tuple[dict[str, str], Decimal, Decimal]] = []
+    for row in full_rows[-11:]:
+        row_close = dec(row["GLI_Close"])
+        row_change = row_close - previous_recent if previous_recent is not None else Decimal(0)
+        row_pct = row_change / previous_recent * Decimal(100) if previous_recent else Decimal(0)
+        recent_calculated.append((row, row_change, row_pct))
+        previous_recent = row_close
+    # Recalculate the first visible row against the session immediately before
+    # the display window when one exists.
+    if len(full_rows) > len(recent_calculated):
+        first_row, _, _ = recent_calculated[0]
+        prior_close = dec(full_rows[-len(recent_calculated)-1]["GLI_Close"])
+        first_close = dec(first_row["GLI_Close"])
+        first_change = first_close - prior_close
+        first_pct = first_change / prior_close * Decimal(100) if prior_close else Decimal(0)
+        recent_calculated[0] = (first_row, first_change, first_pct)
+
+    for row, row_change, row_pct in reversed(recent_calculated):
+        cls = "positive" if row_change > 0 else "negative" if row_change < 0 else ""
+        recent_rows.append(
+            "<tr>"
+            f"<td>{html.escape(row['Date'])}</td>"
+            f"<td>{dec(row['GLI_Open']):,.2f}</td>"
+            f"<td>{dec(row['GLI_High']):,.2f}</td>"
+            f"<td>{dec(row['GLI_Low']):,.2f}</td>"
+            f"<td><b>{dec(row['GLI_Close']):,.2f}</b></td>"
+            f"<td class=\"{cls}\">{row_change:+.2f}</td>"
+            f"<td class=\"{cls}\">{row_pct:+.2f}%</td>"
+            f"<td>{fmt_int(row.get('TotalVolume', '0'))}</td>"
+            "</tr>"
+        )
+
+    chart = """<!-- GLI_INTERACTIVE_CHART_V2 --><div class="chart-shell"><div id="gli-candlestick" style="height:560px"><div class="chart-status">Loading interactive chart…</div></div><div id="gli-chart-fallback" style="display:none"><img src="gli_close.png" alt="Great Lakes Index close chart" style="max-width:100%"></div></div><script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script><script>fetch('./data/gli_history.json',{cache:'no-store'}).then(r=>r.json()).then(d=>{const rows=d.rows;const trace={type:'candlestick',name:'GLI',x:rows.map(r=>r.date),open:rows.map(r=>r.open),high:rows.map(r=>r.high),low:rows.map(r=>r.low),close:rows.map(r=>r.close),increasing:{line:{color:'#087443'}},decreasing:{line:{color:'#b42318'}}};const layout={margin:{l:55,r:25,t:35,b:45},paper_bgcolor:'#fff',plot_bgcolor:'#fff',hovermode:'x unified',xaxis:{type:'date',rangeslider:{visible:true},rangeselector:{buttons:[{count:1,label:'1M',step:'month',stepmode:'backward'},{count:3,label:'3M',step:'month',stepmode:'backward'},{count:6,label:'6M',step:'month',stepmode:'backward'},{count:1,label:'YTD',step:'year',stepmode:'todate'},{count:1,label:'1Y',step:'year',stepmode:'backward'},{count:5,label:'5Y',step:'year',stepmode:'backward'},{step:'all',label:'All'}]}},yaxis:{title:'Index Level',fixedrange:false},showlegend:false};return Plotly.newPlot('gli-candlestick',[trace],layout,{responsive:true,displaylogo:false,scrollZoom:true});}).catch(()=>{document.getElementById('gli-candlestick').style.display='none';document.getElementById('gli-chart-fallback').style.display='block';});</script>"""
+
+    body = f"""
+{ticker}
+{symbol}
+<div class="page-head"><div><h1>The Great Lakes Index (GLI)</h1><div class="muted">Price-weighted • Original base {BASE_VALUE:.2f} on {BASE_DATE}</div></div><a href="./history.html" style="font-weight:800;text-decoration:none">View full history →</a></div>
+<div class="source-note">Accepted close and OHLCV chains are immutable through {accepted_through}. Later completed sessions roll forward live; unfinished sessions are withheld until a valid close is available.</div>
+{chart}
+<h2>Recent Levels</h2>
+<div class="table-wrap"><table aria-label="Recent Great Lakes Index levels"><thead><tr><th>Date</th><th>Open</th><th>High</th><th>Low</th><th>Close</th><th>Point Change</th><th>% Change</th><th>Total Volume</th></tr></thead><tbody>{''.join(recent_rows)}</tbody></table></div>
+"""
+    (REPORT / "index.html").write_text(page("The Great Lakes Index (GLI)", body, "index.html"), encoding="utf-8")
 
 def main() -> None:
     REPORT.mkdir(parents=True, exist_ok=True)
