@@ -1,0 +1,193 @@
+{
+  "schema_version": 1,
+  "generated_utc": "2026-08-06T05:20:30Z",
+  "historical_ohlcv": {
+    "file": "gli_historical_ohlcv_through_2025.csv",
+    "rows": 5138,
+    "first_date": "2005-08-01",
+    "last_date": "2025-12-31",
+    "sha256": "26976edbe0657836591bbe59d40754c1dd3d2a78f4d9b2104d861a78e5e1aaed",
+    "source_workbook_sha256": "3e98167ef83c2b2557ab1b11e10cd273ef73e06ae76d25e359b29a4a390820f0",
+    "source_manifest_sha256": "cada878f0ffcda25d802d01e13e5c635e7e996d2cbddc8829f1e22d01ab71e46"
+  },
+  "component_history": {
+    "file": "component_roster_history_through_2025.json",
+    "legacy_snapshots": 54,
+    "derived_snapshots": 46,
+    "total_snapshots": 100,
+    "first_date": "2005-08-01",
+    "last_date": "2025-12-11",
+    "sha256": "8cc83ed80d2d19e563e8275689d70938ef44bde60972182798cf6021c9f2b1ae",
+    "legacy_csv_sha256": "89c4a9635243b88de3a2330150db925f0553bb2d8565833e4c6ee9dccf6269b1"
+  },
+  "weights": {
+    "2005": {
+      "file": "weights/weights_2005.json",
+      "dates": 107,
+      "first_date": "2005-08-01",
+      "last_date": "2005-12-30",
+      "bytes": 75790,
+      "sha256": "c42a8fb7539d96156b250e4c28e1e3a14f92ec724a0ab6ad2d9b23db1ece362e"
+    },
+    "2006": {
+      "file": "weights/weights_2006.json",
+      "dates": 251,
+      "first_date": "2006-01-03",
+      "last_date": "2006-12-29",
+      "bytes": 231434,
+      "sha256": "3d4402634d21cb9be83e7bac8d2d2d793c93a7d1b44a93f7f6e85c2f183bacd2"
+    },
+    "2007": {
+      "file": "weights/weights_2007.json",
+      "dates": 251,
+      "first_date": "2007-01-03",
+      "last_date": "2007-12-31",
+      "bytes": 338439,
+      "sha256": "d9102fbbe63d4bbea4e8de22d24aa7961cc1c6bac6588d4796ae498eb0e67175"
+    },
+    "2008": {
+      "file": "weights/weights_2008.json",
+      "dates": 253,
+      "first_date": "2008-01-02",
+      "last_date": "2008-12-31",
+      "bytes": 342708,
+      "sha256": "7be07ff5a51281a3e20cc450367125e9e246b954b003df3acc5a85d662eed5bd"
+    },
+    "2009": {
+      "file": "weights/weights_2009.json",
+      "dates": 252,
+      "first_date": "2009-01-02",
+      "last_date": "2009-12-31",
+      "bytes": 341819,
+      "sha256": "ff5782770f601f3734504da12ee9469186f78eaed13e3af85c09afe9a4e009d7"
+    },
+    "2010": {
+      "file": "weights/weights_2010.json",
+      "dates": 252,
+      "first_date": "2010-01-04",
+      "last_date": "2010-12-31",
+      "bytes": 341697,
+      "sha256": "8bc646eb37209e012c3de523cced90ce38e3971e834238f1d3b3c5d2c23002d6"
+    },
+    "2011": {
+      "file": "weights/weights_2011.json",
+      "dates": 252,
+      "first_date": "2011-01-03",
+      "last_date": "2011-12-30",
+      "bytes": 342309,
+      "sha256": "84833db3e8cd8736059d71ea3b1886305794b3512f72d0f9e09b0c16d549b0ed"
+    },
+    "2012": {
+      "file": "weights/weights_2012.json",
+      "dates": 250,
+      "first_date": "2012-01-03",
+      "last_date": "2012-12-31",
+      "bytes": 340529,
+      "sha256": "83106e9aa896f2d954a0efb3153036afb8cbe41668e340c362e014011975ee80"
+    },
+    "2013": {
+      "file": "weights/weights_2013.json",
+      "dates": 252,
+      "first_date": "2013-01-02",
+      "last_date": "2013-12-31",
+      "bytes": 344305,
+      "sha256": "eb1c1c594d76a6b9af13eb91b51775ebd10d55aa48c29d34914625a3d25ec669"
+    },
+    "2014": {
+      "file": "weights/weights_2014.json",
+      "dates": 252,
+      "first_date": "2014-01-02",
+      "last_date": "2014-12-31",
+      "bytes": 343571,
+      "sha256": "148d904aa2f9ded7daaf09c5c76a92a839383b5f846426b1e095c3404a15a296"
+    },
+    "2015": {
+      "file": "weights/weights_2015.json",
+      "dates": 252,
+      "first_date": "2015-01-02",
+      "last_date": "2015-12-31",
+      "bytes": 342741,
+      "sha256": "3f20a116c53dd1e4ad383eaae28cb85333cd82e04d49d1627ceb5ded3e8054df"
+    },
+    "2016": {
+      "file": "weights/weights_2016.json",
+      "dates": 252,
+      "first_date": "2016-01-04",
+      "last_date": "2016-12-30",
+      "bytes": 341010,
+      "sha256": "df558e196a40c59838d4aad0578fae06c92e21155ba9c027eeed5d3d254c420c"
+    },
+    "2017": {
+      "file": "weights/weights_2017.json",
+      "dates": 251,
+      "first_date": "2017-01-03",
+      "last_date": "2017-12-29",
+      "bytes": 335432,
+      "sha256": "aec67bb2581d038c50d24014a25049a73fe21f7ebc784db5ce9112a93711359d"
+    },
+    "2018": {
+      "file": "weights/weights_2018.json",
+      "dates": 251,
+      "first_date": "2018-01-02",
+      "last_date": "2018-12-31",
+      "bytes": 334535,
+      "sha256": "92e3db79f55ac45e99c90898b2c757ac9759f20f1ec40f9886588efc38c9ebe4"
+    },
+    "2019": {
+      "file": "weights/weights_2019.json",
+      "dates": 252,
+      "first_date": "2019-01-02",
+      "last_date": "2019-12-31",
+      "bytes": 330679,
+      "sha256": "292f6fb0050290278687f76618116077c712d8f489c86177e0819f1e1226ae22"
+    },
+    "2020": {
+      "file": "weights/weights_2020.json",
+      "dates": 253,
+      "first_date": "2020-01-02",
+      "last_date": "2020-12-31",
+      "bytes": 321669,
+      "sha256": "f6fd53b4ff110fb2642aa17a829fced28215333cfcc5c53347e3afd9de73629f"
+    },
+    "2021": {
+      "file": "weights/weights_2021.json",
+      "dates": 252,
+      "first_date": "2021-01-04",
+      "last_date": "2021-12-31",
+      "bytes": 339363,
+      "sha256": "9dfaeb76be2b688b232d7422556e10793820067cb86587c14ec4be59b590c805"
+    },
+    "2022": {
+      "file": "weights/weights_2022.json",
+      "dates": 251,
+      "first_date": "2022-01-03",
+      "last_date": "2022-12-30",
+      "bytes": 329296,
+      "sha256": "a507f01bfde0b2baffb3833de58057f86ba6d4633c6236bee461a266007a0d81"
+    },
+    "2023": {
+      "file": "weights/weights_2023.json",
+      "dates": 250,
+      "first_date": "2023-01-03",
+      "last_date": "2023-12-29",
+      "bytes": 321976,
+      "sha256": "8d6435c01642b608dc704f636bf500626f9f9af21f5d8c241a48d1884f4c5fa8"
+    },
+    "2024": {
+      "file": "weights/weights_2024.json",
+      "dates": 252,
+      "first_date": "2024-01-02",
+      "last_date": "2024-12-31",
+      "bytes": 321273,
+      "sha256": "b5bd53387dff7af34e7549348a8c798a3762b57dc3c1e9070a6064469995b515"
+    },
+    "2025": {
+      "file": "weights/weights_2025.json",
+      "dates": 250,
+      "first_date": "2025-01-02",
+      "last_date": "2025-12-31",
+      "bytes": 295653,
+      "sha256": "1833ed28d190e2317a22b4430c41448d07d8f9df60f2239ed8c398a323022f9e"
+    }
+  }
+}

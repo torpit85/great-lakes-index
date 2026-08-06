@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>GLI Historical Values</title>
+<title>GLI Component History</title>
 
 <style>
 :root{
@@ -58,25 +58,17 @@ th:first-child,td:first-child{text-align:left} tbody tr:hover{background:#f8fbff
 
 </head>
 <body>
-<nav class="gli-nav" aria-label="Site navigation"><a href="./index.html">Home</a><a href="./history.html" class="active">Historical Values</a><a href="./market-moves.html">Market Moves</a><a href="./milestones.html">Closing Milestones</a><a href="./weights.html">Component Weights</a><a href="./components.html">Component History</a><a href="./ohlcv.html">Component OHLCV</a></nav>
+<nav class="gli-nav" aria-label="Site navigation"><a href="./index.html">Home</a><a href="./history.html">Historical Values</a><a href="./market-moves.html">Market Moves</a><a href="./milestones.html">Closing Milestones</a><a href="./weights.html">Component Weights</a><a href="./components.html" class="active">Component History</a><a href="./ohlcv.html">Component OHLCV</a></nav>
 
-<div class="page-head"><div><h1>Historical Values</h1><div class="muted">Complete daily history from 2005-08-01 • 5,285 sessions</div></div></div>
-<div class="source-note">Displayed price and index values use two decimals. Rankings and milestone calculations use the unrounded accepted close series.</div>
-<div class="tabs" id="year-tabs"><button class="tab active" data-year="all">All</button><button class="tab" data-year="2005">2005</button><button class="tab" data-year="2006">2006</button><button class="tab" data-year="2007">2007</button><button class="tab" data-year="2008">2008</button><button class="tab" data-year="2009">2009</button><button class="tab" data-year="2010">2010</button><button class="tab" data-year="2011">2011</button><button class="tab" data-year="2012">2012</button><button class="tab" data-year="2013">2013</button><button class="tab" data-year="2014">2014</button><button class="tab" data-year="2015">2015</button><button class="tab" data-year="2016">2016</button><button class="tab" data-year="2017">2017</button><button class="tab" data-year="2018">2018</button><button class="tab" data-year="2019">2019</button><button class="tab" data-year="2020">2020</button><button class="tab" data-year="2021">2021</button><button class="tab" data-year="2022">2022</button><button class="tab" data-year="2023">2023</button><button class="tab" data-year="2024">2024</button><button class="tab" data-year="2025">2025</button><button class="tab" data-year="2026">2026</button></div>
-<div class="table-wrap"><table aria-label="Great Lakes Index historical values">
-<thead><tr><th>Date</th><th>Open</th><th>High</th><th>Low</th><th>Close</th><th>Point Change</th><th>% Change</th><th>Total Volume</th><th>Roster</th></tr></thead>
-<tbody id="history-body"><tr><td colspan="9" class="empty">Loading history…</td></tr></tbody></table></div>
+<div class="page-head"><div><h1>Component History</h1><div class="muted">Roster checkpoints modeled after GLI_Component_history.xlsx</div></div><input type="search" id="component-search" placeholder="Search company or ticker" aria-label="Search component history"></div>
+<div class="source-note">Through May 1, 2014, company labels preserve the historical workbook. Later checkpoints are derived from accepted component OHLCV rows and shown by ticker; 2026 is extended from the committed constituent chronology.</div>
+<div class="tabs" id="component-years"><button class="tab" data-year="all">All</button><button class="tab" data-year="2005">2005</button><button class="tab" data-year="2006">2006</button><button class="tab" data-year="2007">2007</button><button class="tab" data-year="2008">2008</button><button class="tab" data-year="2009">2009</button><button class="tab" data-year="2010">2010</button><button class="tab" data-year="2011">2011</button><button class="tab" data-year="2012">2012</button><button class="tab" data-year="2013">2013</button><button class="tab" data-year="2014">2014</button><button class="tab" data-year="2015">2015</button><button class="tab" data-year="2016">2016</button><button class="tab" data-year="2017">2017</button><button class="tab" data-year="2018">2018</button><button class="tab" data-year="2019">2019</button><button class="tab" data-year="2020">2020</button><button class="tab" data-year="2021">2021</button><button class="tab" data-year="2022">2022</button><button class="tab" data-year="2023">2023</button><button class="tab" data-year="2024">2024</button><button class="tab" data-year="2025">2025</button><button class="tab" data-year="2026">2026</button></div><div id="component-timeline" class="timeline"><div class="empty">Loading component history…</div></div>
 <script>
-const nf2=new Intl.NumberFormat('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
-const nfi=new Intl.NumberFormat('en-US',{maximumFractionDigits:0});
-let historyRows=[]; let selectedYear='all';
-function signed(v,suffix=''){if(v===null||v===undefined)return '';return (v>0?'+':'')+nf2.format(v)+suffix;}
-function renderHistory(){
- const rows=selectedYear==='all'?historyRows:historyRows.filter(r=>String(r.year)===selectedYear);
- document.getElementById('history-body').innerHTML=rows.map(r=>`<tr><td>${r.date}</td><td>${nf2.format(r.open)}</td><td>${nf2.format(r.high)}</td><td>${nf2.format(r.low)}</td><td><b>${nf2.format(r.close)}</b></td><td class="${r.change>0?'positive':r.change<0?'negative':''}">${signed(r.change)}</td><td class="${r.pct>0?'positive':r.pct<0?'negative':''}">${signed(r.pct,'%')}</td><td>${nfi.format(r.volume)}</td><td>${r.roster||''}</td></tr>`).join('');
-}
-fetch('./data/gli_history.json',{cache:'no-store'}).then(r=>r.json()).then(d=>{historyRows=d.rows;renderHistory();}).catch(()=>{document.getElementById('history-body').innerHTML='<tr><td colspan="9" class="empty">History data unavailable.</td></tr>';});
-document.getElementById('year-tabs').addEventListener('click',e=>{if(!e.target.matches('.tab'))return;document.querySelectorAll('#year-tabs .tab').forEach(b=>b.classList.remove('active'));e.target.classList.add('active');selectedYear=e.target.dataset.year;renderHistory();});
+let componentData=null;let componentYear='2026';let componentQuery='';
+function esc(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function renderComponents(){if(!componentData)return;const names=componentData.company_names||{};let rows=componentData.snapshots.filter(s=>componentYear==='all'||s.date.startsWith(componentYear));if(componentQuery)rows=rows.filter(s=>s.components.some(c=>(c+' '+(names[c]||'')).toLowerCase().includes(componentQuery))||s.added.some(c=>c.toLowerCase().includes(componentQuery))||s.removed.some(c=>c.toLowerCase().includes(componentQuery)));rows=rows.slice().reverse();document.getElementById('component-timeline').innerHTML=rows.map(s=>{const added=new Set(s.added||[]);const chips=s.components.map(c=>{const name=s.label_mode==='ticker'?(names[c]||''):'';return `<div class="component ${added.has(c)?'added':''}"><div class="component-symbol">${esc(c)}</div>${name?`<div class="component-name">${esc(name)}</div>`:''}</div>`;}).join('');const adds=(s.added||[]).map(x=>`<span class="badge add">+ ${esc(x)}</span>`).join('');const rems=(s.removed||[]).map(x=>`<span class="badge remove">− ${esc(x)}</span>`).join('');return `<article class="snapshot"><div class="snapshot-head"><div><div class="snapshot-date">${s.date}</div><div class="snapshot-title">${esc(s.title)} • ${s.count} components</div></div><div class="gli-pill">${s.label_mode==='ticker'?'Symbols':'Company names'}</div></div>${s.note?`<div class="source-note">${esc(s.note)}</div>`:''}${adds||rems?`<div class="change-row">${adds}${rems}</div>`:''}<div class="component-grid">${chips}</div></article>`;}).join('')||'<div class="empty">No matching checkpoints.</div>';}
+fetch('./data/component_history.json',{cache:'no-store'}).then(r=>r.json()).then(d=>{componentData=d;document.querySelector(`[data-year="${componentYear}"]`)?.classList.add('active');renderComponents();});
+document.getElementById('component-years').addEventListener('click',e=>{if(!e.target.matches('.tab'))return;document.querySelectorAll('#component-years .tab').forEach(b=>b.classList.remove('active'));e.target.classList.add('active');componentYear=e.target.dataset.year;renderComponents();});document.getElementById('component-search').addEventListener('input',e=>{componentQuery=e.target.value.trim().toLowerCase();renderComponents();});
 </script>
 
 </body>

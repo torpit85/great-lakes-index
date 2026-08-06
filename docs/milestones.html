@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>GLI Closing Milestones</title>
+
+<style>
+:root{
+  --ink:#172033; --muted:#667085; --line:#d9dee8; --panel:#ffffff;
+  --soft:#f5f7fa; --blue:#175cd3; --green:#087443; --red:#b42318;
+  --gold:#946200;
+}
+*{box-sizing:border-box}
+body{margin:24px; color:var(--ink); background:#fff; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+a{color:var(--blue)}
+.gli-nav{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 18px;padding:10px;border:1px solid var(--line);border-radius:14px;background:var(--soft)}
+.gli-nav a{padding:7px 10px;border-radius:9px;text-decoration:none;font-weight:750;color:#344054}
+.gli-nav a:hover,.gli-nav a.active{background:#fff;color:var(--blue);box-shadow:0 1px 2px rgba(16,24,40,.08)}
+#gli-tickerbar{font-weight:800;font-size:18px;padding:12px 16px;margin:0 0 14px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,#fafafa,#f0f0f0);display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+#gltxt .up,.positive{color:var(--green)} #gltxt .down,.negative{color:var(--red)} #gltxt .flat{color:#475467}
+.gli-pill{font-size:12px;font-weight:800;border:1px solid var(--line);border-radius:999px;padding:6px 10px;background:#fff}
+.gli-symbolbox,.panel{border:1px solid var(--line);border-radius:14px;padding:16px;margin:0 0 18px;background:var(--panel);box-shadow:0 1px 2px rgba(16,24,40,.04)}
+.gli-grid,.summary-grid{display:grid;grid-template-columns:repeat(5,minmax(130px,1fr));gap:10px 16px}
+.gli-k{color:var(--muted);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.55px}
+.gli-v{font-size:18px;font-weight:900;margin-top:2px}
+.gli-mini,.muted{color:var(--muted);font-size:13px;line-height:1.4}
+.gli-linkbar{margin:8px 0 18px}.gli-linkbar a{text-decoration:none;font-weight:800}
+h1{margin:0 0 4px;font-size:clamp(28px,4vw,42px)} h2{margin:0 0 10px}
+.page-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+.tabs{display:flex;gap:7px;overflow-x:auto;padding:3px 0 10px;scrollbar-width:thin}
+.tab{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 12px;font-weight:750;cursor:pointer;white-space:nowrap;color:#344054}
+.tab:hover,.tab.active{border-color:#84adff;background:#eff4ff;color:#1849a9}
+.controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:12px 0}
+select,input[type="search"],input[type="date"]{border:1px solid #cbd3df;border-radius:9px;padding:8px 10px;background:#fff;color:var(--ink)}
+input[type="range"]{min-width:240px;accent-color:var(--blue)}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:12px;background:#fff}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{border-bottom:1px solid #e7eaf0;padding:9px 10px;text-align:right;white-space:nowrap}
+th{position:sticky;top:0;z-index:1;background:#f8fafc;color:#475467;font-size:12px;text-transform:uppercase;letter-spacing:.35px}
+th:first-child,td:first-child{text-align:left} tbody tr:hover{background:#f8fbff}
+.rank{color:var(--muted);font-weight:700}.empty{padding:24px;text-align:center;color:var(--muted)}
+.metric-cards{display:grid;grid-template-columns:repeat(4,minmax(160px,1fr));gap:12px;margin:14px 0 18px}
+.metric-card{border:1px solid var(--line);border-radius:12px;padding:14px;background:#fff}.metric-card strong{display:block;font-size:23px;margin-top:3px}
+.milestone-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.milestone{border:1px solid var(--line);border-radius:12px;padding:15px;background:linear-gradient(180deg,#fff,#fafbfd)}
+.milestone .level{font-size:27px;font-weight:900;color:var(--gold)}
+.heatmap{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-top:14px}
+.heat-cell{min-height:86px;border-radius:11px;padding:11px;border:1px solid rgba(0,0,0,.08);display:flex;flex-direction:column;justify-content:space-between;box-shadow:inset 0 1px rgba(255,255,255,.25)}
+.heat-symbol{font-weight:900;font-size:17px}.heat-company{font-size:11px;line-height:1.25;opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.heat-weight{font-size:15px;font-weight:850}
+.timeline{display:grid;gap:14px}.snapshot{border:1px solid var(--line);border-radius:14px;padding:16px;background:#fff}.snapshot-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}.snapshot-date{font-size:20px;font-weight:900}.snapshot-title{color:var(--muted);font-weight:700}.change-row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.badge{border-radius:999px;padding:5px 9px;font-size:12px;font-weight:800}.badge.add{background:#ecfdf3;color:#027a48}.badge.remove{background:#fef3f2;color:#b42318}.component-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:7px;margin-top:12px}.component{border:1px solid #e2e7ef;border-radius:8px;padding:7px 9px;background:#f9fafb;font-size:13px}.component.added{border-color:#86d5ad;background:#ecfdf3;font-weight:750}.component-symbol{font-weight:850}.component-name{color:var(--muted);font-size:11px;margin-top:2px}
+.chart-shell{border:1px solid var(--line);border-radius:14px;padding:8px;background:#fff;margin:14px 0 18px}.chart-status{padding:24px;color:var(--muted);text-align:center}
+.source-note{border-left:4px solid #84adff;background:#f5f8ff;padding:10px 12px;margin:12px 0;color:#344054;font-size:13px}
+@media(max-width:920px){.gli-grid,.summary-grid{grid-template-columns:repeat(2,minmax(130px,1fr))}.metric-cards{grid-template-columns:repeat(2,minmax(140px,1fr))}}
+@media(max-width:560px){body{margin:14px}.metric-cards{grid-template-columns:1fr}.component-grid{grid-template-columns:1fr}.heatmap{grid-template-columns:repeat(2,minmax(0,1fr))}th,td{padding:8px 7px}}
+</style>
+
+
+</head>
+<body>
+<nav class="gli-nav" aria-label="Site navigation"><a href="./index.html">Home</a><a href="./history.html">Historical Values</a><a href="./market-moves.html">Market Moves</a><a href="./milestones.html" class="active">Closing Milestones</a><a href="./weights.html">Component Weights</a><a href="./components.html">Component History</a><a href="./ohlcv.html">Component OHLCV</a></nav>
+
+<div class="page-head"><div><h1>Closing Milestones</h1><div class="muted">First daily close strictly above each 10-point level</div></div></div>
+<div class="metric-cards"><div class="metric-card"><span class="gli-k">Milestones reached</span><strong>31</strong></div><div class="metric-card"><span class="gli-k">Latest level</span><strong>400</strong><span class="muted">2026-06-30</span></div><div class="metric-card"><span class="gli-k">Highest close</span><strong>406.11</strong></div><div class="metric-card"><span class="gli-k">Next level</span><strong>410</strong></div></div>
+<div class="milestone-grid"><article class="milestone"><div class="gli-k">First close above</div><div class="level">100</div><div><b>2005-08-02</b></div><div class="muted">Closed at 100.17 • +0.17 above level</div></article><article class="milestone"><div class="gli-k">First close above</div><div class="level">110</div><div><b>2006-11-15</b></div><div class="muted">Closed at 110.32 • +0.32 above level</div></article><article class="milestone"><div class="gli-k">First close above</div><div class="level">120</div><div><b>2007-05-22</b></div><div class="muted">Closed at 120.10 • +0.10 above level</div></article><article class="milestone"><div class="gli-k">First close above</div><div class="level">130</div><div><b>2013-12-20</b></div><div class="muted">Closed at 130.23 • +0.23 above level</div></article><article class="milestone"><div class="gli-k">First close above</div><div class="level">140</div><div><b>2014-11-06</b></div><div class="muted">Closed at 140.24 • +0.24 above level</div></article><article class="milestone"><div class="gli-k">First close above</div><div class="level">150</div><div><b>2016-07-20</b></div><div class="muted">Closed at 150.06 • +0.06 above level</div></article><article class="milestone"><div class="gli-k">First close above</div><div class="level">160</div><div><b>2016-12-06</b></div><div class="muted">Closed at 160.19 • +0.19 above level</div></article><article class="milestone"><div class="gli-k">First close above</div><div class="level">170</div><div><b>2017-04-25</b></div><div class="muted">Closed at 170.73 • +0.73 above level</div></article><article class="milestone"><div class="gli-k">First close above</div><div class="level">180</div><div><b>2017-10-20</b></div><div class="muted">Closed at 180.08 • +0.08 above level</div></article><article class="milestone"><div class="gli-k">First close above</div><div class="level">190</div><div><b>2018-01-03</b></div><div class="muted">Closed at 190.52 • +0.52 above level</div></article><article class="milestone"><div class="gli-k">First close above</div><div class="level">200</div><div><b>2020-11-16</b></div><div class="muted">Closed at 201.28 • +1.28 above level</div></article><article class="milestone"><div class="gli-k">First close above</div><div class="level">210</div><div><b>2021-01-06</b></div><div class="muted">Closed at 211.89 • +1.89 above level</div></article><article class="milestone"><div class="gli-k">First close above</div><div class="level">220</div><div><b>2021-02-08</b></div><div class="muted">Closed at 221.01 • +1.01 above level</div></article><article class="milestone"><div class="gli-k">First close above</div><div class="level">230</div><div><b>2021-03-08</b></div><div class="muted">Closed at 232.08 • +2.08 above level</div></article><article class="milestone"><div class="gli-k">First close above</div><div class="level">240</div><div><b>2021-03-15</b></div><div class="muted">Closed at 240.24 • +0.24 above level</div></article><article class="milestone"><div class="gli-k">First close above</div><div class="level">250</div><div><b>2021-05-06</b></div><div class="muted">Closed at 251.24 • +1.24 above level</div></article><article class="milestone"><div class="gli-k">First close above</div><div class="level">260</div><div><b>2021-11-15</b></div><div class="muted">Closed at 260.22 • +0.22 above level</div></article><article class="milestone"><div class="gli-k">First close above</div><div class="level">270</div><div><b>2022-01-03</b></div><div class="muted">Closed at 274.20 • +4.20 above level</div></article><article class="milestone"><div class="gli-k">First close above</div><div class="level">280</div><div><b>2023-12-04</b></div><div class="muted">Closed at 281.02 • +1.02 above level</div></article><article class="milestone"><div class="gli-k">First close above</div><div class="level">290</div><div><b>2023-12-14</b></div><div class="muted">Closed at 291.50 • +1.50 above level</div></article><article class="milestone"><div class="gli-k">First close above</div><div class="level">300</div><div><b>2024-02-07</b></div><div class="muted">Closed at 300.63 • +0.63 above level</div></article><article class="milestone"><div class="gli-k">First close above</div><div class="level">310</div><div><b>2024-02-26</b></div><div class="muted">Closed at 310.59 • +0.59 above level</div></article><article class="milestone"><div class="gli-k">First close above</div><div class="level">320</div><div><b>2024-03-21</b></div><div class="muted">Closed at 320.90 • +0.90 above level</div></article><article class="milestone"><div class="gli-k">First close above</div><div class="level">330</div><div><b>2024-08-30</b></div><div class="muted">Closed at 331.02 • +1.02 above level</div></article><article class="milestone"><div class="gli-k">First close above</div><div class="level">340</div><div><b>2024-11-06</b></div><div class="muted">Closed at 340.03 • +0.03 above level</div></article><article class="milestone"><div class="gli-k">First close above</div><div class="level">350</div><div><b>2025-11-25</b></div><div class="muted">Closed at 355.77 • +5.77 above level</div></article><article class="milestone"><div class="gli-k">First close above</div><div class="level">360</div><div><b>2025-12-11</b></div><div class="muted">Closed at 363.15 • +3.15 above level</div></article><article class="milestone"><div class="gli-k">First close above</div><div class="level">370</div><div><b>2026-01-08</b></div><div class="muted">Closed at 370.84 • +0.84 above level</div></article><article class="milestone"><div class="gli-k">First close above</div><div class="level">380</div><div><b>2026-01-22</b></div><div class="muted">Closed at 380.47 • +0.47 above level</div></article><article class="milestone"><div class="gli-k">First close above</div><div class="level">390</div><div><b>2026-02-04</b></div><div class="muted">Closed at 390.85 • +0.85 above level</div></article><article class="milestone"><div class="gli-k">First close above</div><div class="level">400</div><div><b>2026-06-30</b></div><div class="muted">Closed at 400.26 • +0.26 above level</div></article></div>
+
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>GLI Historical Values</title>
+<title>GLI Biggest Market Moves</title>
 
 <style>
 :root{
@@ -58,25 +58,17 @@ th:first-child,td:first-child{text-align:left} tbody tr:hover{background:#f8fbff
 
 </head>
 <body>
-<nav class="gli-nav" aria-label="Site navigation"><a href="./index.html">Home</a><a href="./history.html" class="active">Historical Values</a><a href="./market-moves.html">Market Moves</a><a href="./milestones.html">Closing Milestones</a><a href="./weights.html">Component Weights</a><a href="./components.html">Component History</a><a href="./ohlcv.html">Component OHLCV</a></nav>
+<nav class="gli-nav" aria-label="Site navigation"><a href="./index.html">Home</a><a href="./history.html">Historical Values</a><a href="./market-moves.html" class="active">Market Moves</a><a href="./milestones.html">Closing Milestones</a><a href="./weights.html">Component Weights</a><a href="./components.html">Component History</a><a href="./ohlcv.html">Component OHLCV</a></nav>
 
-<div class="page-head"><div><h1>Historical Values</h1><div class="muted">Complete daily history from 2005-08-01 • 5,285 sessions</div></div></div>
-<div class="source-note">Displayed price and index values use two decimals. Rankings and milestone calculations use the unrounded accepted close series.</div>
-<div class="tabs" id="year-tabs"><button class="tab active" data-year="all">All</button><button class="tab" data-year="2005">2005</button><button class="tab" data-year="2006">2006</button><button class="tab" data-year="2007">2007</button><button class="tab" data-year="2008">2008</button><button class="tab" data-year="2009">2009</button><button class="tab" data-year="2010">2010</button><button class="tab" data-year="2011">2011</button><button class="tab" data-year="2012">2012</button><button class="tab" data-year="2013">2013</button><button class="tab" data-year="2014">2014</button><button class="tab" data-year="2015">2015</button><button class="tab" data-year="2016">2016</button><button class="tab" data-year="2017">2017</button><button class="tab" data-year="2018">2018</button><button class="tab" data-year="2019">2019</button><button class="tab" data-year="2020">2020</button><button class="tab" data-year="2021">2021</button><button class="tab" data-year="2022">2022</button><button class="tab" data-year="2023">2023</button><button class="tab" data-year="2024">2024</button><button class="tab" data-year="2025">2025</button><button class="tab" data-year="2026">2026</button></div>
-<div class="table-wrap"><table aria-label="Great Lakes Index historical values">
-<thead><tr><th>Date</th><th>Open</th><th>High</th><th>Low</th><th>Close</th><th>Point Change</th><th>% Change</th><th>Total Volume</th><th>Roster</th></tr></thead>
-<tbody id="history-body"><tr><td colspan="9" class="empty">Loading history…</td></tr></tbody></table></div>
+<div class="page-head"><div><h1>Biggest Market Moves</h1><div class="muted">Largest daily changes in the Great Lakes Index</div></div><label>Period <select id="move-year"><option value="all">All history</option><option value="2005">2005</option><option value="2006">2006</option><option value="2007">2007</option><option value="2008">2008</option><option value="2009">2009</option><option value="2010">2010</option><option value="2011">2011</option><option value="2012">2012</option><option value="2013">2013</option><option value="2014">2014</option><option value="2015">2015</option><option value="2016">2016</option><option value="2017">2017</option><option value="2018">2018</option><option value="2019">2019</option><option value="2020">2020</option><option value="2021">2021</option><option value="2022">2022</option><option value="2023">2023</option><option value="2024">2024</option><option value="2025">2025</option><option value="2026">2026</option></select></label></div>
+<div class="tabs" id="move-tabs"><button class="tab active" data-view="point_gains">Point Gains</button><button class="tab" data-view="point_losses">Point Losses</button><button class="tab" data-view="percent_gains">Percent Gains</button><button class="tab" data-view="percent_losses">Percent Losses</button></div>
+<div class="table-wrap"><table><thead><tr><th>Rank</th><th>Date</th><th>Previous Close</th><th>Close</th><th>Point Change</th><th>% Change</th></tr></thead><tbody id="moves-body"><tr><td colspan="6" class="empty">Loading rankings…</td></tr></tbody></table></div>
 <script>
-const nf2=new Intl.NumberFormat('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
-const nfi=new Intl.NumberFormat('en-US',{maximumFractionDigits:0});
-let historyRows=[]; let selectedYear='all';
-function signed(v,suffix=''){if(v===null||v===undefined)return '';return (v>0?'+':'')+nf2.format(v)+suffix;}
-function renderHistory(){
- const rows=selectedYear==='all'?historyRows:historyRows.filter(r=>String(r.year)===selectedYear);
- document.getElementById('history-body').innerHTML=rows.map(r=>`<tr><td>${r.date}</td><td>${nf2.format(r.open)}</td><td>${nf2.format(r.high)}</td><td>${nf2.format(r.low)}</td><td><b>${nf2.format(r.close)}</b></td><td class="${r.change>0?'positive':r.change<0?'negative':''}">${signed(r.change)}</td><td class="${r.pct>0?'positive':r.pct<0?'negative':''}">${signed(r.pct,'%')}</td><td>${nfi.format(r.volume)}</td><td>${r.roster||''}</td></tr>`).join('');
-}
-fetch('./data/gli_history.json',{cache:'no-store'}).then(r=>r.json()).then(d=>{historyRows=d.rows;renderHistory();}).catch(()=>{document.getElementById('history-body').innerHTML='<tr><td colspan="9" class="empty">History data unavailable.</td></tr>';});
-document.getElementById('year-tabs').addEventListener('click',e=>{if(!e.target.matches('.tab'))return;document.querySelectorAll('#year-tabs .tab').forEach(b=>b.classList.remove('active'));e.target.classList.add('active');selectedYear=e.target.dataset.year;renderHistory();});
+const nf2m=new Intl.NumberFormat('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});let moveData=null;let moveView='point_gains';
+function sm(v,s=''){return (v>0?'+':'')+nf2m.format(v)+s;}
+function renderMoves(){if(!moveData)return;const y=document.getElementById('move-year').value;const rows=moveData.data[y][moveView];document.getElementById('moves-body').innerHTML=rows.map((r,i)=>`<tr><td class="rank">${i+1}</td><td>${r.date}</td><td>${nf2m.format(r.previous)}</td><td><b>${nf2m.format(r.close)}</b></td><td class="${r.change>0?'positive':'negative'}">${sm(r.change)}</td><td class="${r.pct>0?'positive':'negative'}">${sm(r.pct,'%')}</td></tr>`).join('')||'<tr><td colspan="6" class="empty">No qualifying sessions.</td></tr>';}
+fetch('./data/market_moves.json',{cache:'no-store'}).then(r=>r.json()).then(d=>{moveData=d;renderMoves();});
+document.getElementById('move-year').addEventListener('change',renderMoves);document.getElementById('move-tabs').addEventListener('click',e=>{if(!e.target.matches('.tab'))return;document.querySelectorAll('#move-tabs .tab').forEach(b=>b.classList.remove('active'));e.target.classList.add('active');moveView=e.target.dataset.view;renderMoves();});
 </script>
 
 </body>

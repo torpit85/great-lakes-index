@@ -62,10 +62,30 @@ if len(active) != 86 or "ELV" not in active:
 PY
 
 HOME=/home/torrey "$PYTHON" "$ROOT/gli_site_build.py" >> "$LOG" 2>&1
+
+for required in \
+  index.html history.html market-moves.html milestones.html \
+  weights.html components.html ohlcv.html ticker.txt \
+  data/gli_history.json data/market_moves.json data/milestones.json \
+  data/component_history.json data/weights_manifest.json
+ do
+  test -s "$ROOT/report/$required"
+ done
 grep -q "<th>Company</th>" "$ROOT/report/ohlcv.html"
+grep -q "2005-08-01" "$ROOT/report/data/gli_history.json"
+grep -q "GLI_INTERACTIVE_CHART_V2" "$ROOT/report/index.html"
 
 rsync -av --delete "$ROOT/report/" "$ROOT/docs/" >> "$LOG" 2>&1
+for required in \
+  index.html history.html market-moves.html milestones.html \
+  weights.html components.html ohlcv.html ticker.txt \
+  data/gli_history.json data/market_moves.json data/milestones.json \
+  data/component_history.json data/weights_manifest.json
+ do
+  test -s "$ROOT/docs/$required"
+ done
 grep -q "<th>Company</th>" "$ROOT/docs/ohlcv.html"
+grep -q "2005-08-01" "$ROOT/docs/data/gli_history.json"
 
 git add docs >> "$LOG" 2>&1
 git commit -m "GLI site update $(date +%F)" >> "$LOG" 2>&1 || true

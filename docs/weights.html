@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>GLI Component Weights</title>
+
+<style>
+:root{
+  --ink:#172033; --muted:#667085; --line:#d9dee8; --panel:#ffffff;
+  --soft:#f5f7fa; --blue:#175cd3; --green:#087443; --red:#b42318;
+  --gold:#946200;
+}
+*{box-sizing:border-box}
+body{margin:24px; color:var(--ink); background:#fff; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+a{color:var(--blue)}
+.gli-nav{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 18px;padding:10px;border:1px solid var(--line);border-radius:14px;background:var(--soft)}
+.gli-nav a{padding:7px 10px;border-radius:9px;text-decoration:none;font-weight:750;color:#344054}
+.gli-nav a:hover,.gli-nav a.active{background:#fff;color:var(--blue);box-shadow:0 1px 2px rgba(16,24,40,.08)}
+#gli-tickerbar{font-weight:800;font-size:18px;padding:12px 16px;margin:0 0 14px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,#fafafa,#f0f0f0);display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+#gltxt .up,.positive{color:var(--green)} #gltxt .down,.negative{color:var(--red)} #gltxt .flat{color:#475467}
+.gli-pill{font-size:12px;font-weight:800;border:1px solid var(--line);border-radius:999px;padding:6px 10px;background:#fff}
+.gli-symbolbox,.panel{border:1px solid var(--line);border-radius:14px;padding:16px;margin:0 0 18px;background:var(--panel);box-shadow:0 1px 2px rgba(16,24,40,.04)}
+.gli-grid,.summary-grid{display:grid;grid-template-columns:repeat(5,minmax(130px,1fr));gap:10px 16px}
+.gli-k{color:var(--muted);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.55px}
+.gli-v{font-size:18px;font-weight:900;margin-top:2px}
+.gli-mini,.muted{color:var(--muted);font-size:13px;line-height:1.4}
+.gli-linkbar{margin:8px 0 18px}.gli-linkbar a{text-decoration:none;font-weight:800}
+h1{margin:0 0 4px;font-size:clamp(28px,4vw,42px)} h2{margin:0 0 10px}
+.page-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+.tabs{display:flex;gap:7px;overflow-x:auto;padding:3px 0 10px;scrollbar-width:thin}
+.tab{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 12px;font-weight:750;cursor:pointer;white-space:nowrap;color:#344054}
+.tab:hover,.tab.active{border-color:#84adff;background:#eff4ff;color:#1849a9}
+.controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:12px 0}
+select,input[type="search"],input[type="date"]{border:1px solid #cbd3df;border-radius:9px;padding:8px 10px;background:#fff;color:var(--ink)}
+input[type="range"]{min-width:240px;accent-color:var(--blue)}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:12px;background:#fff}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{border-bottom:1px solid #e7eaf0;padding:9px 10px;text-align:right;white-space:nowrap}
+th{position:sticky;top:0;z-index:1;background:#f8fafc;color:#475467;font-size:12px;text-transform:uppercase;letter-spacing:.35px}
+th:first-child,td:first-child{text-align:left} tbody tr:hover{background:#f8fbff}
+.rank{color:var(--muted);font-weight:700}.empty{padding:24px;text-align:center;color:var(--muted)}
+.metric-cards{display:grid;grid-template-columns:repeat(4,minmax(160px,1fr));gap:12px;margin:14px 0 18px}
+.metric-card{border:1px solid var(--line);border-radius:12px;padding:14px;background:#fff}.metric-card strong{display:block;font-size:23px;margin-top:3px}
+.milestone-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.milestone{border:1px solid var(--line);border-radius:12px;padding:15px;background:linear-gradient(180deg,#fff,#fafbfd)}
+.milestone .level{font-size:27px;font-weight:900;color:var(--gold)}
+.heatmap{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-top:14px}
+.heat-cell{min-height:86px;border-radius:11px;padding:11px;border:1px solid rgba(0,0,0,.08);display:flex;flex-direction:column;justify-content:space-between;box-shadow:inset 0 1px rgba(255,255,255,.25)}
+.heat-symbol{font-weight:900;font-size:17px}.heat-company{font-size:11px;line-height:1.25;opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.heat-weight{font-size:15px;font-weight:850}
+.timeline{display:grid;gap:14px}.snapshot{border:1px solid var(--line);border-radius:14px;padding:16px;background:#fff}.snapshot-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}.snapshot-date{font-size:20px;font-weight:900}.snapshot-title{color:var(--muted);font-weight:700}.change-row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.badge{border-radius:999px;padding:5px 9px;font-size:12px;font-weight:800}.badge.add{background:#ecfdf3;color:#027a48}.badge.remove{background:#fef3f2;color:#b42318}.component-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:7px;margin-top:12px}.component{border:1px solid #e2e7ef;border-radius:8px;padding:7px 9px;background:#f9fafb;font-size:13px}.component.added{border-color:#86d5ad;background:#ecfdf3;font-weight:750}.component-symbol{font-weight:850}.component-name{color:var(--muted);font-size:11px;margin-top:2px}
+.chart-shell{border:1px solid var(--line);border-radius:14px;padding:8px;background:#fff;margin:14px 0 18px}.chart-status{padding:24px;color:var(--muted);text-align:center}
+.source-note{border-left:4px solid #84adff;background:#f5f8ff;padding:10px 12px;margin:12px 0;color:#344054;font-size:13px}
+@media(max-width:920px){.gli-grid,.summary-grid{grid-template-columns:repeat(2,minmax(130px,1fr))}.metric-cards{grid-template-columns:repeat(2,minmax(140px,1fr))}}
+@media(max-width:560px){body{margin:14px}.metric-cards{grid-template-columns:1fr}.component-grid{grid-template-columns:1fr}.heatmap{grid-template-columns:repeat(2,minmax(0,1fr))}th,td{padding:8px 7px}}
+</style>
+
+
+</head>
+<body>
+<nav class="gli-nav" aria-label="Site navigation"><a href="./index.html">Home</a><a href="./history.html">Historical Values</a><a href="./market-moves.html">Market Moves</a><a href="./milestones.html">Closing Milestones</a><a href="./weights.html" class="active">Component Weights</a><a href="./components.html">Component History</a><a href="./ohlcv.html">Component OHLCV</a></nav>
+
+<div class="page-head"><div><h1>Component Weights</h1><div class="muted">Daily price weights in the price-weighted Great Lakes Index</div></div></div>
+<div class="source-note" id="weight-source">Historical weights use accepted component OHLCV rows. For 2026, only live sessions after the accepted cutoff are displayed until an accepted 2026 component-level file is installed.</div>
+<div class="panel"><div class="controls"><label>Year <select id="weight-year"></select></label><label>Date <input id="weight-date" type="date" readonly></label><input id="weight-slider" type="range" min="0" max="0" value="0" aria-label="Weight date"></div><div class="summary-grid"><div><div class="gli-k">As of</div><div class="gli-v" id="weight-asof">—</div></div><div><div class="gli-k">Components</div><div class="gli-v" id="weight-count">—</div></div><div><div class="gli-k">Largest weight</div><div class="gli-v" id="weight-largest">—</div></div><div><div class="gli-k">Total</div><div class="gli-v" id="weight-total">—</div></div><div><div class="gli-k">Dataset</div><div class="gli-v" id="weight-status" style="font-size:14px">—</div></div></div></div>
+<div id="heatmap" class="heatmap"><div class="empty">Loading component weights…</div></div>
+<script>
+const companyNames={"ADM":"Archer-Daniels-Midland Company","AEP":"American Electric Power Company","ALL":"Allstate Corporation (The)","ALLY":"Ally Financial Inc.","ANF":"Abercrombie & Fitch Company","ANGI":"Angi Inc.","AOS":"A.O. Smith Corporation","BA":"Boeing Company (The)","BAX":"Baxter International Inc.","BBWI":"Bath & Body Works, Inc.","BMI":"Badger Meter, Inc.","CARS":"Cars.com Inc.","CAT":"Caterpillar, Inc.","CCC":"CCC Intelligent Solutions Holdings Inc.","CF":"CF Industries Holdings, Inc.","CME":"CME Group Inc.","CMI":"Cummins Inc.","CTS":"CTS Corporation","DE":"Deere & Company","DOW":"Dow Inc.","DPZ":"Domino's Pizza Inc","ELV":"Elevance Health, Inc.","EXC":"Exelon Corporation","F":"Ford Motor Company","FISV":"Fiserv, Inc.","FITB":"Fifth Third Bancorp","FSS":"Federal Signal Corporation","FUN":"Six Flags Entertainment Corpora","GE":"GE Aerospace","GLDD":"Great Lakes Dredge & Dock Corpo","GM":"General Motors Company","GNRC":"Generac Holdings Inc.","GT":"The Goodyear Tire & Rubber Comp","H":"Hyatt Hotels Corporation","HOG":"Harley-Davidson, Inc.","HURC":"Hurco Companies, Inc.","INGR":"Ingredion Incorporated","ITW":"Illinois Tool Works Inc.","JLL":"Jones Lang LaSalle Incorporated","K":"Kellanova","KELYA":"Kelly Services, Inc.","KR":"Kroger Company (The)","KSS":"Kohl's Corporation","LE":"Lands' End, Inc.","LKFN":"Lakeland Financial Corporation","LLY":"Eli Lilly and Company","LZB":"La-Z-Boy Incorporated","M":"Macy's Inc","MAS":"Masco Corporation","MCD":"McDonald's Corporation","MCS":"The Marcus Corporation","MHO":"M/I Homes, Inc.","MOD":"Modine Manufacturing Company","MPC":"Marathon Petroleum Corporation","MRTN":"Marten Transport, Ltd.","MSI":"Motorola Solutions, Inc.","NI":"NiSource Inc","NPK":"National Presto Industries, Inc","NTRS":"Northern Trust Corporation","OI":"O-I Glass, Inc.","OSK":"Oshkosh Corporation (Holding Co","PAG":"Penske Automotive Group, Inc.","PATK":"Patrick Industries, Inc.","PG":"Procter & Gamble Company (The)","PH":"Parker-Hannifin Corporation","PHM":"PulteGroup, Inc.","PKG":"Packaging Corporation of Americ","RAIL":"Freightcar America, Inc.","REX":"REX American Resources Corporat","RKT":"Rocket Companies, Inc.","ROK":"Rockwell Automation, Inc.","SCL":"Stepan Company","SCVL":"Shoe Carnival, Inc.","SEAT":"Vivid Seats Inc.","SGA":"Saga Communications, Inc.","SHOE":"Shoe Station Group, Inc.","SJM":"The J.M. Smucker Company","SKY":"Champion Homes, Inc.","SNA":"Snap-On Incorporated","SPB":"Spectrum Brands Holdings, Inc.","SPG":"Simon Property Group, Inc.","SRCE":"1st Source Corporation","SSP":"E.W. Scripps Company (The)","SUI":"Sun Communities, Inc.","SYK":"Stryker Corporation","TDC":"Teradata Corporation","TDS":"Telephone and Data Systems, Inc","THO":"Thor Industries, Inc.","TR":"Tootsie Roll Industries, Inc.","UAL":"United Airlines Holdings, Inc.","UFPI":"UFP Industries, Inc.","ULTA":"Ulta Beauty, Inc.","WEC":"WEC Energy Group, Inc.","WHR":"Whirlpool Corporation","WNC":"Wabash National Corporation","WWW":"Wolverine World Wide, Inc.","ZBH":"Zimmer Biomet Holdings, Inc.","ZEUS":"Olympic Steel, Inc."};let manifest=null;let weightPayload=null;
+const yearSel=document.getElementById('weight-year'),slider=document.getElementById('weight-slider');
+function renderHeat(index){if(!weightPayload)return;const items=weightPayload.snapshots[index].map(x=>({symbol:x[0],ppm:x[1]})).sort((a,b)=>b.ppm-a.ppm);const max=items[0]?.ppm||1;const total=items.reduce((s,x)=>s+x.ppm,0);const day=weightPayload.dates[index];document.getElementById('weight-date').value=day;document.getElementById('weight-asof').textContent=day;document.getElementById('weight-count').textContent=items.length;document.getElementById('weight-largest').textContent=items.length?`${items[0].symbol} ${(items[0].ppm/10000).toFixed(2)}%`:'—';document.getElementById('weight-total').textContent=(total/10000).toFixed(2)+'%';document.getElementById('weight-status').textContent=manifest.years[yearSel.value].status;document.getElementById('heatmap').innerHTML=items.map(x=>{const ratio=x.ppm/max;const alpha=.16+.78*ratio;const dark=alpha>.55;const name=companyNames[x.symbol]||'';return `<div class="heat-cell" style="background:rgba(23,92,170,${alpha.toFixed(3)});color:${dark?'#fff':'#102a43'}" title="${x.symbol}: ${(x.ppm/10000).toFixed(4)}%"><div><div class="heat-symbol">${x.symbol}</div><div class="heat-company">${name}</div></div><div class="heat-weight">${(x.ppm/10000).toFixed(2)}%</div></div>`;}).join('');}
+function loadYear(year){const meta=manifest.years[year];fetch('./data/'+meta.file,{cache:'no-store'}).then(r=>r.json()).then(d=>{weightPayload=d;slider.max=Math.max(0,d.dates.length-1);slider.value=d.dates.length-1;renderHeat(Number(slider.value));});}
+fetch('./data/weights_manifest.json',{cache:'no-store'}).then(r=>r.json()).then(d=>{manifest=d;const years=Object.keys(d.years).sort((a,b)=>Number(a)-Number(b));yearSel.innerHTML=years.map(y=>`<option value="${y}">${y}</option>`).join('');yearSel.value=years[years.length-1];loadYear(yearSel.value);});
+yearSel.addEventListener('change',()=>loadYear(yearSel.value));slider.addEventListener('input',()=>renderHeat(Number(slider.value)));
+</script>
+
+</body>
+</html>
