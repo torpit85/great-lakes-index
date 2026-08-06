@@ -4,8 +4,9 @@
 Original index base: 100 on 2005-08-01.
 The published live series is anchored to the accepted 2025-12-31 carry.
 Accepted closes and divisors through 2026-08-04 are never recalculated from
-a public market-data vendor. Later sessions roll forward from the accepted
-divisor using the active roster and unadjusted daily Yahoo bars.
+a public market-data vendor. The canonical 2026-08-05 component and aggregate
+checkpoint is pinned separately, and later sessions roll forward from it using
+the active roster and unadjusted daily Yahoo bars.
 """
 from __future__ import annotations
 
@@ -123,6 +124,12 @@ def normalize_prices_df(df: pd.DataFrame) -> pd.DataFrame:
     return out[["Date", "Ticker", "Open", "High", "Low", "Close", "Volume"]]
 
 
+def empty_prices_frame() -> pd.DataFrame:
+    return pd.DataFrame(
+        columns=["Date", "Ticker", "Open", "High", "Low", "Close", "Volume"]
+    )
+
+
 def fetch_yahoo_daily(
     tickers: list[str],
     start: str,
@@ -131,6 +138,8 @@ def fetch_yahoo_daily(
 ) -> pd.DataFrame:
     if yf is None:
         raise RuntimeError("yfinance is not installed")
+    if not tickers or start >= end_exclusive:
+        return empty_prices_frame()
     data = yf.download(
         tickers=tickers,
         start=start,
@@ -141,6 +150,8 @@ def fetch_yahoo_daily(
         threads=True,
         progress=False,
     )
+    if data is None or data.empty:
+        return empty_prices_frame()
     rows = []
     if isinstance(data.columns, pd.MultiIndex):
         available = set(data.columns.get_level_values(0))
@@ -169,8 +180,11 @@ def fetch_yahoo_daily(
             sub[["Date", "Ticker", "Open", "High", "Low", "Close", "Volume"]]
         )
     if not rows:
-        raise RuntimeError("Yahoo returned no daily bars")
-    return normalize_prices_df(pd.concat(rows, ignore_index=True))
+        return empty_prices_frame()
+    result = normalize_prices_df(pd.concat(rows, ignore_index=True))
+    return result[
+        result[["Open", "High", "Low", "Close"]].notna().any(axis=1)
+    ].reset_index(drop=True)
 
 
 @dataclass(frozen=True)
@@ -357,6 +371,156 @@ def read_accepted_ohlcv_chain(
     return rows
 
 
+def read_live_checkpoint_levels(
+    path: Optional[Path],
+) -> list[dict[str, str]]:
+    if path is None:
+        return []
+    rows = list(csv.DictReader(path.open(encoding="utf-8-sig")))
+    required = {
+        "Date", "GLI_Open", "GLI_High", "GLI_Low", "GLI_Close",
+        "TotalVolume", "Divisor", "SumOpen", "SumHigh", "SumLow",
+        "SumClose", "RowsLoaded",
+    }
+    if not rows or not required.issubset(rows[0]):
+        raise ValueError(
+            f"Live checkpoint levels must contain {sorted(required)}"
+        )
+    dates = [row["Date"] for row in rows]
+    if dates != sorted(dates) or len(dates) != len(set(dates)):
+        raise ValueError("Live checkpoint level dates must be unique and sorted")
+    return rows
+
+
+def read_live_checkpoint_prices(
+    path: Optional[Path],
+) -> list[dict[str, str]]:
+    if path is None:
+        return []
+    rows = list(csv.DictReader(path.open(encoding="utf-8-sig")))
+    required = {"Date", "Ticker", "Open", "High", "Low", "Close", "Volume"}
+    if not rows or not required.issubset(rows[0]):
+        raise ValueError(
+            f"Live checkpoint prices must contain {sorted(required)}"
+        )
+    return rows
+
+
+def validate_live_checkpoint_payload(
+    levels: list[dict[str, str]],
+    prices: list[dict[str, str]],
+    constituents: pd.DataFrame,
+    accepted_cutoff: str,
+) -> None:
+    if bool(levels) != bool(prices):
+        raise ValueError(
+            "Provide both live checkpoint levels and live checkpoint prices"
+        )
+    if not levels:
+        return
+
+    levels_by_date = {row["Date"]: row for row in levels}
+    price_dates = {row["Date"] for row in prices}
+    if set(levels_by_date) != price_dates:
+        raise ValueError(
+            "Live checkpoint level and component-price date sets differ"
+        )
+
+    for day in sorted(levels_by_date):
+        if day <= accepted_cutoff:
+            raise ValueError(
+                f"Live checkpoint {day} does not follow accepted cutoff "
+                f"{accepted_cutoff}"
+            )
+        level = levels_by_date[day]
+        active = active_tickers_for_date(constituents, day)
+        active_set = set(active)
+        day_rows = [row for row in prices if row["Date"] == day]
+        tickers = [row["Ticker"].strip().upper() for row in day_rows]
+        if len(tickers) != len(set(tickers)):
+            raise ValueError(f"{day}: duplicate live checkpoint component rows")
+        if set(tickers) != active_set:
+            missing = sorted(active_set - set(tickers))
+            extra = sorted(set(tickers) - active_set)
+            raise ValueError(
+                f"{day}: live checkpoint roster mismatch; "
+                f"missing={missing}, extra={extra}"
+            )
+
+        sums = {name: Decimal(0) for name in ["Open", "High", "Low", "Close", "Volume"]}
+        for row in day_rows:
+            values: dict[str, Decimal] = {}
+            for column in ["Open", "High", "Low", "Close"]:
+                value = Decimal(row[column])
+                if not value.is_finite() or value <= 0:
+                    raise ValueError(
+                        f"{day} {row['Ticker']}: invalid checkpoint {column}={value}"
+                    )
+                values[column] = value
+                sums[column] += value
+            volume = Decimal(row["Volume"] or "0")
+            if not volume.is_finite() or volume < 0:
+                raise ValueError(
+                    f"{day} {row['Ticker']}: invalid checkpoint Volume={volume}"
+                )
+            sums["Volume"] += volume
+        comparisons = {
+            "SumOpen": sums["Open"],
+            "SumHigh": sums["High"],
+            "SumLow": sums["Low"],
+            "SumClose": sums["Close"],
+            "TotalVolume": sums["Volume"],
+        }
+        for field, actual in comparisons.items():
+            if Decimal(level[field]) != actual:
+                raise ValueError(
+                    f"{day}: checkpoint {field} mismatch: "
+                    f"levels={level[field]}, components={actual}"
+                )
+        if int(level["RowsLoaded"]) != len(active):
+            raise ValueError(f"{day}: checkpoint roster count mismatch")
+
+        divisor = Decimal(level["Divisor"])
+        if not divisor.is_finite() or divisor <= 0:
+            raise ValueError(f"{day}: invalid checkpoint divisor")
+        with localcontext() as context:
+            context.prec = DECIMAL_PRECISION
+            arithmetic = {
+                "GLI_Open": sums["Open"] / divisor,
+                "GLI_High": sums["High"] / divisor,
+                "GLI_Low": sums["Low"] / divisor,
+                "GLI_Close": sums["Close"] / divisor,
+            }
+        for field, actual in arithmetic.items():
+            if Decimal(level[field]) != actual:
+                raise ValueError(
+                    f"{day}: checkpoint {field} arithmetic mismatch"
+                )
+        if Decimal(level["GLI_High"]) < max(
+            Decimal(level["GLI_Open"]), Decimal(level["GLI_Close"])
+        ):
+            raise ValueError(f"{day}: checkpoint aggregate high constraint failed")
+        if Decimal(level["GLI_Low"]) > min(
+            Decimal(level["GLI_Open"]), Decimal(level["GLI_Close"])
+        ):
+            raise ValueError(f"{day}: checkpoint aggregate low constraint failed")
+
+
+def overlay_live_checkpoint_prices(
+    vendor_prices: pd.DataFrame,
+    checkpoint_rows: list[dict[str, str]],
+) -> pd.DataFrame:
+    vendor = normalize_prices_df(vendor_prices)
+    if not checkpoint_rows:
+        return vendor
+    checkpoint_dates = {row["Date"] for row in checkpoint_rows}
+    vendor = vendor[~vendor["Date"].isin(checkpoint_dates)].copy()
+    checkpoint = normalize_prices_df(pd.DataFrame(checkpoint_rows))
+    return pd.concat([vendor, checkpoint], ignore_index=True).sort_values(
+        ["Date", "Ticker"]
+    ).reset_index(drop=True)
+
+
 def aggregate_index(
     prices_df: pd.DataFrame,
     constituents: pd.DataFrame,
@@ -366,6 +530,7 @@ def aggregate_index(
     requested_start: str,
     requested_end: str,
     strict: bool,
+    live_checkpoint_levels: list[dict[str, str]],
 ) -> pd.DataFrame:
     prices = normalize_prices_df(prices_df)
     prices = prices[
@@ -386,6 +551,10 @@ def aggregate_index(
         raise ValueError("Requested range does not include the accepted anchor")
 
     accepted_cutoff = max(chain_by_date)
+    checkpoint_by_date = {
+        row["Date"]: row for row in live_checkpoint_levels
+        if requested_start <= row["Date"] <= requested_end
+    }
     events_by_date: dict[str, list[DivisorEvent]] = {}
     for event in events:
         events_by_date.setdefault(event.date, []).append(event)
@@ -452,8 +621,11 @@ def aggregate_index(
 
     # Live roll-forward after the immutable accepted cutoff.
     live_dates = sorted(
-        day for day in raw_by_date
-        if accepted_cutoff < day <= requested_end
+        {
+            day for day in raw_by_date
+            if accepted_cutoff < day <= requested_end
+        }
+        | set(checkpoint_by_date)
     )
     current_divisor = Decimal(chain_by_date[accepted_cutoff]["Divisor"])
     previous_sum = Decimal(chain_by_date[accepted_cutoff]["ComponentSum"])
@@ -494,6 +666,34 @@ def aggregate_index(
                     + ", ".join(missing)
                 )
             if not found:
+                continue
+
+            if day in checkpoint_by_date:
+                checkpoint = checkpoint_by_date[day]
+                if Decimal(checkpoint["Divisor"]) != current_divisor:
+                    raise ValueError(
+                        f"{day}: live checkpoint divisor conflicts with roll-forward"
+                    )
+                source_close = checkpoint.get("CloseSource") or "PINNED_LIVE_CHECKPOINT"
+                source_ohlcv = checkpoint.get("OHLCVSource") or "PINNED_LIVE_CHECKPOINT"
+                output.append({
+                    "Date": day,
+                    "GLI_Open": checkpoint["GLI_Open"],
+                    "GLI_High": checkpoint["GLI_High"],
+                    "GLI_Low": checkpoint["GLI_Low"],
+                    "GLI_Close": checkpoint["GLI_Close"],
+                    "TotalVolume": checkpoint["TotalVolume"],
+                    "Divisor": checkpoint["Divisor"],
+                    "SumOpen": checkpoint["SumOpen"],
+                    "SumHigh": checkpoint["SumHigh"],
+                    "SumLow": checkpoint["SumLow"],
+                    "SumClose": checkpoint["SumClose"],
+                    "RowsLoaded": int(checkpoint["RowsLoaded"]),
+                    "CloseSource": source_close,
+                    "OHLCVSource": source_ohlcv,
+                })
+                previous_sum = Decimal(checkpoint["SumClose"])
+                previous_index = Decimal(checkpoint["GLI_Close"])
                 continue
 
             index_open = sums["Open"] / current_divisor
@@ -740,6 +940,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--tickers", required=True, type=Path)
     parser.add_argument("--accepted-chain", required=True, type=Path)
     parser.add_argument("--accepted-ohlcv-chain", required=True, type=Path)
+    parser.add_argument("--live-checkpoint-levels", type=Path)
+    parser.add_argument("--live-checkpoint-prices", type=Path)
     parser.add_argument("--prices", type=Path)
     parser.add_argument("--fetch", choices=["yfinance"])
     parser.add_argument("--start", default=LIVE_SERIES_START)
@@ -768,26 +970,46 @@ def main() -> int:
     )
     accepted_cutoff = max(row["Date"] for row in accepted_chain)
     events = read_divisor_events(args.events)
+    checkpoint_levels = read_live_checkpoint_levels(
+        args.live_checkpoint_levels
+    )
+    checkpoint_price_rows = read_live_checkpoint_prices(
+        args.live_checkpoint_prices
+    )
+    validate_live_checkpoint_payload(
+        checkpoint_levels, checkpoint_price_rows, constituents, accepted_cutoff
+    )
+
+    checkpoint_cutoff = max(
+        [accepted_cutoff] + [row["Date"] for row in checkpoint_levels]
+    )
+    vendor_start = max(
+        args.start,
+        (pd.to_datetime(checkpoint_cutoff) + pd.Timedelta(days=1))
+        .date().isoformat(),
+    )
 
     if args.fetch == "yfinance":
-        tickers = tickers_intersecting_range(
-            constituents, args.start, end_inclusive
-        )
         end_exclusive = (
             pd.to_datetime(end_inclusive) + pd.Timedelta(days=1)
         ).date().isoformat()
-        prices_df = fetch_yahoo_daily(
-            tickers, args.start, end_exclusive, args.auto_adjust
-        )
+        if vendor_start <= end_inclusive:
+            tickers = tickers_intersecting_range(
+                constituents, vendor_start, end_inclusive
+            )
+            vendor_prices = fetch_yahoo_daily(
+                tickers, vendor_start, end_exclusive, args.auto_adjust
+            )
+        else:
+            vendor_prices = empty_prices_frame()
     elif args.prices:
-        prices_df = normalize_prices_df(pd.read_csv(args.prices))
+        vendor_prices = normalize_prices_df(pd.read_csv(args.prices))
     else:
         raise ValueError("Provide --prices or --fetch yfinance")
 
-    if args.prices_out:
-        normalize_prices_df(prices_df).to_csv(
-            args.prices_out, index=False
-        )
+    prices_df = overlay_live_checkpoint_prices(
+        vendor_prices, checkpoint_price_rows
+    )
 
     index_df = aggregate_index(
         prices_df=prices_df,
@@ -798,8 +1020,17 @@ def main() -> int:
         requested_start=args.start,
         requested_end=end_inclusive,
         strict=args.strict,
+        live_checkpoint_levels=checkpoint_levels,
     )
+
+    # Write outputs only after all accepted-chain, checkpoint, and live-session
+    # validations have passed. A rejected fetch therefore cannot replace the
+    # last good CSV or report artifacts.
     index_df.to_csv(args.out, index=False)
+    if args.prices_out:
+        normalize_prices_df(prices_df).to_csv(
+            args.prices_out, index=False
+        )
 
     if args.db:
         sqlite_init_and_migrate(args.db)
