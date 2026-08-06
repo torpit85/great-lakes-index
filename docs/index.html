@@ -9,9 +9,8 @@ table { border-collapse:collapse; width:100%; }
 th,td { border:1px solid #ddd; padding:8px; text-align:right; }
 th:first-child,td:first-child { text-align:left; }
 .muted { color:#666; }
-.nav { margin-top: 10px; padding: 10px 12px; background:#f6f6f6; border:1px solid #ddd; border-radius:10px; }
-.nav a { margin-right: 14px; text-decoration: none; }
-.nav a:hover { text-decoration: underline; }
+.nav { margin-top:10px; padding:10px 12px; background:#f6f6f6; border:1px solid #ddd; border-radius:10px; }
+.nav a { margin-right:14px; text-decoration:none; }
 </style>
 <style>
 #gli-tickerbar{
@@ -128,20 +127,20 @@ fetch("ticker.txt", { cache: "no-store" })
     <div>
       <div class="gli-k">Symbol</div>
       <div class="gli-v">GLI</div>
-      <div class="gli-mini">Price-weighted • Base 100.00 on 2024-12-31</div>
+      <div class="gli-mini">Price-weighted • Original base 100.00 on 2005-08-01</div>
     </div>
     <div style="text-align:right;">
       <div class="gli-k">As of</div>
-      <div class="gli-v" style="font-size:16px;">2026-08-04</div>
-      <div class="gli-mini">Change: +0.88 (+0.71%)</div>
+      <div class="gli-v" style="font-size:16px;">2026-08-05</div>
+      <div class="gli-mini">Change: +1.91 (+0.47%)</div>
     </div>
   </div>
   <div style="margin-top:12px;" class="gli-grid">
-    <div><div class="gli-k">Open</div><div class="gli-v">124.26</div></div>
-    <div><div class="gli-k">High</div><div class="gli-v">127.02</div></div>
-    <div><div class="gli-k">Low</div><div class="gli-v">122.61</div></div>
-    <div><div class="gli-k">Close</div><div class="gli-v">125.87</div></div>
-    <div><div class="gli-k">Total Volume</div><div class="gli-v">254,002,974</div></div>
+    <div><div class="gli-k">Open</div><div class="gli-v">407.79</div></div>
+    <div><div class="gli-k">High</div><div class="gli-v">414.43</div></div>
+    <div><div class="gli-k">Low</div><div class="gli-v">401.31</div></div>
+    <div><div class="gli-k">Close</div><div class="gli-v">406.92</div></div>
+    <div><div class="gli-k">Total Volume</div><div class="gli-v">232,993,793</div></div>
   </div>
 </div>
 
@@ -151,26 +150,24 @@ fetch("ticker.txt", { cache: "no-store" })
 
 <div class="card">
 <h1>The Great Lakes Index (GLI)</h1>
-<div class="muted">Price-weighted • Base 100.00 on 2024-12-31</div>
+<div class="muted">Price-weighted • Original base 100.00 on 2005-08-01</div>
+<div class="muted">Accepted close chain through 2026-08-04; later sessions roll forward live.</div>
 <div class="nav">
   <a href="./index.html"><b>Home</b></a>
   <a href="./history.html">Historical Values</a>
   <a href="./ohlcv.html">Component OHLCV</a>
 </div>
-
 <div class="kpi" style="margin-top:16px;">
-  <div><b>Latest Date</b><br/>2026-08-04</div>
-  <div><b>Close</b><br/>125.87</div>
-  <div><b>High</b><br/>127.02</div>
-  <div><b>Low</b><br/>122.61</div>
-  <div><b>Total Volume</b><br/>254,002,974</div>
-  <div><b>Day Change</b><br/>+0.88 (+0.71%)</div>
+  <div><b>Latest Date</b><br/>2026-08-05</div>
+  <div><b>Close</b><br/>406.92</div>
+  <div><b>High</b><br/>414.43</div>
+  <div><b>Low</b><br/>401.31</div>
+  <div><b>Total Volume</b><br/>232,993,793</div>
+  <div><b>Day Change</b><br/>+1.91 (+0.47%)</div>
 </div>
-
 <div style="margin-top:16px;">
   <img src="gli_close.png" style="max-width:100%; border:1px solid #eee; border-radius:8px;"/>
 </div>
-
 <h2 style="margin-top:20px;">Recent Levels</h2>
 <table border="1" class="dataframe">
   <thead>
@@ -186,186 +183,185 @@ fetch("ticker.txt", { cache: "no-store" })
   </thead>
   <tbody>
     <tr>
-      <td>2026-07-08</td>
-      <td>121.85</td>
-      <td>123.24</td>
-      <td>119.72</td>
-      <td>121.38</td>
-      <td>287,131,500</td>
-      <td>107.067568</td>
-    </tr>
-    <tr>
       <td>2026-07-09</td>
-      <td>122.06</td>
-      <td>123.57</td>
-      <td>120.27</td>
-      <td>121.71</td>
-      <td>234,354,800</td>
-      <td>107.067568</td>
+      <td>394.18</td>
+      <td>399.26</td>
+      <td>388.60</td>
+      <td>393.22</td>
+      <td>235,417,200</td>
+      <td>34.207561</td>
     </tr>
     <tr>
       <td>2026-07-10</td>
-      <td>121.86</td>
-      <td>123.51</td>
-      <td>120.55</td>
-      <td>122.08</td>
-      <td>221,992,300</td>
-      <td>105.880946</td>
+      <td>393.71</td>
+      <td>398.90</td>
+      <td>389.47</td>
+      <td>394.27</td>
+      <td>222,771,800</td>
+      <td>33.840290</td>
     </tr>
     <tr>
       <td>2026-07-13</td>
-      <td>122.10</td>
-      <td>123.63</td>
-      <td>120.57</td>
-      <td>121.64</td>
-      <td>242,734,800</td>
-      <td>105.880946</td>
+      <td>394.52</td>
+      <td>399.41</td>
+      <td>389.63</td>
+      <td>393.14</td>
+      <td>243,979,600</td>
+      <td>33.840290</td>
     </tr>
     <tr>
       <td>2026-07-14</td>
-      <td>122.04</td>
-      <td>123.04</td>
-      <td>119.97</td>
-      <td>121.27</td>
-      <td>237,823,500</td>
-      <td>105.880946</td>
+      <td>394.74</td>
+      <td>397.85</td>
+      <td>387.85</td>
+      <td>392.06</td>
+      <td>240,016,100</td>
+      <td>33.840290</td>
     </tr>
     <tr>
       <td>2026-07-15</td>
-      <td>121.14</td>
-      <td>122.87</td>
-      <td>119.42</td>
-      <td>121.45</td>
-      <td>285,862,100</td>
-      <td>105.880946</td>
+      <td>390.64</td>
+      <td>396.14</td>
+      <td>384.75</td>
+      <td>391.52</td>
+      <td>289,759,400</td>
+      <td>33.840290</td>
     </tr>
     <tr>
       <td>2026-07-16</td>
-      <td>121.23</td>
-      <td>124.45</td>
-      <td>120.07</td>
-      <td>123.05</td>
-      <td>277,047,100</td>
-      <td>105.880946</td>
+      <td>390.96</td>
+      <td>401.07</td>
+      <td>386.62</td>
+      <td>396.01</td>
+      <td>279,949,900</td>
+      <td>33.840290</td>
     </tr>
     <tr>
       <td>2026-07-17</td>
-      <td>122.19</td>
-      <td>124.91</td>
-      <td>120.46</td>
-      <td>122.35</td>
-      <td>266,723,900</td>
-      <td>105.880946</td>
+      <td>393.30</td>
+      <td>401.99</td>
+      <td>387.70</td>
+      <td>393.83</td>
+      <td>268,664,300</td>
+      <td>33.840290</td>
     </tr>
     <tr>
       <td>2026-07-20</td>
-      <td>123.02</td>
-      <td>123.99</td>
-      <td>120.45</td>
-      <td>121.41</td>
-      <td>238,971,800</td>
-      <td>105.880946</td>
+      <td>396.05</td>
+      <td>399.44</td>
+      <td>387.94</td>
+      <td>391.16</td>
+      <td>240,715,300</td>
+      <td>33.840290</td>
     </tr>
     <tr>
       <td>2026-07-21</td>
-      <td>121.91</td>
-      <td>123.39</td>
-      <td>120.30</td>
-      <td>122.05</td>
-      <td>246,988,500</td>
-      <td>105.880946</td>
+      <td>91.26</td>
+      <td>393.49</td>
+      <td>90.33</td>
+      <td>393.49</td>
+      <td>151,006,400</td>
+      <td>33.840290</td>
     </tr>
     <tr>
       <td>2026-07-22</td>
-      <td>122.60</td>
-      <td>124.04</td>
-      <td>121.00</td>
-      <td>122.34</td>
-      <td>249,712,500</td>
-      <td>105.880946</td>
+      <td>86.34</td>
+      <td>394.28</td>
+      <td>85.08</td>
+      <td>394.28</td>
+      <td>147,282,700</td>
+      <td>33.840290</td>
     </tr>
     <tr>
       <td>2026-07-23</td>
-      <td>121.60</td>
-      <td>123.85</td>
-      <td>120.38</td>
-      <td>122.48</td>
-      <td>278,515,000</td>
-      <td>105.880946</td>
+      <td>391.94</td>
+      <td>399.01</td>
+      <td>387.78</td>
+      <td>394.44</td>
+      <td>279,649,100</td>
+      <td>33.840290</td>
     </tr>
     <tr>
       <td>2026-07-24</td>
-      <td>122.91</td>
-      <td>125.25</td>
-      <td>121.86</td>
-      <td>123.90</td>
-      <td>256,547,300</td>
-      <td>105.880946</td>
+      <td>395.81</td>
+      <td>403.20</td>
+      <td>392.40</td>
+      <td>398.83</td>
+      <td>257,516,800</td>
+      <td>33.840290</td>
     </tr>
     <tr>
       <td>2026-07-27</td>
-      <td>124.53</td>
-      <td>126.07</td>
-      <td>122.68</td>
-      <td>124.52</td>
-      <td>253,873,400</td>
-      <td>105.880946</td>
+      <td>400.83</td>
+      <td>405.65</td>
+      <td>394.85</td>
+      <td>400.78</td>
+      <td>255,053,100</td>
+      <td>33.840290</td>
     </tr>
     <tr>
       <td>2026-07-28</td>
-      <td>125.60</td>
-      <td>127.81</td>
-      <td>123.94</td>
-      <td>126.15</td>
-      <td>311,386,200</td>
-      <td>105.880946</td>
+      <td>404.04</td>
+      <td>411.33</td>
+      <td>398.52</td>
+      <td>406.11</td>
+      <td>313,144,800</td>
+      <td>33.840290</td>
     </tr>
     <tr>
       <td>2026-07-29</td>
-      <td>125.71</td>
-      <td>127.23</td>
-      <td>122.65</td>
-      <td>124.17</td>
-      <td>368,445,800</td>
-      <td>105.880946</td>
+      <td>404.73</td>
+      <td>409.56</td>
+      <td>394.86</td>
+      <td>399.63</td>
+      <td>369,507,100</td>
+      <td>33.840290</td>
     </tr>
     <tr>
       <td>2026-07-30</td>
-      <td>124.35</td>
-      <td>125.83</td>
-      <td>121.56</td>
-      <td>123.82</td>
-      <td>312,975,700</td>
-      <td>105.880946</td>
+      <td>400.03</td>
+      <td>404.87</td>
+      <td>391.23</td>
+      <td>398.53</td>
+      <td>313,759,500</td>
+      <td>33.840290</td>
     </tr>
     <tr>
       <td>2026-07-31</td>
-      <td>123.77</td>
-      <td>124.96</td>
-      <td>121.74</td>
-      <td>123.57</td>
-      <td>271,003,400</td>
-      <td>105.880946</td>
+      <td>143.16</td>
+      <td>397.75</td>
+      <td>140.84</td>
+      <td>397.75</td>
+      <td>193,406,100</td>
+      <td>33.840290</td>
     </tr>
     <tr>
       <td>2026-08-03</td>
-      <td>124.27</td>
-      <td>126.85</td>
-      <td>122.74</td>
-      <td>124.99</td>
-      <td>252,108,200</td>
-      <td>105.880946</td>
+      <td>399.94</td>
+      <td>408.25</td>
+      <td>395.08</td>
+      <td>402.39</td>
+      <td>253,069,200</td>
+      <td>33.840290</td>
     </tr>
     <tr>
       <td>2026-08-04</td>
-      <td>124.26</td>
-      <td>127.02</td>
-      <td>122.61</td>
-      <td>125.87</td>
-      <td>254,002,974</td>
-      <td>105.880946</td>
+      <td>405.01</td>
+      <td>405.01</td>
+      <td>405.01</td>
+      <td>405.01</td>
+      <td>0</td>
+      <td>33.840290</td>
+    </tr>
+    <tr>
+      <td>2026-08-05</td>
+      <td>407.79</td>
+      <td>414.43</td>
+      <td>401.31</td>
+      <td>406.92</td>
+      <td>232,993,793</td>
+      <td>33.840290</td>
     </tr>
   </tbody>
 </table>
-
 </div></body></html>
