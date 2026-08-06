@@ -236,6 +236,77 @@ def read_accepted_chain(path: Path) -> list[dict[str, str]]:
     return rows
 
 
+def _validate_live_day_rows(
+    rows: pd.DataFrame,
+    active_tickers: list[str],
+    day: str,
+) -> None:
+    """Reject incomplete or internally invalid public-vendor bars.
+
+    A batch download can contain a row for a ticker while one or more OHLC
+    fields are still missing. Identity-only coverage is therefore not enough:
+    strict mode requires exactly one complete, finite and positive OHLC bar
+    for every active component before an index session may be published.
+    """
+    active = set(active_tickers)
+    selected = rows[rows["Ticker"].isin(active)].copy()
+    present = set(selected["Ticker"].unique())
+    problems: list[str] = []
+
+    missing = sorted(active - present)
+    if missing:
+        problems.append("missing tickers: " + ", ".join(missing))
+
+    duplicate_counts = selected.groupby("Ticker").size()
+    duplicates = sorted(
+        ticker for ticker, count in duplicate_counts.items() if int(count) != 1
+    )
+    if duplicates:
+        problems.append("non-unique ticker rows: " + ", ".join(duplicates))
+
+    for ticker in sorted(active & present):
+        ticker_rows = selected[selected["Ticker"] == ticker]
+        if len(ticker_rows) != 1:
+            continue
+        row = ticker_rows.iloc[0]
+        values: dict[str, Decimal] = {}
+        ticker_problems: list[str] = []
+        for column in ["Open", "High", "Low", "Close"]:
+            value = row[column]
+            if pd.isna(value):
+                ticker_problems.append(f"{column}=missing")
+                continue
+            try:
+                numeric = _decimal(value)
+            except ValueError:
+                ticker_problems.append(f"{column}=invalid")
+                continue
+            if not numeric.is_finite() or numeric <= 0:
+                ticker_problems.append(f"{column}={numeric}")
+                continue
+            values[column] = numeric
+
+        volume = row["Volume"]
+        if pd.isna(volume):
+            ticker_problems.append("Volume=missing")
+        else:
+            try:
+                numeric_volume = _decimal(volume)
+                if not numeric_volume.is_finite() or numeric_volume < 0:
+                    ticker_problems.append(f"Volume={numeric_volume}")
+            except ValueError:
+                ticker_problems.append("Volume=invalid")
+
+        if ticker_problems:
+            problems.append(f"{ticker}: " + ", ".join(ticker_problems))
+
+    if problems:
+        raise ValueError(
+            f"{day}: incomplete or invalid live component bars; "
+            + " | ".join(problems)
+        )
+
+
 def _aggregate_raw_day(
     rows: pd.DataFrame,
     active_tickers: list[str],
@@ -413,6 +484,8 @@ def aggregate_index(
                     current_divisor = (previous_sum + delta) / previous_index
 
             active = active_tickers_for_date(constituents, day)
+            if strict:
+                _validate_live_day_rows(raw_by_date[day], active, day)
             sums, found = _aggregate_raw_day(raw_by_date[day], active)
             missing = sorted(set(active) - found)
             if strict and missing:
