@@ -4,14 +4,15 @@ AEP,Y,2024-12-31,,
 ALL,Y,2024-12-31,,
 ALLY,Y,2024-12-31,,
 ANF,Y,2024-12-31,,
-ANGI,Y,2024-12-31,,
+ANGI,N,2024-12-31,2026-07-09,Removed; replaced by SEAT effective 2026-07-10
 AOS,Y,2024-12-31,,
-BA,Y,2024-12-31,,
+BA,N,2024-12-31,2026-07-09,Removed; replaced by GE effective 2026-07-10
 BAX,Y,2024-12-31,,
 BBWI,Y,2026-04-01,,Added replacing GLDD effective 2026-04-01
 BMI,Y,2024-12-31,,
 CARS,Y,2024-12-31,,
-CAT,Y,2024-12-31,,
+CAT,N,2024-12-31,2026-07-09,Removed; replaced by ROK effective 2026-07-10
+CCC,Y,2026-07-10,,Added replacing TDC effective 2026-07-10
 CF,Y,2024-12-31,,
 CME,Y,2024-12-31,,
 CMI,Y,2024-12-31,,
@@ -19,12 +20,14 @@ CTS,Y,2024-12-31,,
 DE,Y,2024-12-31,,
 DOW,Y,2024-12-31,,
 DPZ,Y,2024-12-31,,
+ELV,Y,2024-12-31,,Accepted opening-lock restoration; retained throughout 2026
 EXC,Y,2024-12-31,,
 F,Y,2024-12-31,,
 FISV,Y,2024-12-31,,
 FITB,Y,2024-12-31,,
 FSS,Y,2024-12-31,,
-FUN,Y,2024-12-31,,
+FUN,N,2024-12-31,2026-07-09,Removed; replaced by MCS effective 2026-07-10
+GE,Y,2026-07-10,,Added replacing BA effective 2026-07-10
 GLDD,N,2024-12-31,2026-03-31,Removed; replaced by BBWI effective 2026-04-01
 GM,Y,2024-12-31,,
 GNRC,Y,2026-02-13,,Added replacing ZEUS effective 2026-02-13
@@ -39,12 +42,15 @@ K,N,2024-12-31,2025-12-10,Removed; replaced by RKT effective 2025-12-11
 KELYA,Y,2024-12-31,,
 KR,Y,2024-12-31,,
 KSS,Y,2024-12-31,,
+LE,Y,2026-07-10,,Added replacing M effective 2026-07-10
 LKFN,Y,2024-12-31,,
 LLY,Y,2024-12-31,,
 LZB,Y,2024-12-31,,
-M,Y,2024-12-31,,
+M,N,2024-12-31,2026-07-09,Removed; replaced by LE effective 2026-07-10
 MAS,Y,2024-12-31,,
 MCD,Y,2024-12-31,,
+MCS,Y,2026-07-10,,Added replacing FUN effective 2026-07-10
+MHO,Y,2026-07-10,,Added replacing PHM effective 2026-07-10
 MOD,Y,2024-12-31,,
 MPC,Y,2024-12-31,,
 MRTN,Y,2024-12-31,,
@@ -58,23 +64,27 @@ PAG,Y,2024-12-31,,
 PATK,Y,2024-12-31,,
 PG,Y,2024-12-31,,
 PH,Y,2024-12-31,,
-PHM,Y,2024-12-31,,
+PHM,N,2024-12-31,2026-07-09,Removed; replaced by MHO effective 2026-07-10
 PKG,Y,2024-12-31,,
 RAIL,Y,2024-12-31,,
 REX,Y,2024-12-31,,
 RKT,Y,2025-12-11,,Added replacing K effective 2025-12-11
+ROK,Y,2026-07-10,,Added replacing CAT effective 2026-07-10
 SCL,Y,2024-12-31,,
-SCVL,Y,2024-12-31,,
+SCVL,N,2024-12-31,2026-06-11,Ticker changed to SHOE effective 2026-06-12
+SEAT,Y,2026-07-10,,Added replacing ANGI effective 2026-07-10
 SGA,Y,2024-12-31,,
+SHOE,N,2026-06-12,2026-07-09,Successor ticker to SCVL; removed and replaced by SPG effective 2026-07-10
 SJM,Y,2024-12-31,,
 SKY,Y,2024-12-31,,
 SNA,Y,2024-12-31,,
 SPB,Y,2024-12-31,,
+SPG,Y,2026-07-10,,Added replacing SHOE (formerly SCVL) effective 2026-07-10
 SRCE,Y,2024-12-31,,
 SSP,Y,2024-12-31,,
 SUI,Y,2024-12-31,,
 SYK,Y,2024-12-31,,
-TDC,Y,2024-12-31,,
+TDC,N,2024-12-31,2026-07-09,Removed; replaced by CCC effective 2026-07-10
 TDS,Y,2024-12-31,,
 THO,Y,2024-12-31,,
 TR,Y,2024-12-31,,

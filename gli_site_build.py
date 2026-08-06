@@ -18,7 +18,7 @@ from __future__ import annotations
 from pathlib import Path
 import pandas as pd
 
-BASE_DATE = "2024-12-31"
+BASE_DATE = "2005-08-01"
 BASE_VALUE = 100.00
 
 ROOT = Path(__file__).resolve().parent
@@ -618,7 +618,7 @@ def write_history_html(df: pd.DataFrame) -> None:
 <body style="margin:24px;">
   <div class="gli-linkbar"><a href="./index.html">← Back to GLI</a></div>
   <h1 style="margin:0; font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;">GLI History</h1>
-  <div class="gli-mini">Price-weighted • Base {BASE_VALUE:.2f} on {BASE_DATE}</div>
+  <div class="gli-mini">Price-weighted • Original base {BASE_VALUE:.2f} on {BASE_DATE}</div>
   <div style="margin-top:14px;">{table}</div>
 </body>
 </html>
@@ -705,7 +705,7 @@ fetch("ticker.txt", {{ cache: "no-store" }})
     <div>
       <div class="gli-k">Symbol</div>
       <div class="gli-v">GLI</div>
-      <div class="gli-mini">Price-weighted • Base {BASE_VALUE:.2f} on {BASE_DATE}</div>
+      <div class="gli-mini">Price-weighted • Original base {BASE_VALUE:.2f} on {BASE_DATE}</div>
     </div>
     <div style="text-align:right;">
       <div class="gli-k">As of</div>

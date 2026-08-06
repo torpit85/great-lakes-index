@@ -1,7 +1,9 @@
-GitHub token.txt
+report/
 gli.sqlite
 gli_levels.csv
 gli_prices.csv
+gli_cron.log
+GitHub token.txt
 .~lock.*
-*.log
 __pycache__/
+

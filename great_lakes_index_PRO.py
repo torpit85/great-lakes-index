@@ -1,28 +1,28 @@
 #!/usr/bin/env python3
-"""
-The Great Lakes Index (GLI) — PRO engine (Yahoo via yfinance)
+"""Great Lakes Index live engine with an immutable accepted 2026 close anchor.
 
-Price-weighted index with daily Open/High/Low/Close + TotalVolume.
-Base: 100.00 on 2024-12-31.
-
-Key features:
-- Fetch daily OHLCV from Yahoo (yfinance)
-- Strict completeness checks (all tickers present per date)
-- Divisor events for membership changes/corporate actions (DeltaSum continuity)
-- Outputs: CSV, SQLite, HTML+PNG report
+Original index base: 100 on 2005-08-01.
+The published live series is anchored to the accepted 2025-12-31 carry.
+Accepted closes and divisors through 2026-08-04 are never recalculated from
+a public market-data vendor. Later sessions roll forward from the accepted
+divisor using the active roster and unadjusted daily Yahoo bars.
 """
 from __future__ import annotations
 
 import argparse
+import csv
 import sqlite3
 from dataclasses import dataclass
+from decimal import Decimal, localcontext
 from pathlib import Path
 from typing import Optional
 
 import pandas as pd
 
-BASE_DATE = "2024-12-31"
-BASE_VALUE = 100.00
+INDEX_BASE_DATE = "2005-08-01"
+INDEX_BASE_VALUE = Decimal("100")
+LIVE_SERIES_START = "2025-12-31"
+DECIMAL_PRECISION = 180
 
 try:
     import yfinance as yf
@@ -30,297 +30,429 @@ except Exception:
     yf = None
 
 
-def read_constituents(path: Path) -> pd.DataFrame:
-    """Read constituent membership, including optional StartDate/EndDate columns.
+def _decimal(value: object) -> Decimal:
+    if isinstance(value, Decimal):
+        return value
+    if pd.isna(value):
+        raise ValueError("Missing numeric value")
+    return Decimal(str(value))
 
-    If StartDate/EndDate are present, the engine treats membership as date-aware:
-    a ticker is included only on dates between StartDate and EndDate, inclusive.
-    If the columns are absent, all tickers are treated as active from BASE_DATE.
-    """
-    df = pd.read_csv(path)
+
+def read_constituents(path: Path) -> pd.DataFrame:
+    df = pd.read_csv(path, dtype=str).fillna("")
     if "Ticker" not in df.columns:
         df = df.rename(columns={df.columns[0]: "Ticker"})
-
+    for column, default in (
+        ("Active", "Y"),
+        ("StartDate", LIVE_SERIES_START),
+        ("EndDate", ""),
+    ):
+        if column not in df.columns:
+            df[column] = default
     df["Ticker"] = df["Ticker"].astype(str).str.upper().str.strip()
+    df["Active"] = df["Active"].astype(str).str.upper().str.strip()
+    df["StartDate"] = (
+        df["StartDate"].astype(str).str.strip()
+        .replace({"": LIVE_SERIES_START, "nan": LIVE_SERIES_START})
+    )
+    df["EndDate"] = (
+        df["EndDate"].astype(str).str.strip()
+        .replace({"nan": "", "NaT": ""})
+    )
     df = df[df["Ticker"].ne("") & df["Ticker"].str.lower().ne("nan")].copy()
-
-    if "Active" not in df.columns:
-        df["Active"] = "Y"
-    if "StartDate" not in df.columns:
-        df["StartDate"] = BASE_DATE
-    if "EndDate" not in df.columns:
-        df["EndDate"] = ""
-
-    df["Active"] = df["Active"].fillna("Y").astype(str).str.upper().str.strip()
-    df["StartDate"] = df["StartDate"].fillna(BASE_DATE).astype(str).str.strip().replace({"": BASE_DATE, "nan": BASE_DATE})
-    df["EndDate"] = df["EndDate"].fillna("").astype(str).str.strip().replace({"nan": "", "NaT": ""})
-
-    return df.drop_duplicates(subset=["Ticker"], keep="last").reset_index(drop=True)
-
-
-def read_tickers(path: Path) -> list[str]:
-    """Return all tickers that may be needed for any membership period."""
-    constituents = read_constituents(path)
-    seen = set()
-    out: list[str] = []
-    for t in constituents["Ticker"].tolist():
-        if t not in seen:
-            out.append(t)
-            seen.add(t)
-    return out
+    if df["Ticker"].duplicated().any():
+        duplicates = sorted(df.loc[df["Ticker"].duplicated(), "Ticker"].unique())
+        raise ValueError(f"Duplicate constituent identities: {duplicates}")
+    return df.reset_index(drop=True)
 
 
 def active_tickers_for_date(constituents: pd.DataFrame, date_str: str) -> list[str]:
-    d = str(pd.to_datetime(date_str).date())
-    c = constituents.copy()
-    starts = c["StartDate"].fillna(BASE_DATE).astype(str).replace({"": BASE_DATE, "nan": BASE_DATE})
-    ends = c["EndDate"].fillna("").astype(str).replace({"nan": "", "NaT": ""})
-    mask = (starts <= d) & ((ends == "") | (ends >= d))
-    return c.loc[mask, "Ticker"].astype(str).str.upper().str.strip().tolist()
+    day = str(pd.to_datetime(date_str).date())
+    mask = (
+        (constituents["StartDate"] <= day)
+        & (
+            constituents["EndDate"].eq("")
+            | (constituents["EndDate"] >= day)
+        )
+    )
+    return constituents.loc[mask, "Ticker"].tolist()
 
 
-def current_active_tickers(constituents: pd.DataFrame) -> list[str]:
-    c = constituents.copy()
-    if "Active" in c.columns:
-        mask = c["Active"].fillna("Y").astype(str).str.upper().str.strip().isin(["Y", "YES", "TRUE", "1"])
-        tickers = c.loc[mask, "Ticker"].astype(str).str.upper().str.strip().tolist()
-    else:
-        tickers = active_tickers_for_date(c, pd.Timestamp.today().date().isoformat())
-    return list(dict.fromkeys(tickers))
+def tickers_intersecting_range(
+    constituents: pd.DataFrame,
+    start: str,
+    end: str,
+) -> list[str]:
+    mask = (
+        (constituents["StartDate"] <= end)
+        & (
+            constituents["EndDate"].eq("")
+            | (constituents["EndDate"] >= start)
+        )
+    )
+    return list(dict.fromkeys(constituents.loc[mask, "Ticker"].tolist()))
 
 
 def normalize_prices_df(df: pd.DataFrame) -> pd.DataFrame:
-    cols = {c.lower(): c for c in df.columns}
-
-    def col(name: str) -> Optional[str]:
-        return cols.get(name.lower())
-
+    columns = {str(column).lower(): column for column in df.columns}
     required = ["date", "ticker", "open", "high", "low", "close"]
-    missing = [r for r in required if r not in cols]
+    missing = [name for name in required if name not in columns]
     if missing:
-        raise ValueError(f"Missing required columns: {missing}. Present: {list(df.columns)}")
-
-    out = df.copy()
-    out.rename(
-        columns={
-            col("date"): "Date",
-            col("ticker"): "Ticker",
-            col("open"): "Open",
-            col("high"): "High",
-            col("low"): "Low",
-            col("close"): "Close",
-        },
-        inplace=True,
-    )
-
-    vcol = col("volume")
-    if vcol is not None and vcol != "Volume":
-        out.rename(columns={vcol: "Volume"}, inplace=True)
+        raise ValueError(
+            f"Missing required price columns: {missing}; present={list(df.columns)}"
+        )
+    rename = {
+        columns["date"]: "Date",
+        columns["ticker"]: "Ticker",
+        columns["open"]: "Open",
+        columns["high"]: "High",
+        columns["low"]: "Low",
+        columns["close"]: "Close",
+    }
+    if "volume" in columns:
+        rename[columns["volume"]] = "Volume"
+    out = df.rename(columns=rename).copy()
     if "Volume" not in out.columns:
         out["Volume"] = 0
-
     out["Date"] = pd.to_datetime(out["Date"]).dt.date.astype(str)
     out["Ticker"] = out["Ticker"].astype(str).str.upper().str.strip()
-
-    for c in ["Open", "High", "Low", "Close"]:
-        out[c] = pd.to_numeric(out[c], errors="coerce")
-
-    out["Volume"] = pd.to_numeric(out["Volume"], errors="coerce").fillna(0)
-
+    for column in ["Open", "High", "Low", "Close", "Volume"]:
+        out[column] = pd.to_numeric(out[column], errors="coerce")
+    out["Volume"] = out["Volume"].fillna(0)
     out = out.dropna(subset=["Date", "Ticker"])
     return out[["Date", "Ticker", "Open", "High", "Low", "Close", "Volume"]]
 
 
-def validate_completeness(prices_df: pd.DataFrame, constituents: pd.DataFrame) -> None:
-    """Fail when any date is missing a ticker that was active on that date.
-
-    Extra rows for inactive/historical tickers are allowed because Yahoo fetches every
-    ticker across the full requested date range. The aggregation step filters them
-    out date-by-date.
-    """
-    problems = []
-    for d, g in prices_df.groupby("Date"):
-        expected = set(active_tickers_for_date(constituents, str(d)))
-        found = set(g["Ticker"].unique())
-        missing = sorted(expected - found)
-        if missing:
-            problems.append((d, missing))
-    if problems:
-        lines = []
-        for d, missing in problems[:50]:
-            lines.append(
-                f"{d}: missing {len(missing)} active tickers (e.g., {', '.join(missing[:12])}{'...' if len(missing) > 12 else ''})"
-            )
-        raise ValueError("Strict mode: incomplete active constituent coverage detected.\n" + "\n".join(lines))
-
-
-def fetch_yahoo_daily(tickers: list[str], start: str, end: str, auto_adjust: bool) -> pd.DataFrame:
+def fetch_yahoo_daily(
+    tickers: list[str],
+    start: str,
+    end_exclusive: str,
+    auto_adjust: bool,
+) -> pd.DataFrame:
     if yf is None:
-        raise RuntimeError("yfinance is not installed. Run: pip install yfinance")
-
+        raise RuntimeError("yfinance is not installed")
     data = yf.download(
         tickers=tickers,
         start=start,
-        end=end,
+        end=end_exclusive,
         group_by="ticker",
         auto_adjust=auto_adjust,
         actions=False,
         threads=True,
         progress=False,
     )
-
     rows = []
     if isinstance(data.columns, pd.MultiIndex):
-        for t in tickers:
-            if t not in data.columns.get_level_values(0):
+        available = set(data.columns.get_level_values(0))
+        for ticker in tickers:
+            if ticker not in available:
                 continue
-            sub = data[t].copy().reset_index()
+            sub = data[ticker].copy().reset_index()
             keep = ["Date", "Open", "High", "Low", "Close"]
             if "Volume" in sub.columns:
                 keep.append("Volume")
             sub = sub[keep].copy()
-            sub["Ticker"] = t
+            sub["Ticker"] = ticker
             if "Volume" not in sub.columns:
                 sub["Volume"] = 0
-            rows.append(sub[["Date", "Ticker", "Open", "High", "Low", "Close", "Volume"]])
-        if not rows:
-            raise RuntimeError("No data returned from Yahoo for the requested tickers/date range.")
-        df = pd.concat(rows, ignore_index=True)
+            rows.append(
+                sub[["Date", "Ticker", "Open", "High", "Low", "Close", "Volume"]]
+            )
     else:
-        df = data.reset_index()
-        df["Ticker"] = tickers[0]
-        if "Volume" not in df.columns:
-            df["Volume"] = 0
-        df = df.rename(columns={"Date": "Date"})
-        df = df[["Date", "Ticker", "Open", "High", "Low", "Close", "Volume"]]
+        if not tickers:
+            raise RuntimeError("No tickers requested")
+        sub = data.reset_index()
+        sub["Ticker"] = tickers[0]
+        if "Volume" not in sub.columns:
+            sub["Volume"] = 0
+        rows.append(
+            sub[["Date", "Ticker", "Open", "High", "Low", "Close", "Volume"]]
+        )
+    if not rows:
+        raise RuntimeError("Yahoo returned no daily bars")
+    return normalize_prices_df(pd.concat(rows, ignore_index=True))
 
-    df["Date"] = pd.to_datetime(df["Date"]).dt.date.astype(str)
-    df["Ticker"] = df["Ticker"].astype(str).str.upper().str.strip()
-    return df
 
-
-@dataclass
+@dataclass(frozen=True)
 class DivisorEvent:
     date: str
     event_type: str
     ticker: str
+    delta_sum: Decimal
+    reset_required: bool
+    exact_new_divisor: Optional[Decimal]
+    control_id: str
+    reference_date: str
     note: str
-    delta_sum: float
 
 
 def read_divisor_events(path: Optional[Path]) -> list[DivisorEvent]:
     if path is None or not path.exists():
         return []
-    df = pd.read_csv(path)
-    req = {"Date", "Type", "Ticker", "DeltaSum", "Note"}
-    if not req.issubset(set(df.columns)):
-        raise ValueError(f"Divisor events file must contain columns: {sorted(req)}")
-    df["Date"] = pd.to_datetime(df["Date"]).dt.date.astype(str)
-    df["Type"] = df["Type"].astype(str).str.lower().str.strip()
-    df["Ticker"] = df["Ticker"].astype(str).str.upper().str.strip()
-    df["DeltaSum"] = pd.to_numeric(df["DeltaSum"], errors="coerce").fillna(0.0)
-    df["Note"] = df["Note"].astype(str)
-    events = [
-        DivisorEvent(str(r["Date"]), str(r["Type"]), str(r["Ticker"]), str(r["Note"]), float(r["DeltaSum"]))
-        for _, r in df.iterrows()
+    rows = list(csv.DictReader(path.open(encoding="utf-8-sig")))
+    required = {
+        "Date", "Type", "Ticker", "DeltaSum", "ResetRequired",
+        "ExactNewDivisor", "ControlID", "ReferenceDate", "Note",
+    }
+    if not rows:
+        return []
+    if not required.issubset(rows[0]):
+        raise ValueError(
+            f"Divisor event file must contain {sorted(required)}"
+        )
+    events = []
+    for row in rows:
+        exact = row["ExactNewDivisor"].strip()
+        events.append(
+            DivisorEvent(
+                date=str(pd.to_datetime(row["Date"]).date()),
+                event_type=row["Type"].strip().lower(),
+                ticker=row["Ticker"].strip().upper(),
+                delta_sum=Decimal(row["DeltaSum"]),
+                reset_required=row["ResetRequired"].strip().upper()
+                in {"Y", "YES", "TRUE", "1"},
+                exact_new_divisor=Decimal(exact) if exact else None,
+                control_id=row["ControlID"].strip(),
+                reference_date=str(pd.to_datetime(row["ReferenceDate"]).date()),
+                note=row["Note"].strip(),
+            )
+        )
+    return sorted(events, key=lambda event: (event.date, event.control_id))
+
+
+def read_accepted_chain(path: Path) -> list[dict[str, str]]:
+    rows = list(csv.DictReader(path.open(encoding="utf-8-sig")))
+    required = {
+        "Date", "IndexClose", "Divisor", "ComponentSum",
+        "RosterCount", "Status",
+    }
+    if not rows or not required.issubset(rows[0]):
+        raise ValueError(
+            f"Accepted-chain file must contain {sorted(required)}"
+        )
+    dates = [row["Date"] for row in rows]
+    if dates != sorted(dates) or len(dates) != len(set(dates)):
+        raise ValueError("Accepted-chain dates must be unique and sorted")
+    return rows
+
+
+def _aggregate_raw_day(
+    rows: pd.DataFrame,
+    active_tickers: list[str],
+) -> tuple[dict[str, Decimal], set[str]]:
+    active = set(active_tickers)
+    selected = rows[rows["Ticker"].isin(active)].copy()
+    found = set(selected["Ticker"].unique())
+    sums: dict[str, Decimal] = {}
+    for column in ["Open", "High", "Low", "Close", "Volume"]:
+        values = [
+            _decimal(value)
+            for value in selected[column].tolist()
+            if pd.notna(value)
+        ]
+        sums[column] = sum(values, Decimal(0))
+    return sums, found
+
+
+
+def read_accepted_ohlcv_chain(
+    path: Path,
+) -> list[dict[str, str]]:
+    rows = list(csv.DictReader(path.open(encoding="utf-8-sig")))
+    required = {
+        "Date", "GLI_Open", "GLI_High", "GLI_Low",
+        "GLI_Close", "TotalVolume", "Divisor",
+        "SumOpen", "SumHigh", "SumLow", "SumClose",
+        "RosterCount", "Status",
+    }
+    if not rows or not required.issubset(rows[0]):
+        raise ValueError(
+            f"Accepted OHLCV chain must contain {sorted(required)}"
+        )
+    dates = [row["Date"] for row in rows]
+    if dates != sorted(dates) or len(dates) != len(set(dates)):
+        raise ValueError(
+            "Accepted OHLCV chain dates must be unique and sorted"
+        )
+    for row in rows:
+        open_value = Decimal(row["GLI_Open"])
+        high = Decimal(row["GLI_High"])
+        low = Decimal(row["GLI_Low"])
+        close = Decimal(row["GLI_Close"])
+        if high < max(open_value, close) or low > min(open_value, close):
+            raise ValueError(
+                f"Accepted aggregate candle constraint failed on {row['Date']}"
+            )
+    return rows
+
+
+def aggregate_index(
+    prices_df: pd.DataFrame,
+    constituents: pd.DataFrame,
+    events: list[DivisorEvent],
+    accepted_chain: list[dict[str, str]],
+    accepted_ohlcv_chain: list[dict[str, str]],
+    requested_start: str,
+    requested_end: str,
+    strict: bool,
+) -> pd.DataFrame:
+    prices = normalize_prices_df(prices_df)
+    prices = prices[
+        (prices["Date"] >= requested_start)
+        & (prices["Date"] <= requested_end)
+    ].copy()
+
+    raw_by_date = {
+        day: group.copy()
+        for day, group in prices.groupby("Date", sort=True)
+    }
+    chain_by_date = {row["Date"]: row for row in accepted_chain}
+    accepted_dates = [
+        day for day in chain_by_date
+        if requested_start <= day <= requested_end
     ]
-    events.sort(key=lambda e: e.date)
-    return events
+    if not accepted_dates:
+        raise ValueError("Requested range does not include the accepted anchor")
 
+    accepted_cutoff = max(chain_by_date)
+    events_by_date: dict[str, list[DivisorEvent]] = {}
+    for event in events:
+        events_by_date.setdefault(event.date, []).append(event)
 
-def compute_base_divisor(prices_df: pd.DataFrame, constituents: pd.DataFrame) -> float:
-    base_tickers = set(active_tickers_for_date(constituents, BASE_DATE))
-    base = prices_df.loc[(prices_df["Date"] == BASE_DATE) & (prices_df["Ticker"].isin(base_tickers))]
-    missing = sorted(base_tickers - set(base["Ticker"].unique()))
-    if missing:
-        raise ValueError(f"No base-date prices found for active tickers on {BASE_DATE}: {missing}")
-    s = float(base["Close"].sum())
-    if s <= 0:
-        raise ValueError("Base sum of closes not positive.")
-    return s / BASE_VALUE
+    output: list[dict[str, object]] = []
 
-
-def apply_divisor_events(prev_sum_close: float, events_for_date: list[DivisorEvent], prev_index_close: float) -> float:
-    delta = sum(e.delta_sum for e in events_for_date)
-    return (prev_sum_close + delta) / prev_index_close
-
-
-def aggregate_index(prices_df: pd.DataFrame, constituents: pd.DataFrame, events: list[DivisorEvent]) -> pd.DataFrame:
-    prices_df = normalize_prices_df(prices_df)
-    all_tickers = set(constituents["Ticker"].astype(str).str.upper().str.strip())
-    prices_df = prices_df[prices_df["Ticker"].isin(all_tickers)].copy()
-
-    # Filter to the date-appropriate basket before summing. This lets historical
-    # replacements use the old ticker before the effective date and the new ticker
-    # starting on the effective date.
-    frames = []
-    for d, g in prices_df.groupby("Date", sort=True):
-        active = set(active_tickers_for_date(constituents, str(d)))
-        frames.append(g[g["Ticker"].isin(active)])
-    prices_active = pd.concat(frames, ignore_index=True) if frames else prices_df.iloc[0:0].copy()
-
-    divisor = compute_base_divisor(prices_df, constituents)
-
-    grouped = (
-        prices_active.groupby("Date", as_index=False)
-        .agg(
-            SumOpen=("Open", "sum"),
-            SumHigh=("High", "sum"),
-            SumLow=("Low", "sum"),
-            SumClose=("Close", "sum"),
-            TotalVolume=("Volume", "sum"),
-            Rows=("Ticker", "nunique"),
+    # Immutable accepted portion. Both close and OHLCV chains are
+    # frozen accepted artifacts; public vendor bars are never allowed to
+    # reshape accepted history.
+    ohlcv_by_date = {
+        row["Date"]: row
+        for row in accepted_ohlcv_chain
+    }
+    if set(ohlcv_by_date) != set(chain_by_date):
+        raise ValueError(
+            "Accepted close and OHLCV chain date sets differ"
         )
-        .sort_values("Date")
+
+    for day in sorted(accepted_dates):
+        accepted = chain_by_date[day]
+        accepted_ohlcv = ohlcv_by_date[day]
+
+        if Decimal(accepted["IndexClose"]) != Decimal(
+            accepted_ohlcv["GLI_Close"]
+        ):
+            raise ValueError(
+                f"Accepted close/OHLCV mismatch on {day}"
+            )
+        if Decimal(accepted["Divisor"]) != Decimal(
+            accepted_ohlcv["Divisor"]
+        ):
+            raise ValueError(
+                f"Accepted divisor/OHLCV mismatch on {day}"
+            )
+        if Decimal(accepted["ComponentSum"]) != Decimal(
+            accepted_ohlcv["SumClose"]
+        ):
+            raise ValueError(
+                f"Accepted component sum/OHLCV mismatch on {day}"
+            )
+        if int(accepted["RosterCount"]) != int(
+            accepted_ohlcv["RosterCount"]
+        ):
+            raise ValueError(
+                f"Accepted roster/OHLCV mismatch on {day}"
+            )
+
+        output.append({
+            "Date": day,
+            "GLI_Open": accepted_ohlcv["GLI_Open"],
+            "GLI_High": accepted_ohlcv["GLI_High"],
+            "GLI_Low": accepted_ohlcv["GLI_Low"],
+            "GLI_Close": accepted_ohlcv["GLI_Close"],
+            "TotalVolume": accepted_ohlcv["TotalVolume"],
+            "Divisor": accepted_ohlcv["Divisor"],
+            "SumOpen": accepted_ohlcv["SumOpen"],
+            "SumHigh": accepted_ohlcv["SumHigh"],
+            "SumLow": accepted_ohlcv["SumLow"],
+            "SumClose": accepted_ohlcv["SumClose"],
+            "RowsLoaded": int(accepted_ohlcv["RosterCount"]),
+            "CloseSource": accepted["Status"],
+            "OHLCVSource": accepted_ohlcv["Status"],
+        })
+
+    # Live roll-forward after the immutable accepted cutoff.
+    live_dates = sorted(
+        day for day in raw_by_date
+        if accepted_cutoff < day <= requested_end
     )
+    current_divisor = Decimal(chain_by_date[accepted_cutoff]["Divisor"])
+    previous_sum = Decimal(chain_by_date[accepted_cutoff]["ComponentSum"])
+    previous_index = Decimal(chain_by_date[accepted_cutoff]["IndexClose"])
 
-    ev_by_date: dict[str, list[DivisorEvent]] = {}
-    for e in events:
-        ev_by_date.setdefault(e.date, []).append(e)
+    with localcontext() as context:
+        context.prec = DECIMAL_PRECISION
+        for day in live_dates:
+            day_events = events_by_date.get(day, [])
+            reset_events = [event for event in day_events if event.reset_required]
+            if reset_events:
+                exact_values = {
+                    event.exact_new_divisor
+                    for event in reset_events
+                    if event.exact_new_divisor is not None
+                }
+                if len(exact_values) > 1:
+                    raise ValueError(
+                        f"Conflicting exact divisors on {day}: {exact_values}"
+                    )
+                if exact_values:
+                    current_divisor = next(iter(exact_values))
+                else:
+                    delta = sum(
+                        (event.delta_sum for event in reset_events),
+                        Decimal(0),
+                    )
+                    current_divisor = (previous_sum + delta) / previous_index
 
-    out = []
-    prev_sum_close = None
-    prev_index_close = None
-    current_divisor = divisor
+            active = active_tickers_for_date(constituents, day)
+            sums, found = _aggregate_raw_day(raw_by_date[day], active)
+            missing = sorted(set(active) - found)
+            if strict and missing:
+                raise ValueError(
+                    f"{day}: missing {len(missing)} active tickers: "
+                    + ", ".join(missing)
+                )
+            if not found:
+                continue
 
-    for _, r in grouped.iterrows():
-        d = str(r["Date"])
-        if d in ev_by_date:
-            if prev_sum_close is None or prev_index_close is None:
-                raise ValueError(f"Divisor event on {d} but no prior day available.")
-            current_divisor = apply_divisor_events(prev_sum_close, ev_by_date[d], prev_index_close)
+            index_open = sums["Open"] / current_divisor
+            index_high = sums["High"] / current_divisor
+            index_low = sums["Low"] / current_divisor
+            index_close = sums["Close"] / current_divisor
+            index_high = max(index_high, index_open, index_close)
+            index_low = min(index_low, index_open, index_close)
 
-        sum_open = float(r["SumOpen"])
-        sum_high = float(r["SumHigh"])
-        sum_low = float(r["SumLow"])
-        sum_close = float(r["SumClose"])
-        total_vol = float(r["TotalVolume"])
+            output.append({
+                "Date": day,
+                "GLI_Open": format(index_open, "f"),
+                "GLI_High": format(index_high, "f"),
+                "GLI_Low": format(index_low, "f"),
+                "GLI_Close": format(index_close, "f"),
+                "TotalVolume": format(sums["Volume"], "f"),
+                "Divisor": format(current_divisor, "f"),
+                "SumOpen": format(sums["Open"], "f"),
+                "SumHigh": format(sums["High"], "f"),
+                "SumLow": format(sums["Low"], "f"),
+                "SumClose": format(sums["Close"], "f"),
+                "RowsLoaded": len(found),
+                "CloseSource": "LIVE_YAHOO_UNADJUSTED",
+                "OHLCVSource": "LIVE_YAHOO_UNADJUSTED",
+            })
+            previous_sum = sums["Close"]
+            previous_index = index_close
 
-        idx_open = sum_open / current_divisor
-        idx_high = sum_high / current_divisor
-        idx_low = sum_low / current_divisor
-        idx_close = sum_close / current_divisor
-
-        out.append(
-            {
-                "Date": d,
-                "GLI_Open": idx_open,
-                "GLI_High": idx_high,
-                "GLI_Low": idx_low,
-                "GLI_Close": idx_close,
-                "TotalVolume": total_vol,
-                "Divisor": current_divisor,
-                "SumOpen": sum_open,
-                "SumHigh": sum_high,
-                "SumLow": sum_low,
-                "SumClose": sum_close,
-                "RowsLoaded": int(r["Rows"]),
-            }
-        )
-        prev_sum_close = sum_close
-        prev_index_close = idx_close
-
-    return pd.DataFrame(out)
+    frame = pd.DataFrame(output).sort_values("Date").reset_index(drop=True)
+    if frame["Date"].duplicated().any():
+        raise ValueError("Duplicate output dates")
+    return frame
 
 
 SQL_SCHEMA = """
@@ -334,7 +466,6 @@ CREATE TABLE IF NOT EXISTS prices (
   volume REAL,
   PRIMARY KEY(date, ticker)
 );
-
 CREATE TABLE IF NOT EXISTS index_levels (
   date TEXT PRIMARY KEY,
   gli_open REAL,
@@ -349,7 +480,6 @@ CREATE TABLE IF NOT EXISTS index_levels (
   sum_close REAL,
   rows_loaded INTEGER
 );
-
 CREATE TABLE IF NOT EXISTS meta (
   key TEXT PRIMARY KEY,
   value TEXT
@@ -357,113 +487,94 @@ CREATE TABLE IF NOT EXISTS meta (
 """
 
 
-def _table_columns(con: sqlite3.Connection, table: str) -> set[str]:
-    cur = con.execute(f"PRAGMA table_info({table})")
-    return {row[1] for row in cur.fetchall()}
-
-
 def sqlite_init_and_migrate(db_path: Path) -> None:
-    con = sqlite3.connect(db_path)
+    connection = sqlite3.connect(db_path)
     try:
-        con.executescript(SQL_SCHEMA)
-
-        cols_prices = _table_columns(con, "prices")
-        if "volume" not in cols_prices:
-            con.execute("ALTER TABLE prices ADD COLUMN volume REAL")
-
-        cols_idx = _table_columns(con, "index_levels")
-        if "total_volume" not in cols_idx:
-            con.execute("ALTER TABLE index_levels ADD COLUMN total_volume REAL")
-
-        con.execute("INSERT OR REPLACE INTO meta(key,value) VALUES(?,?)", ("base_date", BASE_DATE))
-        con.execute("INSERT OR REPLACE INTO meta(key,value) VALUES(?,?)", ("base_value", str(BASE_VALUE)))
-        con.commit()
+        connection.executescript(SQL_SCHEMA)
+        connection.execute(
+            "INSERT OR REPLACE INTO meta(key,value) VALUES(?,?)",
+            ("original_base_date", INDEX_BASE_DATE),
+        )
+        connection.execute(
+            "INSERT OR REPLACE INTO meta(key,value) VALUES(?,?)",
+            ("original_base_value", str(INDEX_BASE_VALUE)),
+        )
+        connection.commit()
     finally:
-        con.close()
+        connection.close()
 
 
 def sqlite_upsert_prices(db_path: Path, prices_df: pd.DataFrame) -> None:
-    prices_df = normalize_prices_df(prices_df)
-    con = sqlite3.connect(db_path)
+    connection = sqlite3.connect(db_path)
     try:
-        con.executemany(
-            "INSERT OR REPLACE INTO prices(date,ticker,open,high,low,close,volume) VALUES(?,?,?,?,?,?,?)",
+        connection.executemany(
+            "INSERT OR REPLACE INTO prices(date,ticker,open,high,low,close,volume) "
+            "VALUES(?,?,?,?,?,?,?)",
             [
                 (
-                    r.Date,
-                    r.Ticker,
-                    float(r.Open) if pd.notna(r.Open) else None,
-                    float(r.High) if pd.notna(r.High) else None,
-                    float(r.Low) if pd.notna(r.Low) else None,
-                    float(r.Close) if pd.notna(r.Close) else None,
-                    float(r.Volume) if pd.notna(r.Volume) else 0.0,
+                    row.Date,
+                    row.Ticker,
+                    float(row.Open) if pd.notna(row.Open) else None,
+                    float(row.High) if pd.notna(row.High) else None,
+                    float(row.Low) if pd.notna(row.Low) else None,
+                    float(row.Close) if pd.notna(row.Close) else None,
+                    float(row.Volume) if pd.notna(row.Volume) else 0.0,
                 )
-                for r in prices_df.itertuples(index=False)
+                for row in normalize_prices_df(prices_df).itertuples(index=False)
             ],
         )
-        con.commit()
+        connection.commit()
     finally:
-        con.close()
+        connection.close()
 
 
-def sqlite_upsert_index(db_path: Path, idx_df: pd.DataFrame) -> None:
-    con = sqlite3.connect(db_path)
+def sqlite_upsert_index(db_path: Path, index_df: pd.DataFrame) -> None:
+    connection = sqlite3.connect(db_path)
     try:
-        con.executemany(
+        connection.executemany(
             """INSERT OR REPLACE INTO index_levels
-            (date,gli_open,gli_high,gli_low,gli_close,total_volume,divisor,sum_open,sum_high,sum_low,sum_close,rows_loaded)
+            (date,gli_open,gli_high,gli_low,gli_close,total_volume,divisor,
+             sum_open,sum_high,sum_low,sum_close,rows_loaded)
             VALUES(?,?,?,?,?,?,?,?,?,?,?,?)""",
             [
                 (
-                    r.Date,
-                    float(r.GLI_Open),
-                    float(r.GLI_High),
-                    float(r.GLI_Low),
-                    float(r.GLI_Close),
-                    float(r.TotalVolume),
-                    float(r.Divisor),
-                    float(r.SumOpen),
-                    float(r.SumHigh),
-                    float(r.SumLow),
-                    float(r.SumClose),
-                    int(r.RowsLoaded),
+                    row.Date,
+                    float(row.GLI_Open),
+                    float(row.GLI_High),
+                    float(row.GLI_Low),
+                    float(row.GLI_Close),
+                    float(row.TotalVolume),
+                    float(row.Divisor),
+                    float(row.SumOpen) if str(row.SumOpen) else None,
+                    float(row.SumHigh) if str(row.SumHigh) else None,
+                    float(row.SumLow) if str(row.SumLow) else None,
+                    float(row.SumClose),
+                    int(row.RowsLoaded),
                 )
-                for r in idx_df.itertuples(index=False)
+                for row in index_df.itertuples(index=False)
             ],
         )
-        con.commit()
+        connection.commit()
     finally:
-        con.close()
+        connection.close()
 
 
-def make_chart_png(idx_df: pd.DataFrame, out_png: Path) -> None:
-    """
-    Render a candlestick chart for GLI (Open/High/Low/Close) with volume bars.
-
-    Note:
-      - The "volume" plotted is GLI TotalVolume (sum of constituent volumes),
-        not exchange volume for a single traded instrument.
-      - Requires: mplfinance (pip install mplfinance)
-    """
+def make_chart_png(index_df: pd.DataFrame, output_path: Path) -> None:
     try:
         import mplfinance as mpf
-    except Exception as e:
-        raise RuntimeError(
-            "mplfinance is required for candlestick charts. "
-            "Install it in your venv with: pip install mplfinance"
-        ) from e
-
-    df = idx_df.copy()
-    df["Date"] = pd.to_datetime(df["Date"])
-    df = df.sort_values("Date")
-
-    # Build OHLCV frame for mplfinance
-    ohlcv = df.set_index("Date")[["GLI_Open", "GLI_High", "GLI_Low", "GLI_Close", "TotalVolume"]].copy()
+    except Exception as exc:
+        raise RuntimeError("mplfinance is required") from exc
+    frame = index_df.copy()
+    frame["Date"] = pd.to_datetime(frame["Date"])
+    for column in [
+        "GLI_Open", "GLI_High", "GLI_Low", "GLI_Close", "TotalVolume"
+    ]:
+        frame[column] = pd.to_numeric(frame[column], errors="coerce")
+    ohlcv = frame.set_index("Date")[
+        ["GLI_Open", "GLI_High", "GLI_Low", "GLI_Close", "TotalVolume"]
+    ].copy()
     ohlcv.columns = ["Open", "High", "Low", "Close", "Volume"]
-
-    # mplfinance expects numeric Volume; fill any missing with 0
-    ohlcv["Volume"] = pd.to_numeric(ohlcv["Volume"], errors="coerce").fillna(0)
-
+    ohlcv["Volume"] = ohlcv["Volume"].fillna(0)
     mpf.plot(
         ohlcv,
         type="candle",
@@ -471,41 +582,46 @@ def make_chart_png(idx_df: pd.DataFrame, out_png: Path) -> None:
         title="The Great Lakes Index (GLI) - Candlestick",
         ylabel="Index Level",
         volume=True,
-        savefig=dict(fname=str(out_png), dpi=150, bbox_inches="tight"),
+        savefig=dict(fname=str(output_path), dpi=150, bbox_inches="tight"),
     )
 
 
-
-def _fmt_int(x: float) -> str:
+def _format_volume(value: object) -> str:
     try:
-        return f"{int(round(float(x))):,}"
+        return f"{int(round(float(value))):,}"
     except Exception:
         return "0"
 
 
-def make_html_report(idx_df: pd.DataFrame, out_html: Path, chart_png_name: str) -> None:
-    df = idx_df.sort_values("Date").copy()
-    latest = df.iloc[-1].to_dict()
-    prev = df.iloc[-2].to_dict() if len(df) >= 2 else None
-
-    change = None
-    change_pct = None
-    if prev:
-        change = latest["GLI_Close"] - prev["GLI_Close"]
-        change_pct = (change / prev["GLI_Close"]) * 100 if prev["GLI_Close"] else None
-
-    tail = df.tail(20).copy()
-    for c in ["GLI_Open", "GLI_High", "GLI_Low", "GLI_Close"]:
-        tail[c] = tail[c].map(lambda x: f"{float(x):,.2f}")
-    tail["Divisor"] = tail["Divisor"].map(lambda x: f"{float(x):,.6f}")
-    tail["TotalVolume"] = tail["TotalVolume"].map(_fmt_int)
-
-    tail_html = tail[["Date", "GLI_Open", "GLI_High", "GLI_Low", "GLI_Close", "TotalVolume", "Divisor"]].to_html(
-        index=False, escape=True
+def make_html_report(
+    index_df: pd.DataFrame,
+    output_path: Path,
+    chart_name: str,
+    accepted_cutoff: str,
+) -> None:
+    frame = index_df.sort_values("Date").copy()
+    for column in ["GLI_Open", "GLI_High", "GLI_Low", "GLI_Close"]:
+        frame[column] = pd.to_numeric(frame[column], errors="coerce")
+    latest = frame.iloc[-1].to_dict()
+    previous = frame.iloc[-2].to_dict() if len(frame) >= 2 else None
+    change = latest["GLI_Close"] - previous["GLI_Close"] if previous else None
+    change_pct = (
+        change / previous["GLI_Close"] * 100
+        if previous and previous["GLI_Close"]
+        else None
     )
-
-    vol_latest = _fmt_int(latest.get("TotalVolume", 0))
-
+    tail = frame.tail(20).copy()
+    for column in ["GLI_Open", "GLI_High", "GLI_Low", "GLI_Close"]:
+        tail[column] = tail[column].map(lambda value: f"{float(value):,.2f}")
+    tail["Divisor"] = tail["Divisor"].map(lambda value: f"{float(value):,.6f}")
+    tail["TotalVolume"] = tail["TotalVolume"].map(_format_volume)
+    table = tail[
+        [
+            "Date", "GLI_Open", "GLI_High", "GLI_Low",
+            "GLI_Close", "TotalVolume", "Divisor",
+        ]
+    ].to_html(index=False, escape=True)
+    volume = _format_volume(latest.get("TotalVolume", 0))
     html = f"""<!doctype html>
 <html><head><meta charset="utf-8"/><title>The Great Lakes Index (GLI)</title>
 <style>
@@ -517,95 +633,112 @@ table {{ border-collapse:collapse; width:100%; }}
 th,td {{ border:1px solid #ddd; padding:8px; text-align:right; }}
 th:first-child,td:first-child {{ text-align:left; }}
 .muted {{ color:#666; }}
-.nav {{ margin-top: 10px; padding: 10px 12px; background:#f6f6f6; border:1px solid #ddd; border-radius:10px; }}
-.nav a {{ margin-right: 14px; text-decoration: none; }}
-.nav a:hover {{ text-decoration: underline; }}
+.nav {{ margin-top:10px; padding:10px 12px; background:#f6f6f6; border:1px solid #ddd; border-radius:10px; }}
+.nav a {{ margin-right:14px; text-decoration:none; }}
 </style></head>
 <body><div class="card">
 <h1>The Great Lakes Index (GLI)</h1>
-<div class="muted">Price-weighted • Base {BASE_VALUE:.2f} on {BASE_DATE}</div>
+<div class="muted">Price-weighted • Original base 100.00 on 2005-08-01</div>
+<div class="muted">Accepted close chain through {accepted_cutoff}; later sessions roll forward live.</div>
 <div class="nav">
   <a href="./index.html"><b>Home</b></a>
   <a href="./history.html">Historical Values</a>
   <a href="./ohlcv.html">Component OHLCV</a>
 </div>
-
 <div class="kpi" style="margin-top:16px;">
   <div><b>Latest Date</b><br/>{latest["Date"]}</div>
   <div><b>Close</b><br/>{latest["GLI_Close"]:,.2f}</div>
   <div><b>High</b><br/>{latest["GLI_High"]:,.2f}</div>
   <div><b>Low</b><br/>{latest["GLI_Low"]:,.2f}</div>
-  <div><b>Total Volume</b><br/>{vol_latest}</div>
+  <div><b>Total Volume</b><br/>{volume}</div>
   <div><b>Day Change</b><br/>{("" if change is None else f"{change:+.2f} ({change_pct:+.2f}%)")}</div>
 </div>
-
 <div style="margin-top:16px;">
-  <img src="{chart_png_name}" style="max-width:100%; border:1px solid #eee; border-radius:8px;"/>
+  <img src="{chart_name}" style="max-width:100%; border:1px solid #eee; border-radius:8px;"/>
 </div>
-
 <h2 style="margin-top:20px;">Recent Levels</h2>
-{tail_html}
-
+{table}
 </div></body></html>"""
-    out_html.write_text(html, encoding="utf-8")
+    output_path.write_text(html, encoding="utf-8")
 
 
 def parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="Compute and track The Great Lakes Index (GLI).")
-    p.add_argument("--tickers", required=True, type=Path, help="CSV containing a 'Ticker' column (or first column).")
-    p.add_argument("--prices", type=Path, help="CSV input with OHLC(V) if not fetching.")
-    p.add_argument("--fetch", choices=["yfinance"], help="Fetch OHLCV from Yahoo via yfinance.")
-    p.add_argument("--start", default=BASE_DATE, help="Start date (YYYY-MM-DD). Default is base date.")
-    p.add_argument("--end", default=None, help="End date (YYYY-MM-DD). Default is today.")
-    p.add_argument("--auto-adjust", action="store_true", default=False, help="Use adjusted OHLC from Yahoo.")
-    p.add_argument("--strict", action="store_true", default=True, help="Fail if any date is missing a ticker.")
-    p.add_argument("--no-strict", dest="strict", action="store_false", help="Disable strict completeness checks.")
-    p.add_argument("--events", type=Path, default=None, help="Divisor events CSV (membership/splits/spinoffs).")
-    p.add_argument("--out", type=Path, default=Path("gli_output.csv"), help="Output index levels CSV.")
-    p.add_argument("--prices-out", type=Path, default=None, help="If fetching, write normalized OHLCV to this CSV.")
-    p.add_argument("--db", type=Path, default=None, help="SQLite DB path to store prices and index levels.")
-    p.add_argument("--report-dir", type=Path, default=None, help="Directory to write HTML+PNG report.")
-    return p.parse_args()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--tickers", required=True, type=Path)
+    parser.add_argument("--accepted-chain", required=True, type=Path)
+    parser.add_argument("--accepted-ohlcv-chain", required=True, type=Path)
+    parser.add_argument("--prices", type=Path)
+    parser.add_argument("--fetch", choices=["yfinance"])
+    parser.add_argument("--start", default=LIVE_SERIES_START)
+    parser.add_argument("--end", default=None)
+    parser.add_argument("--auto-adjust", action="store_true", default=False)
+    parser.add_argument("--strict", action="store_true", default=True)
+    parser.add_argument("--no-strict", dest="strict", action="store_false")
+    parser.add_argument("--events", type=Path, default=None)
+    parser.add_argument("--out", type=Path, default=Path("gli_levels.csv"))
+    parser.add_argument("--prices-out", type=Path, default=None)
+    parser.add_argument("--db", type=Path, default=None)
+    parser.add_argument("--report-dir", type=Path, default=None)
+    return parser.parse_args()
 
 
 def main() -> int:
     args = parse_args()
-    constituents = read_constituents(args.tickers)
-    tickers = read_tickers(args.tickers)
-
-    # Interpret --end as an INCLUSIVE date (human-friendly).
-    # yfinance end is end-EXCLUSIVE, so add +1 day when fetching.
     end_inclusive = args.end or pd.Timestamp.today().date().isoformat()
-    end_fetch = (pd.to_datetime(end_inclusive) + pd.Timedelta(days=1)).date().isoformat()
+    if args.start > end_inclusive:
+        raise ValueError("Start date is after end date")
+
+    constituents = read_constituents(args.tickers)
+    accepted_chain = read_accepted_chain(args.accepted_chain)
+    accepted_ohlcv_chain = read_accepted_ohlcv_chain(
+        args.accepted_ohlcv_chain
+    )
+    accepted_cutoff = max(row["Date"] for row in accepted_chain)
+    events = read_divisor_events(args.events)
 
     if args.fetch == "yfinance":
-        prices_df = fetch_yahoo_daily(tickers, args.start, end_fetch, auto_adjust=args.auto_adjust)
-        prices_df = normalize_prices_df(prices_df)
-        if args.prices_out:
-            prices_df.to_csv(args.prices_out, index=False)
+        tickers = tickers_intersecting_range(
+            constituents, args.start, end_inclusive
+        )
+        end_exclusive = (
+            pd.to_datetime(end_inclusive) + pd.Timedelta(days=1)
+        ).date().isoformat()
+        prices_df = fetch_yahoo_daily(
+            tickers, args.start, end_exclusive, args.auto_adjust
+        )
     elif args.prices:
         prices_df = normalize_prices_df(pd.read_csv(args.prices))
     else:
-        raise ValueError("Provide either --prices (CSV) or --fetch yfinance.")
+        raise ValueError("Provide --prices or --fetch yfinance")
 
-    if args.strict:
-        validate_completeness(prices_df, constituents)
+    if args.prices_out:
+        normalize_prices_df(prices_df).to_csv(
+            args.prices_out, index=False
+        )
 
-    events = read_divisor_events(args.events)
-    idx_df = aggregate_index(prices_df, constituents, events)
-    idx_df.to_csv(args.out, index=False)
+    index_df = aggregate_index(
+        prices_df=prices_df,
+        constituents=constituents,
+        events=events,
+        accepted_chain=accepted_chain,
+        accepted_ohlcv_chain=accepted_ohlcv_chain,
+        requested_start=args.start,
+        requested_end=end_inclusive,
+        strict=args.strict,
+    )
+    index_df.to_csv(args.out, index=False)
 
     if args.db:
         sqlite_init_and_migrate(args.db)
         sqlite_upsert_prices(args.db, prices_df)
-        sqlite_upsert_index(args.db, idx_df)
+        sqlite_upsert_index(args.db, index_df)
 
     if args.report_dir:
         args.report_dir.mkdir(parents=True, exist_ok=True)
-        png = args.report_dir / "gli_close.png"
-        html = args.report_dir / "index.html"
-        make_chart_png(idx_df, png)
-        make_html_report(idx_df, html, png.name)
+        chart = args.report_dir / "gli_close.png"
+        report = args.report_dir / "index.html"
+        make_chart_png(index_df, chart)
+        make_html_report(index_df, report, chart.name, accepted_cutoff)
 
     print(f"Wrote index CSV: {args.out}")
     if args.prices_out:
@@ -613,8 +746,9 @@ def main() -> int:
     if args.db:
         print(f"Updated SQLite DB: {args.db}")
     if args.report_dir:
-        print(f"Wrote report: {args.report_dir/'index.html'}")
+        print(f"Wrote report: {args.report_dir / 'index.html'}")
     return 0
+
 
 if __name__ == "__main__":
     raise SystemExit(main())
