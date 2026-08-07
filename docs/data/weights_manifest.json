@@ -151,9 +151,9 @@
     },
     "2026": {
       "file": "weights/weights_2026.json",
-      "dates": 1,
+      "dates": 2,
       "first_date": "2026-08-05",
-      "last_date": "2026-08-05",
+      "last_date": "2026-08-06",
       "status": "live sessions after accepted cutoff 2026-08-04"
     }
   }
