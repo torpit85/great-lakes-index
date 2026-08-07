@@ -33,6 +33,7 @@ CONSTITUENTS = ROOT / "constituents_great_lakes.csv"
 COMPANY_CACHE = ROOT / "company_names.csv"
 LIVE_ANCHOR = ROOT / "GLI_2026_live_anchor.json"
 SITE_DATA = ROOT / "site_data"
+HISTORICAL_COMPANY_NAMES = SITE_DATA / "historical_company_names.csv"
 HISTORICAL_BASE = SITE_DATA / "gli_historical_ohlcv_through_2025.csv"
 ROSTER_BASE = SITE_DATA / "component_roster_history_through_2025.json"
 WEIGHTS_BASE = SITE_DATA / "weights"
@@ -387,6 +388,29 @@ def company_map() -> dict[str, str]:
     return out
 
 
+def historical_company_name_map() -> dict[str, list[dict[str, str]]]:
+    """Return date-aware company names keyed by ticker.
+
+    This presentation metadata never changes component prices, weights, rosters,
+    divisors, or accepted index history. ``company_names.csv`` remains the
+    fallback for current/new live tickers not yet in the historical file.
+    """
+    out: dict[str, list[dict[str, str]]] = defaultdict(list)
+    if not HISTORICAL_COMPANY_NAMES.exists():
+        return {}
+    with HISTORICAL_COMPANY_NAMES.open(newline="", encoding="utf-8-sig") as stream:
+        for row in csv.DictReader(stream):
+            ticker = row.get("Ticker", "").strip().upper()
+            name = row.get("Company", "").strip()
+            start = row.get("StartDate", "").strip() or "0001-01-01"
+            end = row.get("EndDate", "").strip() or "9999-12-31"
+            if ticker and name and start <= end:
+                out[ticker].append({"start": start, "end": end, "name": name})
+    for ranges in out.values():
+        ranges.sort(key=lambda item: (item["start"], item["end"], item["name"]))
+    return dict(out)
+
+
 def accepted_cutoff() -> str:
     try:
         return json.loads(LIVE_ANCHOR.read_text(encoding="utf-8"))["accepted_through"]
@@ -461,18 +485,21 @@ def write_weights_page(constituents: list[dict[str, str]]) -> None:
     write_json(REPORT_DATA / "weights_manifest.json", {"schema_version": 1, "accepted_cutoff": accepted_cutoff(), "years": years}, pretty=True)
     body = """
 <div class="page-head"><div><h1>Component Weights</h1><div class="muted">Daily price weights in the price-weighted Great Lakes Index</div></div></div>
-<div class="source-note" id="weight-source">Historical weights use accepted component OHLCV rows. For 2026, only live sessions after the accepted cutoff are displayed until an accepted 2026 component-level file is installed.</div>
+<div class="source-note" id="weight-source">Historical weights use accepted component OHLCV rows. Company labels use the name effective on the selected date, with the current company-name cache as a fallback. For 2026, only live sessions after the accepted cutoff are displayed until an accepted 2026 component-level file is installed.</div>
 <div class="panel"><div class="controls"><label>Year <select id="weight-year"></select></label><label>Date <input id="weight-date" type="date" readonly></label><input id="weight-slider" type="range" min="0" max="0" value="0" aria-label="Weight date"></div><div class="summary-grid"><div><div class="gli-k">As of</div><div class="gli-v" id="weight-asof">—</div></div><div><div class="gli-k">Components</div><div class="gli-v" id="weight-count">—</div></div><div><div class="gli-k">Largest weight</div><div class="gli-v" id="weight-largest">—</div></div><div><div class="gli-k">Total</div><div class="gli-v" id="weight-total">—</div></div><div><div class="gli-k">Dataset</div><div class="gli-v" id="weight-status" style="font-size:14px">—</div></div></div></div>
 <div id="heatmap" class="heatmap"><div class="empty">Loading component weights…</div></div>
 <script>
-const companyNames=COMPANY_MAP_TOKEN;let manifest=null;let weightPayload=null;
+const companyNames=COMPANY_MAP_TOKEN;const historicalCompanyNames=HISTORICAL_COMPANY_NAMES_TOKEN;let manifest=null;let weightPayload=null;
+function companyNameAt(symbol,day){const ranges=historicalCompanyNames[symbol]||[];for(const r of ranges){if(r.start<=day&&day<=r.end)return r.name;}return companyNames[symbol]||symbol;}
 const yearSel=document.getElementById('weight-year'),slider=document.getElementById('weight-slider');
-function renderHeat(index){if(!weightPayload)return;const items=weightPayload.snapshots[index].map(x=>({symbol:x[0],ppm:x[1]})).sort((a,b)=>b.ppm-a.ppm);const max=items[0]?.ppm||1;const total=items.reduce((s,x)=>s+x.ppm,0);const day=weightPayload.dates[index];document.getElementById('weight-date').value=day;document.getElementById('weight-asof').textContent=day;document.getElementById('weight-count').textContent=items.length;document.getElementById('weight-largest').textContent=items.length?`${items[0].symbol} ${(items[0].ppm/10000).toFixed(2)}%`:'—';document.getElementById('weight-total').textContent=(total/10000).toFixed(2)+'%';document.getElementById('weight-status').textContent=manifest.years[yearSel.value].status;document.getElementById('heatmap').innerHTML=items.map(x=>{const ratio=x.ppm/max;const alpha=.16+.78*ratio;const dark=alpha>.55;const name=companyNames[x.symbol]||'';return `<div class="heat-cell" style="background:rgba(23,92,170,${alpha.toFixed(3)});color:${dark?'#fff':'#102a43'}" title="${x.symbol}: ${(x.ppm/10000).toFixed(4)}%"><div><div class="heat-symbol">${x.symbol}</div><div class="heat-company">${name}</div></div><div class="heat-weight">${(x.ppm/10000).toFixed(2)}%</div></div>`;}).join('');}
+function renderHeat(index){if(!weightPayload)return;const items=weightPayload.snapshots[index].map(x=>({symbol:x[0],ppm:x[1]})).sort((a,b)=>b.ppm-a.ppm);const max=items[0]?.ppm||1;const total=items.reduce((s,x)=>s+x.ppm,0);const day=weightPayload.dates[index];document.getElementById('weight-date').value=day;document.getElementById('weight-asof').textContent=day;document.getElementById('weight-count').textContent=items.length;document.getElementById('weight-largest').textContent=items.length?`${items[0].symbol} ${(items[0].ppm/10000).toFixed(2)}%`:'—';document.getElementById('weight-total').textContent=(total/10000).toFixed(2)+'%';document.getElementById('weight-status').textContent=manifest.years[yearSel.value].status;document.getElementById('heatmap').innerHTML=items.map(x=>{const ratio=x.ppm/max;const alpha=.16+.78*ratio;const dark=alpha>.55;const name=companyNameAt(x.symbol,day);return `<div class="heat-cell" style="background:rgba(23,92,170,${alpha.toFixed(3)});color:${dark?'#fff':'#102a43'}" title="${x.symbol}: ${(x.ppm/10000).toFixed(4)}%"><div><div class="heat-symbol">${x.symbol}</div><div class="heat-company">${name}</div></div><div class="heat-weight">${(x.ppm/10000).toFixed(2)}%</div></div>`;}).join('');}
 function loadYear(year){const meta=manifest.years[year];fetch('./data/'+meta.file,{cache:'no-store'}).then(r=>r.json()).then(d=>{weightPayload=d;slider.max=Math.max(0,d.dates.length-1);slider.value=d.dates.length-1;renderHeat(Number(slider.value));});}
 fetch('./data/weights_manifest.json',{cache:'no-store'}).then(r=>r.json()).then(d=>{manifest=d;const years=Object.keys(d.years).sort((a,b)=>Number(a)-Number(b));yearSel.innerHTML=years.map(y=>`<option value="${y}">${y}</option>`).join('');yearSel.value=years[years.length-1];loadYear(yearSel.value);});
 yearSel.addEventListener('change',()=>loadYear(yearSel.value));slider.addEventListener('input',()=>renderHeat(Number(slider.value)));
 </script>
-""".replace("COMPANY_MAP_TOKEN", json.dumps(company_map(), separators=(",", ":")))
+"""
+    body = body.replace("COMPANY_MAP_TOKEN", json.dumps(company_map(), separators=(",", ":")))
+    body = body.replace("HISTORICAL_COMPANY_NAMES_TOKEN", json.dumps(historical_company_name_map(), separators=(",", ":")))
     (REPORT / "weights.html").write_text(page("GLI Component Weights", body, "weights.html"), encoding="utf-8")
 
 
