@@ -112,9 +112,45 @@ if checkpoint.get("OHLCVSource") != "PINNED_LIVE_CHECKPOINT":
 
 with open("constituents_great_lakes.csv", newline="", encoding="utf-8") as stream:
     constituents = list(csv.DictReader(stream))
-active = [row["Ticker"] for row in constituents if row["Active"].upper() == "Y"]
-if len(active) != 86 or "ELV" not in active:
-    raise SystemExit("Hard guard: current roster is not accepted 86-name roster")
+
+# Membership is date-effective. Do not use the Active flag here: during a
+# staged transition, future additions may already be Active=Y and outgoing
+# members may already be Active=N while StartDate/EndDate remain authoritative.
+import datetime
+guard_date = datetime.date.today().isoformat()
+
+def roster_member_on(row, day):
+    start = row.get("StartDate", "").strip()
+    end = row.get("EndDate", "").strip()
+    return (not start or start <= day) and (not end or day <= end)
+
+active = [
+    row["Ticker"].strip().upper()
+    for row in constituents
+    if roster_member_on(row, guard_date)
+]
+
+expected_count = 90 if guard_date >= "2026-08-10" else 86
+
+if len(active) != expected_count or "ELV" not in active:
+    raise SystemExit(
+        f"Hard guard: {guard_date} roster is not accepted "
+        f"{expected_count}-name roster"
+    )
+
+gli90_removed = {"LE", "RAIL", "WNC"}
+gli90_added = {"CDW", "DTE", "DTM", "MPLX", "TWI", "VTR", "ZBRA"}
+
+if guard_date < "2026-08-10":
+    if not gli90_removed.issubset(active) or gli90_added.intersection(active):
+        raise SystemExit(
+            "Hard guard: pre-2026-08-10 GLI90 membership transition is incorrect"
+        )
+else:
+    if gli90_removed.intersection(active) or not gli90_added.issubset(active):
+        raise SystemExit(
+            "Hard guard: 2026-08-10 GLI90 membership transition is incorrect"
+        )
 PY
 
 HOME=/home/torrey "$PYTHON" "$ROOT/gli_site_build.py" >> "$LOG" 2>&1
