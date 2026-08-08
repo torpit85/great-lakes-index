@@ -13,6 +13,7 @@ BMI,"Badger Meter, Inc."
 CARS,Cars.com Inc.
 CAT,"Caterpillar, Inc."
 CCC,CCC Intelligent Solutions Holdings Inc.
+CDW,CDW Corporation
 CF,"CF Industries Holdings, Inc."
 CME,CME Group Inc.
 CMI,Cummins Inc.
@@ -20,6 +21,8 @@ CTS,CTS Corporation
 DE,Deere & Company
 DOW,Dow Inc.
 DPZ,Domino's Pizza Inc
+DTE,DTE Energy Company
+DTM,"DT Midstream, Inc."
 ELV,"Elevance Health, Inc."
 EXC,Exelon Corporation
 F,Ford Motor Company
@@ -53,6 +56,7 @@ MCS,The Marcus Corporation
 MHO,"M/I Homes, Inc."
 MOD,Modine Manufacturing Company
 MPC,Marathon Petroleum Corporation
+MPLX,MPLX LP
 MRTN,"Marten Transport, Ltd."
 MSI,"Motorola Solutions, Inc."
 NI,NiSource Inc
@@ -88,12 +92,15 @@ TDC,Teradata Corporation
 TDS,"Telephone and Data Systems, Inc"
 THO,"Thor Industries, Inc."
 TR,"Tootsie Roll Industries, Inc."
+TWI,"Titan International, Inc."
 UAL,"United Airlines Holdings, Inc."
 UFPI,"UFP Industries, Inc."
 ULTA,"Ulta Beauty, Inc."
+VTR,"Ventas, Inc."
 WEC,"WEC Energy Group, Inc."
 WHR,Whirlpool Corporation
 WNC,Wabash National Corporation
 WWW,"Wolverine World Wide, Inc."
 ZBH,"Zimmer Biomet Holdings, Inc."
+ZBRA,Zebra Technologies Corporation
 ZEUS,"Olympic Steel, Inc."
