@@ -1052,8 +1052,24 @@ def inject_home(full_rows: list[dict[str, str]]) -> None:
             "</tr>"
         )
 
-    chart = """<!-- GLI_INTERACTIVE_CHART_V3_DYNAMIC_YAXIS -->
+    chart = """<!-- GLI_INTERACTIVE_CHART_V5_DATE_INPUTS -->
 <div class="chart-shell">
+  <style>
+  .gli-chart-date-controls{display:flex;align-items:end;gap:10px;flex-wrap:wrap;padding:10px 12px 4px}
+  .gli-chart-date-controls label{display:grid;gap:4px;font-size:12px;font-weight:800;color:#344054}
+  .gli-chart-date-controls input[type="date"]{min-width:154px;font:inherit;font-weight:650}
+  .gli-chart-date-controls button{border:1px solid #175cd3;border-radius:9px;padding:8px 14px;background:#175cd3;color:#fff;font:inherit;font-weight:800;cursor:pointer;min-height:38px}
+  .gli-chart-date-controls button:hover{background:#1849a9}
+  .gli-chart-date-controls button:focus-visible{outline:3px solid #84adff;outline-offset:2px}
+  .gli-chart-date-status{min-height:18px;flex-basis:100%;font-size:12px;color:#b42318}
+  @media(max-width:600px){.gli-chart-date-controls{align-items:stretch;padding-left:6px;padding-right:6px}.gli-chart-date-controls label{flex:1 1 145px}.gli-chart-date-controls input[type="date"]{width:100%;min-width:0}.gli-chart-date-controls button{flex:1 1 100%}}
+  </style>
+  <div class="gli-chart-date-controls" aria-label="Candlestick chart date range">
+    <label for="gli-date-start">Start date<input id="gli-date-start" type="date"></label>
+    <label for="gli-date-end">End date<input id="gli-date-end" type="date"></label>
+    <button id="gli-date-apply" type="button">Apply</button>
+    <div class="gli-chart-date-status" id="gli-date-status" aria-live="polite"></div>
+  </div>
   <div id="gli-candlestick" style="height:560px"><div class="chart-status">Loading interactive chart…</div></div>
   <div id="gli-chart-fallback" style="display:none"><img src="gli_close.png" alt="Great Lakes Index close chart" style="max-width:100%"></div>
 </div>
@@ -1069,7 +1085,7 @@ fetch('./data/gli_history.json',{cache:'no-store'}).then(r=>r.json()).then(d=>{
   const layout={
     margin:{l:55,r:25,t:35,b:45},paper_bgcolor:'#fff',plot_bgcolor:'#fff',hovermode:'x unified',
     xaxis:{
-      type:'date',rangeslider:{visible:true},
+      type:'date',rangeslider:{visible:false},
       rangeselector:{buttons:[
         {count:1,label:'1M',step:'month',stepmode:'backward'},
         {count:3,label:'3M',step:'month',stepmode:'backward'},
@@ -1083,6 +1099,34 @@ fetch('./data/gli_history.json',{cache:'no-store'}).then(r=>r.json()).then(d=>{
     yaxis:{title:'Index Level',fixedrange:false},showlegend:false
   };
   const rowTimes=rows.map(r=>Date.parse(r.date));
+  const dateStart=document.getElementById('gli-date-start');
+  const dateEnd=document.getElementById('gli-date-end');
+  const dateApply=document.getElementById('gli-date-apply');
+  const dateStatus=document.getElementById('gli-date-status');
+  const firstDate=rows[0]?.date||'';
+  const lastDate=rows[rows.length-1]?.date||'';
+  dateStart.min=firstDate;dateStart.max=lastDate;dateStart.value=firstDate;
+  dateEnd.min=firstDate;dateEnd.max=lastDate;dateEnd.value=lastDate;
+  function isoDay(value,fallback){
+    if(value==null)return fallback;
+    const text=String(value);
+    const match=text.match(/^\\d{4}-\\d{2}-\\d{2}/);
+    if(match)return match[0];
+    const t=Date.parse(value);
+    return Number.isFinite(t)?new Date(t).toISOString().slice(0,10):fallback;
+  }
+  function clampDay(value){
+    let day=isoDay(value,'');
+    if(!day)return '';
+    if(firstDate&&day<firstDate)day=firstDate;
+    if(lastDate&&day>lastDate)day=lastDate;
+    return day;
+  }
+  function syncDateInputs(startValue,endValue){
+    dateStart.value=clampDay(startValue==null?firstDate:startValue)||firstDate;
+    dateEnd.value=clampDay(endValue==null?lastDate:endValue)||lastDate;
+    dateStatus.textContent='';
+  }
   function rescaleVisibleY(gd,startValue,endValue){
     let start=startValue==null?-Infinity:Date.parse(startValue);
     let end=endValue==null?Infinity:Date.parse(endValue);
@@ -1102,22 +1146,30 @@ fetch('./data/gli_history.json',{cache:'no-store'}).then(r=>r.json()).then(d=>{
     const pad=span>0?span*0.08:Math.max(Math.abs(hi)*0.02,1);
     Plotly.relayout(gd,{'yaxis.autorange':false,'yaxis.range':[lo-pad,hi+pad]});
   }
+  function applyDateInputs(gd){
+    const start=clampDay(dateStart.value);
+    const end=clampDay(dateEnd.value);
+    if(!start||!end){dateStatus.textContent='Enter both a start date and an end date.';return;}
+    if(start>end){dateStatus.textContent='Start date must be on or before end date.';return;}
+    if(start===end){dateStatus.textContent='Choose at least a two-day calendar range.';return;}
+    dateStart.value=start;dateEnd.value=end;dateStatus.textContent='';
+    Plotly.relayout(gd,{'xaxis.autorange':false,'xaxis.range':[start,end]});
+    rescaleVisibleY(gd,start,end);
+  }
   return Plotly.newPlot('gli-candlestick',[trace],layout,{responsive:true,displaylogo:false,scrollZoom:true}).then(gd=>{
+    dateApply.addEventListener('click',()=>applyDateInputs(gd));
+    [dateStart,dateEnd].forEach(input=>input.addEventListener('keydown',ev=>{if(ev.key==='Enter')applyDateInputs(gd);}));
     gd.on('plotly_relayout',ev=>{
       if(ev['xaxis.autorange']===true){
-        rescaleVisibleY(gd,null,null);
-        return;
+        syncDateInputs(firstDate,lastDate);rescaleVisibleY(gd,null,null);return;
       }
       let x0=ev['xaxis.range[0]'],x1=ev['xaxis.range[1]'];
-      if(Array.isArray(ev['xaxis.range'])){
-        x0=ev['xaxis.range'][0];
-        x1=ev['xaxis.range'][1];
-      }
+      if(Array.isArray(ev['xaxis.range'])){x0=ev['xaxis.range'][0];x1=ev['xaxis.range'][1];}
       if(x0!==undefined||x1!==undefined){
         const current=gd.layout.xaxis&&gd.layout.xaxis.range;
         if(x0===undefined&&Array.isArray(current))x0=current[0];
         if(x1===undefined&&Array.isArray(current))x1=current[1];
-        rescaleVisibleY(gd,x0,x1);
+        syncDateInputs(x0,x1);rescaleVisibleY(gd,x0,x1);
       }
     });
     return gd;
