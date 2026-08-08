@@ -94,7 +94,7 @@ th:first-child,td:first-child{text-align:left} tbody tr:hover{background:#f8fbff
 .heatmap{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-top:14px}
 .heat-cell{min-height:86px;border-radius:11px;padding:11px;border:1px solid rgba(0,0,0,.08);display:flex;flex-direction:column;justify-content:space-between;box-shadow:inset 0 1px rgba(255,255,255,.25)}
 .heat-symbol{font-weight:900;font-size:17px}.heat-company{font-size:11px;line-height:1.25;opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.heat-weight{font-size:15px;font-weight:850}
-.timeline{display:grid;gap:14px}.snapshot{border:1px solid var(--line);border-radius:14px;padding:16px;background:#fff}.snapshot-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}.snapshot-date{font-size:20px;font-weight:900}.snapshot-title{color:var(--muted);font-weight:700}.change-row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.badge{border-radius:999px;padding:5px 9px;font-size:12px;font-weight:800}.badge.add{background:#ecfdf3;color:#027a48}.badge.remove{background:#fef3f2;color:#b42318}.component-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:7px;margin-top:12px}.component{border:1px solid #e2e7ef;border-radius:8px;padding:7px 9px;background:#f9fafb;font-size:13px}.component.added{border-color:#86d5ad;background:#ecfdf3;font-weight:750}.component-symbol{font-weight:850}.component-name{color:var(--muted);font-size:11px;margin-top:2px}
+.timeline{display:grid;gap:14px}.snapshot{border:1px solid var(--line);border-radius:14px;padding:16px;background:#fff}.snapshot-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}.snapshot-date{font-size:20px;font-weight:900}.snapshot-title{color:var(--muted);font-weight:700}.change-row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.badge{border-radius:999px;padding:5px 9px;font-size:12px;font-weight:800}.badge.add{background:#ecfdf3;color:#027a48}.badge.remove{background:#fef3f2;color:#b42318}.event-list{display:grid;gap:7px;margin:10px 0}.component-event{border-left:4px solid #7f56d9;background:#f9f5ff;padding:8px 10px;border-radius:8px;font-size:13px;color:#344054}.component-event.security{border-left-color:#f79009;background:#fffaeb}.event-label{font-weight:900;color:#53389e}.component-event.security .event-label{color:#b54708}.event-detail{color:#667085;margin-left:5px}.component-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:7px;margin-top:12px}.component{border:1px solid #e2e7ef;border-radius:8px;padding:7px 9px;background:#f9fafb;font-size:13px}.component.added{border-color:#86d5ad;background:#ecfdf3;font-weight:750}.component-symbol{font-weight:850}.component-name{color:var(--muted);font-size:11px;margin-top:2px}
 .chart-shell{border:1px solid var(--line);border-radius:14px;padding:8px;background:#fff;margin:14px 0 18px}.chart-status{padding:24px;color:var(--muted);text-align:center}
 .source-note{border-left:4px solid #84adff;background:#f5f8ff;padding:10px 12px;margin:12px 0;color:#344054;font-size:13px}
 @media(max-width:920px){.gli-grid,.summary-grid{grid-template-columns:repeat(2,minmax(130px,1fr))}.metric-cards{grid-template-columns:repeat(2,minmax(140px,1fr))}}
@@ -411,6 +411,327 @@ def historical_company_name_map() -> dict[str, list[dict[str, str]]]:
     return dict(out)
 
 
+def _normalize_component_identity_label(value: str) -> str:
+    """Normalize a presentation label for historical identity matching."""
+    text = str(value or "").replace("\n", " ").strip().casefold().replace("&", " and ")
+    text = re.sub(r"\b(name change)\s*:\s*", "", text)
+    text = re.sub(r"[^a-z0-9]+", " ", text)
+    return " ".join(text.split())
+
+
+def historical_component_symbol_map() -> dict[str, str]:
+    """Return legacy Component History labels -> accepted historical tickers.
+
+    The mapping is read from the dedicated ``ComponentHistoryLabels`` column
+    in ``historical_company_names.csv``.  It intentionally does not use the
+    broader identity alias field, so display symbols cannot be contaminated
+    by name-change aliases or same-security lineage controls.
+    """
+    candidates: dict[str, set[str]] = defaultdict(set)
+    if not HISTORICAL_COMPANY_NAMES.exists():
+        return {}
+    with HISTORICAL_COMPANY_NAMES.open(newline="", encoding="utf-8-sig") as stream:
+        for row in csv.DictReader(stream):
+            ticker = row.get("Ticker", "").strip().upper()
+            labels = [part.strip() for part in row.get("ComponentHistoryLabels", "").split("|") if part.strip()]
+            for label in labels:
+                key = _normalize_component_identity_label(label)
+                if ticker and key:
+                    candidates[key].add(ticker)
+    return {key: next(iter(tickers)) for key, tickers in candidates.items() if len(tickers) == 1}
+
+
+def historical_symbol_for_label(label: str, symbol_map: dict[str, str] | None = None) -> str:
+    symbol_map = symbol_map if symbol_map is not None else historical_component_symbol_map()
+    return symbol_map.get(_normalize_component_identity_label(label), "")
+
+
+def historical_component_identity_metadata() -> tuple[dict[str, list[dict[str, str]]], dict[str, str]]:
+    """Return date-aware ticker identities and unambiguous legacy-label identities."""
+    ticker_ranges: dict[str, list[dict[str, str]]] = defaultdict(list)
+    label_candidates: dict[str, set[str]] = defaultdict(set)
+    if not HISTORICAL_COMPANY_NAMES.exists():
+        return {}, {}
+    with HISTORICAL_COMPANY_NAMES.open(newline="", encoding="utf-8-sig") as stream:
+        for row in csv.DictReader(stream):
+            ticker = row.get("Ticker", "").strip().upper()
+            identity = row.get("Identity", "").strip().upper() or ticker
+            name = row.get("Company", "").strip()
+            start = row.get("StartDate", "").strip() or "0001-01-01"
+            end = row.get("EndDate", "").strip() or "9999-12-31"
+            if not ticker:
+                continue
+            ticker_ranges[ticker].append({
+                "start": start, "end": end, "identity": identity,
+                "name": name, "source": row.get("Source", "").strip(),
+            })
+            labels = [name]
+            labels.extend(part.strip() for part in row.get("Aliases", "").split("|") if part.strip())
+            labels.extend(part.strip() for part in row.get("ComponentHistoryLabels", "").split("|") if part.strip())
+            for label in labels:
+                key = _normalize_component_identity_label(label)
+                if key:
+                    label_candidates[key].add(identity)
+    for ranges in ticker_ranges.values():
+        ranges.sort(key=lambda item: (item["start"], item["end"], item["identity"]))
+    label_identity = {key: next(iter(ids)) for key, ids in label_candidates.items() if len(ids) == 1}
+    return dict(ticker_ranges), label_identity
+
+
+def _ticker_identity_meta_at(
+    ticker: str,
+    day: str,
+    ticker_ranges: dict[str, list[dict[str, str]]],
+    *,
+    allow_nearest: bool = True,
+) -> dict[str, str]:
+    ticker = str(ticker or "").strip().upper()
+    ranges = ticker_ranges.get(ticker, [])
+    for item in ranges:
+        if item["start"] <= day <= item["end"]:
+            return {"symbol": ticker, **item}
+    if allow_nearest and ranges:
+        prior = [item for item in ranges if item["end"] < day]
+        future = [item for item in ranges if item["start"] > day]
+        if prior:
+            item = max(prior, key=lambda x: x["end"])
+            return {"symbol": ticker, **item}
+        if future:
+            item = min(future, key=lambda x: x["start"])
+            return {"symbol": ticker, **item}
+    return {"symbol": ticker, "identity": ticker, "name": "", "start": "", "end": "", "source": ""}
+
+
+def historical_component_explicit_events() -> dict[str, list[dict[str, str]]]:
+    """Read vetted Component History event annotations from the historical name master."""
+    out: dict[str, list[dict[str, str]]] = defaultdict(list)
+    if not HISTORICAL_COMPANY_NAMES.exists():
+        return {}
+    kind_map = {
+        "NAME_CHANGE": "name_change",
+        "NAME_AND_TICKER_CHANGE": "name_and_ticker_change",
+        "TICKER_CHANGE": "ticker_change",
+        "SECURITY_REPLACEMENT": "security_replacement",
+        "SECURITY_REPLACEMENT_SAME_TICKER": "security_replacement_same_ticker",
+    }
+    with HISTORICAL_COMPANY_NAMES.open(newline="", encoding="utf-8-sig") as stream:
+        for row in csv.DictReader(stream):
+            raw_kind = row.get("EventType", "").strip().upper()
+            if not raw_kind:
+                continue
+            day = row.get("EventDate", "").strip() or row.get("StartDate", "").strip()
+            to_symbol = row.get("Ticker", "").strip().upper()
+            to_name = row.get("Company", "").strip()
+            from_symbol = row.get("PriorTicker", "").strip().upper()
+            from_name = row.get("PriorCompany", "").strip()
+            if not day or not to_symbol:
+                continue
+            out[day].append({
+                "kind": kind_map.get(raw_kind, raw_kind.lower()),
+                "from_symbol": from_symbol,
+                "from_name": from_name,
+                "to_symbol": to_symbol,
+                "to_name": to_name,
+                "detail": row.get("EventDetail", "").strip(),
+                "source": "historical_company_names.csv",
+            })
+    return dict(out)
+
+
+def _clean_component_history_snapshots(snapshots: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Clean legacy artifacts while preserving real security changes and naming continuity."""
+    ticker_ranges, label_identity = historical_component_identity_metadata()
+    legacy_symbol_map = historical_component_symbol_map()
+    cleaned: list[dict[str, Any]] = []
+    previous_day = "0001-01-01"
+
+    def clean_label(value: str) -> str:
+        return " ".join(str(value or "").replace("\n", " ").split())
+
+    for raw in snapshots:
+        snap = dict(raw)
+        day = str(snap.get("date", ""))
+        mode = snap.get("label_mode")
+        components = [str(x) for x in snap.get("components", [])]
+        added = [str(x) for x in snap.get("added", [])]
+        removed = [str(x) for x in snap.get("removed", [])]
+
+        # The legacy workbook placed NAME CHANGE markers inside the roster.
+        # They are annotations, not constituents.  We infer the real event from
+        # the removed/added security identities below.
+        def is_name_change_marker(value: str) -> bool:
+            return clean_label(value).upper().startswith("NAME CHANGE:")
+
+        components = [x for x in components if not is_name_change_marker(x)]
+        added = [x for x in added if not is_name_change_marker(x)]
+        removed = [x for x in removed if not is_name_change_marker(x)]
+
+        def meta(value: str, item_day: str) -> dict[str, str]:
+            if mode == "ticker":
+                symbol = clean_label(value).upper()
+                found = _ticker_identity_meta_at(symbol, item_day, ticker_ranges, allow_nearest=True)
+                return {
+                    "value": value, "symbol": symbol,
+                    "name": found.get("name", "") or symbol,
+                    "identity": found.get("identity", "") or symbol,
+                }
+            label = clean_label(value)
+            symbol = historical_symbol_for_label(label, legacy_symbol_map)
+            if symbol:
+                found = _ticker_identity_meta_at(symbol, item_day, ticker_ranges, allow_nearest=True)
+                identity = found.get("identity", "") or symbol
+            else:
+                key = _normalize_component_identity_label(label)
+                identity = label_identity.get(key, f"LABEL:{key}")
+            return {"value": value, "symbol": symbol, "name": label, "identity": identity}
+
+        add_meta = [meta(value, day) for value in added]
+        rem_meta = [meta(value, previous_day or day) for value in removed]
+        add_by_id: dict[str, list[int]] = defaultdict(list)
+        rem_by_id: dict[str, list[int]] = defaultdict(list)
+        for i, item in enumerate(add_meta):
+            add_by_id[item["identity"]].append(i)
+        for i, item in enumerate(rem_meta):
+            rem_by_id[item["identity"]].append(i)
+
+        consumed_add: set[int] = set()
+        consumed_rem: set[int] = set()
+        # Preserve events inferred on an earlier normalization pass.  The
+        # Component History builder cleans the seed once before extending live
+        # chronology and once after; without this carry, continuity events whose
+        # false add/remove pair was already suppressed vanish on pass two.
+        events: list[dict[str, str]] = [dict(e) for e in snap.get("events", [])]
+
+        # Same underlying security: do not show false membership turnover.
+        # Instead, explicitly describe the name/ticker continuity event.
+        for identity in sorted(set(add_by_id) & set(rem_by_id)):
+            for ai, ri in zip(add_by_id[identity], rem_by_id[identity]):
+                a, r = add_meta[ai], rem_meta[ri]
+                consumed_add.add(ai); consumed_rem.add(ri)
+                same_symbol = bool(a["symbol"] and r["symbol"] and a["symbol"] == r["symbol"])
+                same_name = _normalize_component_identity_label(a["name"]) == _normalize_component_identity_label(r["name"])
+                if same_symbol and not same_name:
+                    kind = "name_change"
+                    detail = "Same accepted GLI security lineage and ticker; this is a company-name change, not membership turnover."
+                elif not same_symbol and not same_name:
+                    kind = "name_and_ticker_change"
+                    detail = "Same accepted GLI security lineage; the company name and ticker changed without membership turnover."
+                elif not same_symbol:
+                    kind = "ticker_change"
+                    detail = "Same accepted GLI security lineage; ticker changed without membership turnover."
+                else:
+                    continue
+                events.append({
+                    "kind": kind, "from_name": r["name"], "from_symbol": r["symbol"],
+                    "to_name": a["name"], "to_symbol": a["symbol"], "detail": detail,
+                    "source": "component identity continuity",
+                })
+
+        # Same ticker does NOT always mean same security.  If an unpaired
+        # removal/addition reuses the same symbol, preserve both turnover badges
+        # and call the security replacement out explicitly.
+        for ri, r in enumerate(rem_meta):
+            if ri in consumed_rem or not r["symbol"]:
+                continue
+            for ai, a in enumerate(add_meta):
+                if ai in consumed_add or not a["symbol"]:
+                    continue
+                if r["symbol"] == a["symbol"] and r["identity"] != a["identity"]:
+                    events.append({
+                        "kind": "security_replacement_same_ticker",
+                        "from_name": r["name"], "from_symbol": r["symbol"],
+                        "to_name": a["name"], "to_symbol": a["symbol"],
+                        "detail": "Ticker was reused, but the incoming component is a different security.",
+                        "source": "component security identity",
+                    })
+                    break
+
+        snap["components"] = components
+        snap["added"] = [value for i, value in enumerate(added) if i not in consumed_add]
+        snap["removed"] = [value for i, value in enumerate(removed) if i not in consumed_rem]
+        snap["events"] = events
+        snap["count"] = len(components)
+
+        # Some legacy workbook notes called a predecessor ticker "deleted" even
+        # when security-master review later established continuous identity.
+        # Preserve the wording for provenance, but make the modern classification
+        # explicit so the page does not contradict its own event badges.
+        original_note = str(snap.get("note", "") or "").strip()
+        continuity_kinds = {"name_change", "name_and_ticker_change", "ticker_change"}
+        if (
+            original_note.upper().startswith("STOCK")
+            and removed
+            and not snap["removed"]
+            and events
+            and all(e.get("kind") in continuity_kinds for e in events)
+        ):
+            snap["legacy_note"] = original_note
+            snap["note"] = f"Legacy workbook note: {original_note} • Identity review: no membership turnover at this checkpoint."
+        cleaned.append(snap)
+        previous_day = day or previous_day
+    return cleaned
+
+
+def _apply_component_history_explicit_events(snapshots: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Merge vetted event notes and add event-only checkpoints when necessary."""
+    explicit = historical_component_explicit_events()
+    if not explicit:
+        return snapshots
+    by_date: dict[str, dict[str, Any]] = {str(s.get("date", "")): s for s in snapshots}
+
+    def event_key(event: dict[str, str]) -> tuple[str, str, str]:
+        return (
+            event.get("from_symbol", "").upper(),
+            event.get("to_symbol", "").upper(),
+            event.get("kind", ""),
+        )
+
+    for day in sorted(explicit):
+        snap = by_date.get(day)
+        if snap is None:
+            prior = [s for s in snapshots if str(s.get("date", "")) < day]
+            if not prior:
+                continue
+            base = max(prior, key=lambda s: str(s.get("date", "")))
+            components = list(base.get("components", []))
+            snap = {
+                "date": day,
+                "title": f"The Great Lakes {len(components)}",
+                "count": len(components),
+                "components": components,
+                "added": [], "removed": [], "note": "",
+                "source": "historical_company_names.csv",
+                "label_mode": base.get("label_mode", "ticker"),
+                "events": [], "event_only": True,
+            }
+            snapshots.append(snap)
+            by_date[day] = snap
+        events = list(snap.get("events", []))
+        for vetted in explicit[day]:
+            match = None
+            # Match first by from/to symbol regardless of provisional event kind.
+            for event in events:
+                if (event.get("from_symbol", "").upper(), event.get("to_symbol", "").upper()) == (
+                    vetted.get("from_symbol", "").upper(), vetted.get("to_symbol", "").upper()
+                ):
+                    match = event
+                    break
+            if match is not None:
+                match.update(vetted)
+            else:
+                events.append(dict(vetted))
+        # Preserve insertion order but remove accidental exact duplicates.
+        seen: set[tuple[str, str, str]] = set()
+        unique = []
+        for event in events:
+            key = event_key(event)
+            if key in seen:
+                continue
+            seen.add(key); unique.append(event)
+        snap["events"] = unique
+    return sorted(snapshots, key=lambda s: str(s.get("date", "")))
+
+
 def accepted_cutoff() -> str:
     try:
         return json.loads(LIVE_ANCHOR.read_text(encoding="utf-8"))["accepted_through"]
@@ -505,7 +826,7 @@ yearSel.addEventListener('change',()=>loadYear(yearSel.value));slider.addEventLi
 
 def extend_component_history(history_rows: list[dict[str, str]], constituents: list[dict[str, str]]) -> dict[str, Any]:
     payload = json.loads(ROSTER_BASE.read_text(encoding="utf-8"))
-    snapshots = list(payload["snapshots"])
+    snapshots = _clean_component_history_snapshots(list(payload["snapshots"]))
     previous = set()
     for snapshot in reversed(snapshots):
         if snapshot.get("label_mode") == "ticker":
@@ -525,8 +846,25 @@ def extend_component_history(history_rows: list[dict[str, str]], constituents: l
                 "note": " • ".join(dict.fromkeys(notes)), "source": "constituents_great_lakes.csv", "label_mode": "ticker",
             })
             previous = current
+    snapshots = _clean_component_history_snapshots(snapshots)
+    snapshots = _apply_component_history_explicit_events(snapshots)
+    legacy_symbol_map = historical_component_symbol_map()
+    for snapshot in snapshots:
+        if snapshot.get("label_mode") != "company_name":
+            continue
+        labels = list(snapshot.get("components", [])) + list(snapshot.get("added", [])) + list(snapshot.get("removed", []))
+        symbol_map: dict[str, str] = {}
+        for label in dict.fromkeys(str(x) for x in labels):
+            symbol = historical_symbol_for_label(label, legacy_symbol_map)
+            if symbol:
+                symbol_map[label] = symbol
+        snapshot["component_symbols"] = symbol_map
     payload["snapshots"] = snapshots
+    # Keep the current-name cache for live/new symbols, but also publish the
+    # date-aware historical name master so Component History can label each
+    # ticker using the company name effective on that checkpoint date.
     payload["company_names"] = company_map()
+    payload["historical_company_names"] = historical_company_name_map()
     return payload
 
 
@@ -537,12 +875,20 @@ def write_component_history(history_rows: list[dict[str, str]], constituents: li
     year_buttons = '<button class="tab" data-year="all">All</button>' + "".join(f'<button class="tab" data-year="{y}">{y}</button>' for y in years)
     body = f"""
 <div class="page-head"><div><h1>Component History</h1><div class="muted">Roster checkpoints modeled after GLI_Component_history.xlsx</div></div><input type="search" id="component-search" placeholder="Search company or ticker" aria-label="Search component history"></div>
-<div class="source-note">Through May 1, 2014, company labels preserve the historical workbook. Later checkpoints are derived from accepted component OHLCV rows and shown by ticker; 2026 is extended from the committed constituent chronology.</div>
+<div class="source-note">Through May 1, 2014, company labels preserve the historical workbook and their historical ticker symbols are resolved from <code>site_data/historical_company_names.csv</code>. Name and ticker changes are called out separately from membership turnover. A reused ticker does not imply security continuity; documented same-ticker replacement events remain true removals/additions. Ticker-based checkpoints use the same historical-name file, with the current company-name cache only as a fallback; 2026 is extended from the committed constituent chronology.</div>
 <div class="tabs" id="component-years">{year_buttons}</div><div id="component-timeline" class="timeline"><div class="empty">Loading component history…</div></div>
 <script>
 let componentData=null;let componentYear='{years[-1]}';let componentQuery='';
 function esc(s){{return String(s??'').replace(/[&<>\"]/g,c=>({{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}}[c]));}}
-function renderComponents(){{if(!componentData)return;const names=componentData.company_names||{{}};let rows=componentData.snapshots.filter(s=>componentYear==='all'||s.date.startsWith(componentYear));if(componentQuery)rows=rows.filter(s=>s.components.some(c=>(c+' '+(names[c]||'')).toLowerCase().includes(componentQuery))||s.added.some(c=>c.toLowerCase().includes(componentQuery))||s.removed.some(c=>c.toLowerCase().includes(componentQuery)));rows=rows.slice().reverse();document.getElementById('component-timeline').innerHTML=rows.map(s=>{{const added=new Set(s.added||[]);const chips=s.components.map(c=>{{const name=s.label_mode==='ticker'?(names[c]||''):'';return `<div class="component ${{added.has(c)?'added':''}}"><div class="component-symbol">${{esc(c)}}</div>${{name?`<div class="component-name">${{esc(name)}}</div>`:''}}</div>`;}}).join('');const adds=(s.added||[]).map(x=>`<span class="badge add">+ ${{esc(x)}}</span>`).join('');const rems=(s.removed||[]).map(x=>`<span class="badge remove">− ${{esc(x)}}</span>`).join('');return `<article class="snapshot"><div class="snapshot-head"><div><div class="snapshot-date">${{s.date}}</div><div class="snapshot-title">${{esc(s.title)}} • ${{s.count}} components</div></div><div class="gli-pill">${{s.label_mode==='ticker'?'Symbols':'Company names'}}</div></div>${{s.note?`<div class="source-note">${{esc(s.note)}}</div>`:''}}${{adds||rems?`<div class="change-row">${{adds}}${{rems}}</div>`:''}}<div class="component-grid">${{chips}}</div></article>`;}}).join('')||'<div class="empty">No matching checkpoints.</div>';}}
+function companyNameAt(symbol,day,allowNearest=false){{const key=String(symbol??'').toUpperCase();const ranges=(componentData?.historical_company_names||{{}})[key]||[];for(const r of ranges){{if(r.start<=day&&day<=r.end)return r.name;}}if(allowNearest&&ranges.length){{let prior=null,next=null;for(const r of ranges){{if(r.end<day&&(!prior||r.end>prior.end))prior=r;if(r.start>day&&(!next||r.start<next.start))next=r;}}if(prior)return prior.name;if(next)return next.name;}}return (componentData?.company_names||{{}})[key]||'';}}
+function legacySymbol(s,label){{return (s.component_symbols||{{}})[String(label)]||'';}}
+function componentSearchText(s,c){{if(s.label_mode==='ticker')return `${{c}} ${{companyNameAt(c,s.date,true)}}`;return `${{c}} ${{legacySymbol(s,c)}}`;}}
+function changeBadge(kind,value,s){{const sign=kind==='add'?'+':'−';if(s.label_mode==='ticker'){{const name=companyNameAt(value,s.date,true);return `<span class="badge ${{kind}}">${{sign}} ${{esc(value)}}${{name?` — ${{esc(name)}}`:''}}</span>`;}}const symbol=legacySymbol(s,value);return `<span class="badge ${{kind}}">${{sign}} ${{esc(value)}}${{symbol?` (${{esc(symbol)}})`:''}}</span>`;}}
+function eventLabel(kind){{return ({{name_change:'Name change',name_and_ticker_change:'Name + ticker change',ticker_change:'Ticker change',security_replacement:'Security replacement',security_replacement_same_ticker:'Security replacement · ticker reused'}})[kind]||'Component event';}}
+function eventParty(name,symbol){{const n=String(name||'').trim();const t=String(symbol||'').trim();return n&&t?`${{n}} (${{t}})`:n||t;}}
+function eventSearchText(e){{return `${{eventLabel(e.kind)}} ${{eventParty(e.from_name,e.from_symbol)}} ${{eventParty(e.to_name,e.to_symbol)}} ${{e.detail||''}}`;}}
+function eventHtml(e){{const security=String(e.kind||'').startsWith('security_replacement');const from=eventParty(e.from_name,e.from_symbol);const to=eventParty(e.to_name,e.to_symbol);const arrow=from&&to?`${{esc(from)}} → ${{esc(to)}}`:esc(to||from);return `<div class="component-event ${{security?'security':''}}"><span class="event-label">${{esc(eventLabel(e.kind))}}:</span> ${{arrow}}${{e.detail?`<span class="event-detail">${{esc(e.detail)}}</span>`:''}}</div>`;}}
+function renderComponents(){{if(!componentData)return;let rows=componentData.snapshots.filter(s=>componentYear==='all'||s.date.startsWith(componentYear));if(componentQuery)rows=rows.filter(s=>s.components.some(c=>componentSearchText(s,c).toLowerCase().includes(componentQuery))||(s.added||[]).some(c=>componentSearchText(s,c).toLowerCase().includes(componentQuery))||(s.removed||[]).some(c=>componentSearchText(s,c).toLowerCase().includes(componentQuery))||(s.events||[]).some(e=>eventSearchText(e).toLowerCase().includes(componentQuery)));rows=rows.slice().reverse();document.getElementById('component-timeline').innerHTML=rows.map(s=>{{const added=new Set(s.added||[]);const chips=s.components.map(c=>{{if(s.label_mode==='ticker'){{const name=companyNameAt(c,s.date);return `<div class="component ${{added.has(c)?'added':''}}"><div class="component-symbol">${{esc(c)}}</div>${{name?`<div class="component-name">${{esc(name)}}</div>`:''}}</div>`;}}const symbol=legacySymbol(s,c);return `<div class="component ${{added.has(c)?'added':''}}"><div class="component-symbol">${{esc(c)}}</div>${{symbol?`<div class="component-name">${{esc(symbol)}}</div>`:''}}</div>`;}}).join('');const adds=(s.added||[]).map(x=>changeBadge('add',x,s)).join('');const rems=(s.removed||[]).map(x=>changeBadge('remove',x,s)).join('');const events=(s.events||[]).map(eventHtml).join('');return `<article class="snapshot"><div class="snapshot-head"><div><div class="snapshot-date">${{s.date}}</div><div class="snapshot-title">${{esc(s.title)}} • ${{s.count}} components${{s.event_only?' • name/event checkpoint':''}}</div></div><div class="gli-pill">${{s.label_mode==='ticker'?'Symbols + historical names':'Company names + symbols'}}</div></div>${{s.note?`<div class="source-note">${{esc(s.note)}}</div>`:''}}${{events?`<div class="event-list">${{events}}</div>`:''}}${{adds||rems?`<div class="change-row">${{adds}}${{rems}}</div>`:''}}<div class="component-grid">${{chips}}</div></article>`;}}).join('')||'<div class="empty">No matching checkpoints.</div>';}}
 fetch('./data/component_history.json',{{cache:'no-store'}}).then(r=>r.json()).then(d=>{{componentData=d;document.querySelector(`[data-year="${{componentYear}}"]`)?.classList.add('active');renderComponents();}});
 document.getElementById('component-years').addEventListener('click',e=>{{if(!e.target.matches('.tab'))return;document.querySelectorAll('#component-years .tab').forEach(b=>b.classList.remove('active'));e.target.classList.add('active');componentYear=e.target.dataset.year;renderComponents();}});document.getElementById('component-search').addEventListener('input',e=>{{componentQuery=e.target.value.trim().toLowerCase();renderComponents();}});
 </script>
@@ -706,7 +1052,81 @@ def inject_home(full_rows: list[dict[str, str]]) -> None:
             "</tr>"
         )
 
-    chart = """<!-- GLI_INTERACTIVE_CHART_V2 --><div class="chart-shell"><div id="gli-candlestick" style="height:560px"><div class="chart-status">Loading interactive chart…</div></div><div id="gli-chart-fallback" style="display:none"><img src="gli_close.png" alt="Great Lakes Index close chart" style="max-width:100%"></div></div><script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script><script>fetch('./data/gli_history.json',{cache:'no-store'}).then(r=>r.json()).then(d=>{const rows=d.rows;const trace={type:'candlestick',name:'GLI',x:rows.map(r=>r.date),open:rows.map(r=>r.open),high:rows.map(r=>r.high),low:rows.map(r=>r.low),close:rows.map(r=>r.close),increasing:{line:{color:'#087443'}},decreasing:{line:{color:'#b42318'}}};const layout={margin:{l:55,r:25,t:35,b:45},paper_bgcolor:'#fff',plot_bgcolor:'#fff',hovermode:'x unified',xaxis:{type:'date',rangeslider:{visible:true},rangeselector:{buttons:[{count:1,label:'1M',step:'month',stepmode:'backward'},{count:3,label:'3M',step:'month',stepmode:'backward'},{count:6,label:'6M',step:'month',stepmode:'backward'},{count:1,label:'YTD',step:'year',stepmode:'todate'},{count:1,label:'1Y',step:'year',stepmode:'backward'},{count:5,label:'5Y',step:'year',stepmode:'backward'},{step:'all',label:'All'}]}},yaxis:{title:'Index Level',fixedrange:false},showlegend:false};return Plotly.newPlot('gli-candlestick',[trace],layout,{responsive:true,displaylogo:false,scrollZoom:true});}).catch(()=>{document.getElementById('gli-candlestick').style.display='none';document.getElementById('gli-chart-fallback').style.display='block';});</script>"""
+    chart = """<!-- GLI_INTERACTIVE_CHART_V3_DYNAMIC_YAXIS -->
+<div class="chart-shell">
+  <div id="gli-candlestick" style="height:560px"><div class="chart-status">Loading interactive chart…</div></div>
+  <div id="gli-chart-fallback" style="display:none"><img src="gli_close.png" alt="Great Lakes Index close chart" style="max-width:100%"></div>
+</div>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script>
+fetch('./data/gli_history.json',{cache:'no-store'}).then(r=>r.json()).then(d=>{
+  const rows=d.rows;
+  const trace={
+    type:'candlestick',name:'GLI',x:rows.map(r=>r.date),
+    open:rows.map(r=>r.open),high:rows.map(r=>r.high),low:rows.map(r=>r.low),close:rows.map(r=>r.close),
+    increasing:{line:{color:'#087443'}},decreasing:{line:{color:'#b42318'}}
+  };
+  const layout={
+    margin:{l:55,r:25,t:35,b:45},paper_bgcolor:'#fff',plot_bgcolor:'#fff',hovermode:'x unified',
+    xaxis:{
+      type:'date',rangeslider:{visible:true},
+      rangeselector:{buttons:[
+        {count:1,label:'1M',step:'month',stepmode:'backward'},
+        {count:3,label:'3M',step:'month',stepmode:'backward'},
+        {count:6,label:'6M',step:'month',stepmode:'backward'},
+        {count:1,label:'YTD',step:'year',stepmode:'todate'},
+        {count:1,label:'1Y',step:'year',stepmode:'backward'},
+        {count:5,label:'5Y',step:'year',stepmode:'backward'},
+        {step:'all',label:'All'}
+      ]}
+    },
+    yaxis:{title:'Index Level',fixedrange:false},showlegend:false
+  };
+  const rowTimes=rows.map(r=>Date.parse(r.date));
+  function rescaleVisibleY(gd,startValue,endValue){
+    let start=startValue==null?-Infinity:Date.parse(startValue);
+    let end=endValue==null?Infinity:Date.parse(endValue);
+    if(!Number.isFinite(start))start=-Infinity;
+    if(!Number.isFinite(end))end=Infinity;
+    if(start>end){const tmp=start;start=end;end=tmp;}
+    let lo=Infinity,hi=-Infinity;
+    for(let i=0;i<rows.length;i++){
+      const t=rowTimes[i];
+      if(!Number.isFinite(t)||t<start||t>end)continue;
+      const low=Number(rows[i].low),high=Number(rows[i].high);
+      if(Number.isFinite(low))lo=Math.min(lo,low);
+      if(Number.isFinite(high))hi=Math.max(hi,high);
+    }
+    if(!Number.isFinite(lo)||!Number.isFinite(hi))return;
+    const span=hi-lo;
+    const pad=span>0?span*0.08:Math.max(Math.abs(hi)*0.02,1);
+    Plotly.relayout(gd,{'yaxis.autorange':false,'yaxis.range':[lo-pad,hi+pad]});
+  }
+  return Plotly.newPlot('gli-candlestick',[trace],layout,{responsive:true,displaylogo:false,scrollZoom:true}).then(gd=>{
+    gd.on('plotly_relayout',ev=>{
+      if(ev['xaxis.autorange']===true){
+        rescaleVisibleY(gd,null,null);
+        return;
+      }
+      let x0=ev['xaxis.range[0]'],x1=ev['xaxis.range[1]'];
+      if(Array.isArray(ev['xaxis.range'])){
+        x0=ev['xaxis.range'][0];
+        x1=ev['xaxis.range'][1];
+      }
+      if(x0!==undefined||x1!==undefined){
+        const current=gd.layout.xaxis&&gd.layout.xaxis.range;
+        if(x0===undefined&&Array.isArray(current))x0=current[0];
+        if(x1===undefined&&Array.isArray(current))x1=current[1];
+        rescaleVisibleY(gd,x0,x1);
+      }
+    });
+    return gd;
+  });
+}).catch(()=>{
+  document.getElementById('gli-candlestick').style.display='none';
+  document.getElementById('gli-chart-fallback').style.display='block';
+});
+</script>"""
 
     body = f"""
 {ticker}
