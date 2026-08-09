@@ -1,0 +1,79 @@
+{
+  "status": "PASS",
+  "year": 2026,
+  "artifact": "GLI_2026_component_ohlcv_used.csv",
+  "sha256": "d6533d5d1b42d72a11b7edcf6e31965357a30aecd4a1ce12e3fd816ba17f3b40",
+  "coverage": {
+    "first_date": "2026-01-02",
+    "last_date": "2026-08-04",
+    "sessions": 147,
+    "component_rows": 12642,
+    "roster_count_profile": {
+      "86": 147
+    }
+  },
+  "sources": {
+    "TIINGO_RAW": 12513,
+    "TIER1_SCVL_SHOE_RAW": 129,
+    "tiingo_json_files_loaded": 95,
+    "tier1_raw_dates_loaded": 129
+  },
+  "methodology": {
+    "tiingo_fields": "raw open/high/low/close/volume; adjusted fields not used",
+    "scvl_shoe_price_scale_factor": "1",
+    "scvl_shoe_volume_scale_factor": "1",
+    "scvl_shoe_identity_effective": "2026-06-12",
+    "scvl_shoe_note": "SCVL->SHOE is the same-security Tier-1 lineage; raw 1x OHLCV is retained."
+  },
+  "validation": {
+    "duplicate_date_ticker_keys": 0,
+    "missing_raw_rows": 0,
+    "close_selection_mismatches": 0,
+    "candle_failures": 0,
+    "daily_component_sum_mismatch_dates": 0,
+    "max_daily_component_sum_residual": "0",
+    "all_dates_have_86_components": true
+  },
+  "repaired_chain_checkpoints": {
+    "2026-01-02_component_sum": "12221.6564",
+    "2026-08-04_component_sum": "13705.72"
+  },
+  "spot_checks": {
+    "2026-01-02/SCVL": {
+      "Close": "17.5",
+      "CloseSource": "TIER1_SCVL_SHOE_RAW",
+      "CoverageClass": "EXACT_RAW_OHLCV",
+      "PriceScaleFactor": "1"
+    },
+    "2026-06-11/SCVL": {
+      "Close": "17.43",
+      "CloseSource": "TIER1_SCVL_SHOE_RAW",
+      "CoverageClass": "EXACT_RAW_OHLCV",
+      "PriceScaleFactor": "1"
+    },
+    "2026-06-12/SHOE": {
+      "Close": "17.37",
+      "CloseSource": "TIER1_SCVL_SHOE_RAW",
+      "CoverageClass": "EXACT_RAW_OHLCV",
+      "PriceScaleFactor": "1"
+    },
+    "2026-07-09/SHOE": {
+      "Close": "15.03",
+      "CloseSource": "TIER1_SCVL_SHOE_RAW",
+      "CoverageClass": "EXACT_RAW_OHLCV",
+      "PriceScaleFactor": "1"
+    },
+    "2026-07-10/SPG": {
+      "Close": "218.77",
+      "CloseSource": "TIINGO_RAW",
+      "CoverageClass": "EXACT_RAW_OHLCV",
+      "PriceScaleFactor": "1"
+    },
+    "2026-08-04/SPG": {
+      "Close": "225.9",
+      "CloseSource": "TIINGO_RAW",
+      "CoverageClass": "EXACT_RAW_OHLCV",
+      "PriceScaleFactor": "1"
+    }
+  }
+}

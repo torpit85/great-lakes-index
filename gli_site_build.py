@@ -37,6 +37,7 @@ HISTORICAL_COMPANY_NAMES = SITE_DATA / "historical_company_names.csv"
 HISTORICAL_BASE = SITE_DATA / "gli_historical_ohlcv_through_2025.csv"
 ROSTER_BASE = SITE_DATA / "component_roster_history_through_2025.json"
 WEIGHTS_BASE = SITE_DATA / "weights"
+ACCEPTED_COMPONENT_OHLCV = SITE_DATA / "component_ohlcv"
 REPORT = ROOT / "report"
 REPORT_DATA = REPORT / "data"
 
@@ -757,6 +758,102 @@ def copy_weight_seed() -> dict[str, Any]:
     return years
 
 
+
+def build_accepted_2026_weight_file(years: dict[str, Any], constituents: list[dict[str, str]]) -> None:
+    source = ACCEPTED_COMPONENT_OHLCV / "GLI_2026_component_ohlcv_used.csv"
+    validation_path = ACCEPTED_COMPONENT_OHLCV / "GLI_2026_component_ohlcv_used_validation.json"
+    if not source.exists():
+        return
+
+    if validation_path.exists():
+        validation = json.loads(validation_path.read_text(encoding="utf-8"))
+        if validation.get("status") != "PASS":
+            raise SystemExit(f"Accepted 2026 component validation is not PASS: {validation_path}")
+        coverage = validation.get("coverage", {})
+        if coverage.get("sessions") != 147 or coverage.get("component_rows") != 12642:
+            raise SystemExit(f"Unexpected accepted 2026 component coverage: {coverage}")
+
+    prices = pd.read_csv(source, dtype=str).fillna("")
+    required = {"Date", "Ticker", "Close"}
+    if not required.issubset(prices.columns):
+        raise SystemExit(f"Accepted 2026 component file lacks columns {sorted(required - set(prices.columns))}")
+
+    prices = prices[prices["Date"].str.startswith("2026-")].copy()
+    if prices.empty:
+        raise SystemExit("Accepted 2026 component file has no 2026 rows.")
+
+    if prices.duplicated(["Date", "Ticker"]).any():
+        duplicates = prices.loc[prices.duplicated(["Date", "Ticker"], keep=False), ["Date", "Ticker"]]
+        raise SystemExit(f"Duplicate accepted 2026 Date/Ticker rows: {duplicates.head(10).to_dict('records')}")
+
+    dates: list[str] = []
+    snapshots: list[list[list[Any]]] = []
+    for day, group in prices.groupby("Date", sort=True):
+        allowed = active_on(day, constituents)
+        items: list[tuple[str, Decimal]] = []
+        seen: set[str] = set()
+        for _, row in group.iterrows():
+            ticker = str(row["Ticker"]).strip().upper()
+            if ticker not in allowed:
+                raise SystemExit(f"Accepted 2026 weight row is not active on {day}: {ticker}")
+            if ticker in seen:
+                raise SystemExit(f"Duplicate accepted 2026 weight ticker on {day}: {ticker}")
+            seen.add(ticker)
+            close = dec(row["Close"])
+            if close <= 0:
+                raise SystemExit(f"Nonpositive accepted 2026 close on {day} for {ticker}: {close}")
+            items.append((ticker, close))
+
+        if seen != allowed:
+            missing = sorted(allowed - seen)
+            extra = sorted(seen - allowed)
+            raise SystemExit(
+                f"Accepted 2026 roster mismatch on {day}: "
+                f"rows={len(seen)} active={len(allowed)} missing={missing} extra={extra}"
+            )
+
+        total = sum((value for _, value in items), Decimal(0))
+        if total <= 0:
+            raise SystemExit(f"Nonpositive accepted 2026 component sum on {day}: {total}")
+
+        weights = [
+            [
+                ticker,
+                int(
+                    (value / total * Decimal(1_000_000)).quantize(
+                        Decimal("1"), rounding=ROUND_HALF_UP
+                    )
+                ),
+            ]
+            for ticker, value in sorted(items)
+        ]
+        dates.append(day)
+        snapshots.append(weights)
+
+    if len(dates) != 147 or dates[0] != "2026-01-02" or dates[-1] != "2026-08-04":
+        raise SystemExit(
+            f"Unexpected accepted 2026 weight coverage: "
+            f"{len(dates)} dates {dates[0]}..{dates[-1]}"
+        )
+
+    payload = {
+        "schema_version": 1,
+        "year": 2026,
+        "unit": "parts_per_million_of_component_sum",
+        "dates": dates,
+        "snapshots": snapshots,
+    }
+    path = REPORT_DATA / "weights" / "weights_2026.json"
+    write_json(path, payload)
+    years["2026"] = {
+        "file": f"weights/{path.name}",
+        "dates": len(dates),
+        "first_date": dates[0],
+        "last_date": dates[-1],
+        "status": "accepted component OHLCV through 2026-08-04",
+    }
+
+
 def build_live_weight_files(years: dict[str, Any], constituents: list[dict[str, str]]) -> None:
     if not PRICES.exists():
         return
@@ -794,19 +891,56 @@ def build_live_weight_files(years: dict[str, Any], constituents: list[dict[str, 
             snapshots.append(weights)
         if not dates:
             continue
-        payload = {"schema_version": 1, "year": int(year), "unit": "parts_per_million_of_component_sum", "dates": dates, "snapshots": snapshots}
         path = REPORT_DATA / "weights" / f"weights_{year}.json"
+        existing_dates: list[str] = []
+        existing_snapshots: list[list[list[Any]]] = []
+        if path.exists():
+            existing = json.loads(path.read_text(encoding="utf-8"))
+            existing_dates = [str(x) for x in existing.get("dates", [])]
+            existing_snapshots = list(existing.get("snapshots", []))
+            if len(existing_dates) != len(existing_snapshots):
+                raise SystemExit(f"Malformed existing weight payload: {path}")
+
+        merged: dict[str, list[list[Any]]] = {
+            day: snapshot for day, snapshot in zip(existing_dates, existing_snapshots)
+        }
+        for day, snapshot in zip(dates, snapshots):
+            if day in merged:
+                raise SystemExit(f"Duplicate accepted/live weight date for {year}: {day}")
+            merged[day] = snapshot
+
+        merged_dates = sorted(merged)
+        merged_snapshots = [merged[day] for day in merged_dates]
+        payload = {
+            "schema_version": 1,
+            "year": int(year),
+            "unit": "parts_per_million_of_component_sum",
+            "dates": merged_dates,
+            "snapshots": merged_snapshots,
+        }
         write_json(path, payload)
-        years[year] = {"file": f"weights/{path.name}", "dates": len(dates), "first_date": dates[0], "last_date": dates[-1], "status": f"live sessions after accepted cutoff {cutoff}"}
+
+        if existing_dates:
+            status = f"accepted component OHLCV through {cutoff}; live sessions after accepted cutoff"
+        else:
+            status = f"live sessions after accepted cutoff {cutoff}"
+        years[year] = {
+            "file": f"weights/{path.name}",
+            "dates": len(merged_dates),
+            "first_date": merged_dates[0],
+            "last_date": merged_dates[-1],
+            "status": status,
+        }
 
 
 def write_weights_page(constituents: list[dict[str, str]]) -> None:
     years = copy_weight_seed()
+    build_accepted_2026_weight_file(years, constituents)
     build_live_weight_files(years, constituents)
     write_json(REPORT_DATA / "weights_manifest.json", {"schema_version": 1, "accepted_cutoff": accepted_cutoff(), "years": years}, pretty=True)
     body = """
 <div class="page-head"><div><h1>Component Weights</h1><div class="muted">Daily price weights in the price-weighted Great Lakes Index</div></div></div>
-<div class="source-note" id="weight-source">Historical weights use accepted component OHLCV rows. Company labels use the name effective on the selected date, with the current company-name cache as a fallback. For 2026, only live sessions after the accepted cutoff are displayed until an accepted 2026 component-level file is installed.</div>
+<div class="source-note" id="weight-source">Historical weights use accepted component OHLCV rows. Company labels use the name effective on the selected date, with the current company-name cache as a fallback. For 2026, accepted component OHLCV is displayed through the accepted cutoff and live component prices are appended for later completed sessions.</div>
 <div class="panel"><div class="controls"><label>Year <select id="weight-year"></select></label><label>Date <input id="weight-date" type="date" readonly></label><input id="weight-slider" type="range" min="0" max="0" value="0" aria-label="Weight date"></div><div class="summary-grid"><div><div class="gli-k">As of</div><div class="gli-v" id="weight-asof">—</div></div><div><div class="gli-k">Components</div><div class="gli-v" id="weight-count">—</div></div><div><div class="gli-k">Largest weight</div><div class="gli-v" id="weight-largest">—</div></div><div><div class="gli-k">Total</div><div class="gli-v" id="weight-total">—</div></div><div><div class="gli-k">Dataset</div><div class="gli-v" id="weight-status" style="font-size:14px">—</div></div></div></div>
 <div id="heatmap" class="heatmap"><div class="empty">Loading component weights…</div></div>
 <script>

@@ -151,10 +151,10 @@
     },
     "2026": {
       "file": "weights/weights_2026.json",
-      "dates": 3,
-      "first_date": "2026-08-05",
+      "dates": 150,
+      "first_date": "2026-01-02",
       "last_date": "2026-08-07",
-      "status": "live sessions after accepted cutoff 2026-08-04"
+      "status": "accepted component OHLCV through 2026-08-04; live sessions after accepted cutoff"
     }
   }
 }
