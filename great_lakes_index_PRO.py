@@ -491,10 +491,17 @@ def validate_live_checkpoint_payload(
                 "GLI_Low": sums["Low"] / divisor,
                 "GLI_Close": sums["Close"] / divisor,
             }
+        # Checkpoints may preserve more digits than the 180-digit live
+        # arithmetic context. Accept only sub-tolerance rounding differences;
+        # materially inconsistent checkpoint arithmetic still fails hard.
+        arithmetic_tolerance = Decimal("1E-170")
         for field, actual in arithmetic.items():
-            if Decimal(level[field]) != actual:
+            stored = Decimal(level[field])
+            delta = stored - actual
+            if abs(delta) > arithmetic_tolerance:
                 raise ValueError(
-                    f"{day}: checkpoint {field} arithmetic mismatch"
+                    f"{day}: checkpoint {field} arithmetic mismatch: "
+                    f"levels={stored}, calculated={actual}, delta={delta}"
                 )
         if Decimal(level["GLI_High"]) < max(
             Decimal(level["GLI_Open"]), Decimal(level["GLI_Close"])
