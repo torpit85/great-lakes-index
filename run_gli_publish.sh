@@ -183,7 +183,7 @@ for required in \
  done
 grep -q "<th>Company</th>" "$ROOT/report/ohlcv.html"
 grep -q "2005-08-01" "$ROOT/report/data/gli_history.json"
-grep -q "GLI_INTERACTIVE_CHART_V2" "$ROOT/report/index.html"
+grep -q "GLI_INTERACTIVE_CHART_V5_DATE_INPUTS" "$ROOT/report/index.html"
 
 rsync -av --delete "$ROOT/report/" "$ROOT/docs/" >> "$LOG" 2>&1
 for required in \
