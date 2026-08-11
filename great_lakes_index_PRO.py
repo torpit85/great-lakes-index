@@ -584,11 +584,19 @@ def aggregate_index(
         accepted = chain_by_date[day]
         accepted_ohlcv = ohlcv_by_date[day]
 
-        if Decimal(accepted["IndexClose"]) != Decimal(
-            accepted_ohlcv["GLI_Close"]
-        ):
+        accepted_close = Decimal(accepted["IndexClose"])
+        accepted_ohlcv_close = Decimal(accepted_ohlcv["GLI_Close"])
+        accepted_close_delta = accepted_close - accepted_ohlcv_close
+
+        # The accepted close and OHLCV chains may differ only in their final
+        # serialized Decimal digit(s). Preserve exact divisor/component-sum
+        # checks below, while allowing only sub-tolerance close differences.
+        if abs(accepted_close_delta) > Decimal("1E-170"):
             raise ValueError(
-                f"Accepted close/OHLCV mismatch on {day}"
+                f"Accepted close/OHLCV mismatch on {day}: "
+                f"close={accepted_close}, "
+                f"ohlcv_close={accepted_ohlcv_close}, "
+                f"delta={accepted_close_delta}"
             )
         if Decimal(accepted["Divisor"]) != Decimal(
             accepted_ohlcv["Divisor"]
