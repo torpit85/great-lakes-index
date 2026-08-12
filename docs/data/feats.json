@@ -1,0 +1,2312 @@
+{
+  "schema_version": 2,
+  "generated_through": "2026-08-11",
+  "component_data_through": "2026-08-11",
+  "definitions": [
+    "Index daily point/percentage gains and losses are intentionally excluded; those remain on Market Moves.",
+    "Component single-session gain/loss records use open-to-close returns so splits, ticker re-entries, and overnight identity discontinuities do not masquerade as trading-session feats.",
+    "Component return chains require consecutive GLI trading sessions within the same ticker tenure. On GLI divisor-reset sessions, the return chain uses open-to-close movement to neutralize mechanical split/reconstitution discontinuities; contribution records exclude those reset sessions.",
+    "Multi-session component price records use uninterrupted active-ticker sessions. Calendar week/month/quarter/year rankings require at least 4/15/45/180 active sessions respectively so very short entry/removal fragments do not compete as full periods.",
+    "Relative volume (RVOL) compares the current session with the prior 20 active sessions for that component; GLI RVOL uses the prior 20 index sessions.",
+    "Raw share-volume records use the accepted reported share counts and are therefore sensitive to stock splits and long-run changes in shares outstanding; RVOL records provide a within-era comparison.",
+    "Lowest week/month volume records require at least 4/15 sessions respectively. Partial 2005 and the current partial calendar year are excluded from lowest annual-volume comparisons.",
+    "Sector/state-specific feats are reserved until a historical sector/state metadata table is available."
+  ],
+  "categories": [
+    {
+      "id": "index",
+      "title": "Index Feats",
+      "sections": [
+        {
+          "title": "Highs, Milestones & Progress",
+          "records": [
+            {
+              "feat": "Highest closing value",
+              "holder": "GLI",
+              "value": "411.01",
+              "date": "2026-08-11",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Highest intraday value",
+              "holder": "GLI",
+              "value": "418.35",
+              "date": "2026-08-06",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Lowest closing value since inception",
+              "holder": "GLI",
+              "value": "45.34",
+              "date": "2009-03-09",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Lowest intraday value since inception",
+              "holder": "GLI",
+              "value": "44.34",
+              "date": "2009-03-09",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Most consecutive record-high closes",
+              "holder": "GLI",
+              "value": "7 sessions",
+              "date": "2014-12-29",
+              "detail": "2014-12-18 through 2014-12-29",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Most record-high closes in a calendar year",
+              "holder": "GLI",
+              "value": "41 closes",
+              "date": "2021",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Longest span without a new all-time closing high",
+              "holder": "GLI",
+              "value": "2250 calendar days",
+              "date": "2013-08-01",
+              "detail": "Previous record: 2007-06-04",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Fastest 10-point advance",
+              "holder": "GLI",
+              "value": "2 sessions",
+              "date": "2026-02-04",
+              "detail": "2026-02-02 (381.72) \u2192 2026-02-04 (391.95)",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Fastest 25-point advance",
+              "holder": "GLI",
+              "value": "21 sessions",
+              "date": "2026-02-04",
+              "detail": "2026-01-05 (364.79) \u2192 2026-02-04 (391.95)",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Fastest 50-point advance",
+              "holder": "GLI",
+              "value": "59 sessions",
+              "date": "2026-02-20",
+              "detail": "2025-11-24 (348.41) \u2192 2026-02-20 (400.37)",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Fastest 100-point advance",
+              "holder": "GLI",
+              "value": "511 sessions",
+              "date": "2026-02-13",
+              "detail": "2024-01-31 (295.18) \u2192 2026-02-13 (398.71)",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Shortest time between 100-point milestones",
+              "holder": "GLI",
+              "value": "510 sessions",
+              "date": "2026-02-20",
+              "detail": "300 \u2192 400",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Longest time between 100-point milestones",
+              "holder": "GLI",
+              "value": "3593 sessions",
+              "date": "2019-11-07",
+              "detail": "100 \u2192 200",
+              "ticker": "",
+              "raw": null
+            }
+          ]
+        },
+        {
+          "title": "Intraday & Session Feats",
+          "records": [
+            {
+              "feat": "Largest intraday point range",
+              "holder": "GLI",
+              "value": "30.54",
+              "date": "2025-04-09",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Largest intraday percentage range",
+              "holder": "GLI",
+              "value": "17.09%",
+              "date": "2008-10-10",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Largest gap up",
+              "holder": "GLI",
+              "value": "+10.71",
+              "date": "2020-11-09",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Largest gap down",
+              "holder": "GLI",
+              "value": "-17.22",
+              "date": "2020-03-16",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Biggest open-to-close rally",
+              "holder": "GLI",
+              "value": "+23.79",
+              "date": "2025-04-09",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Biggest open-to-close decline",
+              "holder": "GLI",
+              "value": "-13.82",
+              "date": "2025-04-08",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Largest low-to-close recovery",
+              "holder": "GLI",
+              "value": "27.05",
+              "date": "2025-04-09",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Largest high-to-close reversal",
+              "holder": "GLI",
+              "value": "-16.77",
+              "date": "2025-04-08",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Largest gain after opening lower",
+              "holder": "GLI",
+              "value": "+7.21%",
+              "date": "2025-04-09",
+              "detail": "Opened -1.12% vs prior close",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Largest loss after opening higher",
+              "holder": "GLI",
+              "value": "-8.20%",
+              "date": "2008-10-09",
+              "detail": "Opened +1.35% vs prior close",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Closest finish to unchanged",
+              "holder": "GLI",
+              "value": "-0.0001%",
+              "date": "2022-06-23",
+              "detail": "-0.0003 points",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Largest intraday range on a nearly unchanged close",
+              "holder": "GLI",
+              "value": "6.81%",
+              "date": "2008-11-18",
+              "detail": "Close within \u00b10.10% of prior session",
+              "ticker": "",
+              "raw": null
+            }
+          ]
+        },
+        {
+          "title": "Multi-Session Performance",
+          "records": [
+            {
+              "feat": "Best 2-session performance",
+              "holder": "GLI",
+              "value": "+10.99%",
+              "date": "2020-03-24",
+              "detail": "Ending 2020-03-24",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Worst 2-session performance",
+              "holder": "GLI",
+              "value": "-12.13%",
+              "date": "2020-03-16",
+              "detail": "Ending 2020-03-16",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Best 5-session performance",
+              "holder": "GLI",
+              "value": "+19.89%",
+              "date": "2008-11-26",
+              "detail": "Ending 2008-11-26",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Worst 5-session performance",
+              "holder": "GLI",
+              "value": "-19.94%",
+              "date": "2020-03-16",
+              "detail": "Ending 2020-03-16",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Best 10-session performance",
+              "holder": "GLI",
+              "value": "+17.40%",
+              "date": "2009-03-18",
+              "detail": "Ending 2009-03-18",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Worst 10-session performance",
+              "holder": "GLI",
+              "value": "-28.39%",
+              "date": "2020-03-23",
+              "detail": "Ending 2020-03-23",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Best week",
+              "holder": "GLI",
+              "value": "+17.11%",
+              "date": "2020-03-27",
+              "detail": "2020-03-21/2020-03-27",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Worst week",
+              "holder": "GLI",
+              "value": "-14.85%",
+              "date": "2008-10-24",
+              "detail": "2008-10-18/2008-10-24",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Best month",
+              "holder": "GLI",
+              "value": "+18.50%",
+              "date": "2020-04-30",
+              "detail": "2020-04",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Worst month",
+              "holder": "GLI",
+              "value": "-21.68%",
+              "date": "2020-03-31",
+              "detail": "2020-03",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Best quarter",
+              "holder": "GLI",
+              "value": "+24.26%",
+              "date": "2020-06-30",
+              "detail": "2020Q2",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Worst quarter",
+              "holder": "GLI",
+              "value": "-27.72%",
+              "date": "2008-12-31",
+              "detail": "2008Q4",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Best calendar year",
+              "holder": "GLI",
+              "value": "+29.26%",
+              "date": "2021-12-31",
+              "detail": "2021",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Worst calendar year",
+              "holder": "GLI",
+              "value": "-43.34%",
+              "date": "2008-12-31",
+              "detail": "2008",
+              "ticker": "",
+              "raw": null
+            }
+          ]
+        },
+        {
+          "title": "Drawdowns & Recoveries",
+          "records": [
+            {
+              "feat": "Largest decline from an all-time high",
+              "holder": "GLI",
+              "value": "-62.54%",
+              "date": "2009-03-09",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Largest calendar-year drawdown",
+              "holder": "GLI",
+              "value": "-54.67%",
+              "date": "2008-11-20",
+              "detail": "2008",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Longest drawdown",
+              "holder": "GLI",
+              "value": "1552 sessions",
+              "date": "2013-08-01",
+              "detail": "2007-06-04 through 2013-08-01",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Fastest recovery from a 10% decline",
+              "holder": "GLI",
+              "value": "24 sessions",
+              "date": "2023-12-01",
+              "detail": "Trough 2023-10-27; prior peak 2023-08-01",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Fastest recovery from a 20% decline",
+              "holder": "GLI",
+              "value": "166 sessions",
+              "date": "2020-11-16",
+              "detail": "Trough 2020-03-23; prior peak 2020-02-20",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Fastest recovery from a 30% decline",
+              "holder": "GLI",
+              "value": "166 sessions",
+              "date": "2020-11-16",
+              "detail": "Trough 2020-03-23; prior peak 2020-02-20",
+              "ticker": "",
+              "raw": null
+            }
+          ]
+        },
+        {
+          "title": "Breadth",
+          "records": [
+            {
+              "feat": "Most advancing components in one session",
+              "holder": "GLI",
+              "value": "100 components",
+              "date": "2011-08-29",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Most declining components in one session",
+              "holder": "GLI",
+              "value": "100 components",
+              "date": "2010-05-04",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Highest percentage of components advancing",
+              "holder": "GLI",
+              "value": "100.00%",
+              "date": "2011-08-29",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Highest percentage of components declining",
+              "holder": "GLI",
+              "value": "100.00%",
+              "date": "2010-05-04",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Most unanimous advancing session",
+              "holder": "GLI",
+              "value": "100 of 100 advanced",
+              "date": "2011-08-29",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Most unanimous declining session",
+              "holder": "GLI",
+              "value": "100 of 100 declined",
+              "date": "2010-05-04",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Largest GLI gain with a majority of components declining",
+              "holder": "GLI",
+              "value": "+1.94%",
+              "date": "2008-10-10",
+              "detail": "47 up / 53 down",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Largest GLI decline with a majority of components advancing",
+              "holder": "GLI",
+              "value": "-1.23%",
+              "date": "2019-08-30",
+              "detail": "58 up / 36 down",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Most advancing GLI sessions in a calendar year",
+              "holder": "GLI",
+              "value": "154 sessions",
+              "date": "2013",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Most declining GLI sessions in a calendar year",
+              "holder": "GLI",
+              "value": "133 sessions",
+              "date": "2015",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Highest percentage of advancing sessions in a calendar year",
+              "holder": "GLI",
+              "value": "61.11%",
+              "date": "2013",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Lowest percentage of advancing sessions in a calendar year",
+              "holder": "GLI",
+              "value": "47.01%",
+              "date": "2022",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "component",
+      "title": "Component Feats",
+      "sections": [
+        {
+          "title": "Price Performance",
+          "records": [
+            {
+              "feat": "Largest single-session percentage gain",
+              "holder": "COA \u2014 Coachmen Industries, Inc.",
+              "value": "+4,850.00%",
+              "date": "2009-03-24",
+              "detail": "Open-to-close; avoids split/re-entry discontinuities",
+              "ticker": "COA",
+              "raw": null
+            },
+            {
+              "feat": "Largest single-session percentage decline",
+              "holder": "MWY \u2014 Midway Games Inc.",
+              "value": "-69.23%",
+              "date": "2008-11-12",
+              "detail": "Open-to-close; avoids split/re-entry discontinuities",
+              "ticker": "MWY",
+              "raw": null
+            },
+            {
+              "feat": "Largest intraday percentage range",
+              "holder": "COA \u2014 Coachmen Industries, Inc.",
+              "value": "5,450.00%",
+              "date": "2009-03-24",
+              "detail": "",
+              "ticker": "COA",
+              "raw": null
+            },
+            {
+              "feat": "Best 2-session performance",
+              "holder": "BIG \u2014 Big Lots, Inc.",
+              "value": "+120.00%",
+              "date": "2024-12-30",
+              "detail": "",
+              "ticker": "BIG",
+              "raw": null
+            },
+            {
+              "feat": "Worst 2-session performance",
+              "holder": "BIG \u2014 Big Lots, Inc.",
+              "value": "-78.20%",
+              "date": "2024-09-10",
+              "detail": "",
+              "ticker": "BIG",
+              "raw": null
+            },
+            {
+              "feat": "Best 5-session performance",
+              "holder": "BIG \u2014 Big Lots, Inc.",
+              "value": "+256.02%",
+              "date": "2024-12-31",
+              "detail": "",
+              "ticker": "BIG",
+              "raw": null
+            },
+            {
+              "feat": "Worst 5-session performance",
+              "holder": "BIG \u2014 Big Lots, Inc.",
+              "value": "-86.17%",
+              "date": "2024-09-12",
+              "detail": "",
+              "ticker": "BIG",
+              "raw": null
+            },
+            {
+              "feat": "Best 10-session performance",
+              "holder": "BIG \u2014 Big Lots, Inc.",
+              "value": "+341.52%",
+              "date": "2024-12-04",
+              "detail": "",
+              "ticker": "BIG",
+              "raw": null
+            },
+            {
+              "feat": "Worst 10-session performance",
+              "holder": "BIG \u2014 Big Lots, Inc.",
+              "value": "-91.34%",
+              "date": "2024-09-11",
+              "detail": "",
+              "ticker": "BIG",
+              "raw": null
+            },
+            {
+              "feat": "Best week",
+              "holder": "NCC \u2014 National City Corporation",
+              "value": "+158.09%",
+              "date": "2008-10-03",
+              "detail": "2008-09-27/2008-10-03",
+              "ticker": "NCC",
+              "raw": null
+            },
+            {
+              "feat": "Worst week",
+              "holder": "BIG \u2014 Big Lots, Inc.",
+              "value": "-81.88%",
+              "date": "2024-09-13",
+              "detail": "2024-09-07/2024-09-13",
+              "ticker": "BIG",
+              "raw": null
+            },
+            {
+              "feat": "Best month",
+              "holder": "QUIX \u2014 Quixote Corporation",
+              "value": "+180.18%",
+              "date": "2009-12-31",
+              "detail": "2009-12",
+              "ticker": "QUIX",
+              "raw": null
+            },
+            {
+              "feat": "Worst month",
+              "holder": "ESI \u2014 ITT Educational Services, Inc.",
+              "value": "-83.26%",
+              "date": "2016-08-31",
+              "detail": "2016-08",
+              "ticker": "ESI",
+              "raw": null
+            },
+            {
+              "feat": "Best quarter",
+              "holder": "BGP \u2014 Borders Group, Inc.",
+              "value": "+279.26%",
+              "date": "2009-06-30",
+              "detail": "2009Q2",
+              "ticker": "BGP",
+              "raw": null
+            },
+            {
+              "feat": "Worst quarter",
+              "holder": "BGP \u2014 Borders Group, Inc.",
+              "value": "-94.50%",
+              "date": "2008-12-31",
+              "detail": "2008Q4",
+              "ticker": "BGP",
+              "raw": null
+            },
+            {
+              "feat": "Best calendar year",
+              "holder": "RRD \u2014 R.R. Donnelley & Sons Company",
+              "value": "+321.99%",
+              "date": "2021-12-31",
+              "detail": "2021",
+              "ticker": "RRD",
+              "raw": null
+            },
+            {
+              "feat": "Worst calendar year",
+              "holder": "BIG \u2014 Big Lots, Inc.",
+              "value": "-96.71%",
+              "date": "2024-12-31",
+              "detail": "2024",
+              "ticker": "BIG",
+              "raw": null
+            },
+            {
+              "feat": "Largest gain from GLI entry price",
+              "holder": "DPZ \u2014 Domino's Pizza, Inc.",
+              "value": "+4,010.97%",
+              "date": "2024-06-18",
+              "detail": "Entry 2005-09-22",
+              "ticker": "DPZ",
+              "raw": null
+            },
+            {
+              "feat": "Largest multiple of GLI entry price",
+              "holder": "DPZ \u2014 Domino's Pizza, Inc.",
+              "value": "41.11\u00d7",
+              "date": "2024-06-18",
+              "detail": "Entry 2005-09-22",
+              "ticker": "DPZ",
+              "raw": null
+            },
+            {
+              "feat": "Fastest doubling from GLI entry price",
+              "holder": "AKS \u2014 AK Steel Holding Corporation",
+              "value": "105 sessions",
+              "date": "2007-04-25",
+              "detail": "Entry 2006-11-20",
+              "ticker": "AKS",
+              "raw": null
+            },
+            {
+              "feat": "Largest rally from a GLI-tenure low",
+              "holder": "MOD \u2014 Modine Manufacturing Company",
+              "value": "+37,447.97%",
+              "date": "2026-06-02",
+              "detail": "Tenure low 2009-02-12",
+              "ticker": "MOD",
+              "raw": null
+            },
+            {
+              "feat": "Largest drawdown while in the index",
+              "holder": "BIG \u2014 Big Lots, Inc.",
+              "value": "-99.92%",
+              "date": "2024-11-01",
+              "detail": "Peak 2021-06-08",
+              "ticker": "BIG",
+              "raw": null
+            },
+            {
+              "feat": "Fastest recovery from a 20% component drawdown",
+              "holder": "CF \u2014 CF Industries Holdings, Inc.",
+              "value": "6 sessions",
+              "date": "2008-04-08",
+              "detail": "Threshold hit 2008-03-31; recovered prior peak from 2008-02-25",
+              "ticker": "CF",
+              "raw": null
+            },
+            {
+              "feat": "Fastest recovery from a 30% component drawdown",
+              "holder": "ORI \u2014 Old Republic International Corporation",
+              "value": "12 sessions",
+              "date": "2009-03-23",
+              "detail": "Threshold hit 2009-03-05; recovered prior peak from 2009-02-13",
+              "ticker": "ORI",
+              "raw": null
+            },
+            {
+              "feat": "Fastest recovery from a 50% component drawdown",
+              "holder": "MI \u2014 Marshall & Ilsley Corporation",
+              "value": "55 sessions",
+              "date": "2009-09-22",
+              "detail": "Threshold hit 2009-07-06; recovered prior peak from 2009-05-18",
+              "ticker": "MI",
+              "raw": null
+            }
+          ]
+        },
+        {
+          "title": "Contribution & Weight",
+          "records": [
+            {
+              "feat": "Highest component weight ever",
+              "holder": "CME \u2014 CME Group Inc.",
+              "value": "16.25%",
+              "date": "2007-12-17",
+              "detail": "",
+              "ticker": "CME",
+              "raw": null
+            },
+            {
+              "feat": "Lowest nonzero component weight ever",
+              "holder": "BIG \u2014 Big Lots, Inc.",
+              "value": "0.0005%",
+              "date": "2024-12-26",
+              "detail": "",
+              "ticker": "BIG",
+              "raw": null
+            },
+            {
+              "feat": "Largest one-session increase in weight",
+              "holder": "SNS \u2014 The Steak n Shake Company",
+              "value": "+7.70 pp",
+              "date": "2009-12-21",
+              "detail": "",
+              "ticker": "SNS",
+              "raw": null
+            },
+            {
+              "feat": "Largest one-session decrease in weight",
+              "holder": "CME \u2014 CME Group Inc.",
+              "value": "-5.02 pp",
+              "date": "2012-07-23",
+              "detail": "",
+              "ticker": "CME",
+              "raw": null
+            },
+            {
+              "feat": "Most sessions as the GLI\u2019s largest-weighted component",
+              "holder": "CME \u2014 CME Group Inc.",
+              "value": "1,215 sessions",
+              "date": "2012-07-20",
+              "detail": "",
+              "ticker": "CME",
+              "raw": null
+            },
+            {
+              "feat": "Longest consecutive run as the GLI\u2019s largest-weighted component",
+              "holder": "CF \u2014 CF Industries Holdings, Inc.",
+              "value": "729 sessions",
+              "date": "2015-06-16",
+              "detail": "2012-07-23 through 2015-06-16",
+              "ticker": "CF",
+              "raw": null
+            },
+            {
+              "feat": "Largest weight gap between #1 and #2 components",
+              "holder": "CME \u2014 CME Group Inc.",
+              "value": "13.81 pp",
+              "date": "2007-12-17",
+              "detail": "Runner-up: SHLD \u2014 Sears Holdings Corporation",
+              "ticker": "CME",
+              "raw": null
+            },
+            {
+              "feat": "Largest positive one-session contribution to the GLI",
+              "holder": "LLY \u2014 Eli Lilly and Company",
+              "value": "+3.08 points",
+              "date": "2026-02-04",
+              "detail": "",
+              "ticker": "LLY",
+              "raw": null
+            },
+            {
+              "feat": "Largest negative one-session contribution to the GLI",
+              "holder": "LLY \u2014 Eli Lilly and Company",
+              "value": "-3.10 points",
+              "date": "2025-08-07",
+              "detail": "",
+              "ticker": "LLY",
+              "raw": null
+            },
+            {
+              "feat": "Largest cumulative positive contribution in a calendar year",
+              "holder": "CAT \u2014 Caterpillar, Inc.",
+              "value": "+9.33 points",
+              "date": "2026",
+              "detail": "2026",
+              "ticker": "CAT",
+              "raw": null
+            },
+            {
+              "feat": "Largest cumulative negative contribution in a calendar year",
+              "holder": "CME \u2014 CME Group Inc.",
+              "value": "-12.56 points",
+              "date": "2008",
+              "detail": "2008",
+              "ticker": "CME",
+              "raw": null
+            },
+            {
+              "feat": "Largest cumulative contribution over all GLI sessions",
+              "holder": "LLY \u2014 Eli Lilly and Company",
+              "value": "+30.53 points",
+              "date": "",
+              "detail": "",
+              "ticker": "LLY",
+              "raw": null
+            },
+            {
+              "feat": "Most sessions as the largest positive contributor",
+              "holder": "CME \u2014 CME Group Inc.",
+              "value": "428 sessions",
+              "date": "",
+              "detail": "",
+              "ticker": "CME",
+              "raw": null
+            },
+            {
+              "feat": "Most sessions as the largest negative contributor",
+              "holder": "CME \u2014 CME Group Inc.",
+              "value": "450 sessions",
+              "date": "",
+              "detail": "",
+              "ticker": "CME",
+              "raw": null
+            },
+            {
+              "feat": "Most #1 positive-contributor finishes in a calendar year",
+              "holder": "CME \u2014 CME Group Inc.",
+              "value": "85 sessions",
+              "date": "2008",
+              "detail": "",
+              "ticker": "CME",
+              "raw": null
+            },
+            {
+              "feat": "Most #1 negative-contributor finishes in a calendar year",
+              "holder": "CME \u2014 CME Group Inc.",
+              "value": "109 sessions",
+              "date": "2008",
+              "detail": "",
+              "ticker": "CME",
+              "raw": null
+            },
+            {
+              "feat": "Highest percentage of a single day\u2019s GLI move attributable to one component",
+              "holder": "CME \u2014 CME Group Inc.",
+              "value": "276.26%",
+              "date": "2008-11-03",
+              "detail": "+0.50 contribution points; sessions with |GLI move| \u2265 0.25%",
+              "ticker": "CME",
+              "raw": null
+            },
+            {
+              "feat": "Highest percentage of a calendar year\u2019s GLI gain attributable to one component",
+              "holder": "CME \u2014 CME Group Inc.",
+              "value": "56.87%",
+              "date": "2007",
+              "detail": "+2.26 component points vs +3.98 GLI points",
+              "ticker": "CME",
+              "raw": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "streaks",
+      "title": "Streaks",
+      "sections": [
+        {
+          "title": "GLI Streaks",
+          "records": [
+            {
+              "feat": "Longest winning streak",
+              "holder": "GLI",
+              "value": "10 sessions",
+              "date": "2013-03-11",
+              "detail": "2013-02-26 through 2013-03-11",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Longest losing streak",
+              "holder": "GLI",
+              "value": "11 sessions",
+              "date": "2008-07-07",
+              "detail": "2008-06-20 through 2008-07-07",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Longest streak without a declining session",
+              "holder": "GLI",
+              "value": "10 sessions",
+              "date": "2013-03-11",
+              "detail": "2013-02-26 through 2013-03-11",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Longest streak without an advancing session",
+              "holder": "GLI",
+              "value": "11 sessions",
+              "date": "2008-07-07",
+              "detail": "2008-06-20 through 2008-07-07",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Longest streak of record-high closes",
+              "holder": "GLI",
+              "value": "7 sessions",
+              "date": "2014-12-29",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Longest streak of \u00b11% sessions",
+              "holder": "GLI",
+              "value": "28 sessions",
+              "date": "2020-04-06",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Longest streak without a \u00b11% move",
+              "holder": "GLI",
+              "value": "47 sessions",
+              "date": "2017-11-15",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Longest streak of \u00b12% sessions",
+              "holder": "GLI",
+              "value": "10 sessions",
+              "date": "2008-11-17",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Longest streak without a \u00b12% move",
+              "holder": "GLI",
+              "value": "352 sessions",
+              "date": "2018-02-02",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Longest streak of positive weeks",
+              "holder": "GLI",
+              "value": "9 weeks",
+              "date": "2009-05-08",
+              "detail": "2009-03-07/2009-03-13 through 2009-05-02/2009-05-08",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Longest streak of negative weeks",
+              "holder": "GLI",
+              "value": "8 weeks",
+              "date": "2023-10-27",
+              "detail": "2023-09-02/2023-09-08 through 2023-10-21/2023-10-27",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Longest streak of positive months",
+              "holder": "GLI",
+              "value": "7 months",
+              "date": "2021-05-28",
+              "detail": "2020-11 through 2021-05",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Longest streak of negative months",
+              "holder": "GLI",
+              "value": "5 months",
+              "date": "2008-03-31",
+              "detail": "2007-11 through 2008-03",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Longest streak above the 20-session moving average",
+              "holder": "GLI",
+              "value": "52 sessions",
+              "date": "2010-04-29",
+              "detail": "2010-02-16 through 2010-04-29",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Longest streak below the 20-session moving average",
+              "holder": "GLI",
+              "value": "42 sessions",
+              "date": "2008-07-21",
+              "detail": "2008-05-21 through 2008-07-21",
+              "ticker": "",
+              "raw": null
+            }
+          ]
+        },
+        {
+          "title": "Component Streaks",
+          "records": [
+            {
+              "feat": "Longest winning streak",
+              "holder": "SRCL \u2014 Stericycle, Inc.",
+              "value": "18 sessions",
+              "date": "2019-01-25",
+              "detail": "2018-12-31 through 2019-01-25",
+              "ticker": "SRCL",
+              "raw": null
+            },
+            {
+              "feat": "Longest losing streak",
+              "holder": "PLA \u2014 Playboy Enterprises, Inc.",
+              "value": "19 sessions",
+              "date": "2008-10-24",
+              "detail": "2008-09-30 through 2008-10-24",
+              "ticker": "PLA",
+              "raw": null
+            },
+            {
+              "feat": "Longest streak without a decline",
+              "holder": "SRCL \u2014 Stericycle, Inc.",
+              "value": "18 sessions",
+              "date": "2019-01-25",
+              "detail": "2018-12-31 through 2019-01-25",
+              "ticker": "SRCL",
+              "raw": null
+            },
+            {
+              "feat": "Longest streak without an advance",
+              "holder": "RAIL \u2014 FreightCar America, Inc.",
+              "value": "23 sessions",
+              "date": "2019-11-20",
+              "detail": "2019-10-21 through 2019-11-20",
+              "ticker": "RAIL",
+              "raw": null
+            },
+            {
+              "feat": "Longest streak outperforming the GLI",
+              "holder": "BAX \u2014 Baxter International Inc.",
+              "value": "15 sessions",
+              "date": "2008-07-15",
+              "detail": "2008-06-24 through 2008-07-15",
+              "ticker": "BAX",
+              "raw": null
+            },
+            {
+              "feat": "Longest streak underperforming the GLI",
+              "holder": "RAIL \u2014 FreightCar America, Inc.",
+              "value": "23 sessions",
+              "date": "2019-11-20",
+              "detail": "2019-10-21 through 2019-11-20",
+              "ticker": "RAIL",
+              "raw": null
+            },
+            {
+              "feat": "Longest streak of new GLI-tenure highs",
+              "holder": "FI \u2014 Fiserv, Inc.",
+              "value": "13 sessions",
+              "date": "2024-08-30",
+              "detail": "2024-08-14 through 2024-08-30",
+              "ticker": "FI",
+              "raw": null
+            },
+            {
+              "feat": "Longest streak of positive weeks",
+              "holder": "UAL \u2014 United Continental Holdings, Inc.",
+              "value": "16 weeks",
+              "date": "2024-11-22",
+              "detail": "2024-08-09 through 2024-11-22",
+              "ticker": "UAL",
+              "raw": null
+            },
+            {
+              "feat": "Longest streak of negative weeks",
+              "holder": "BA \u2014 The Boeing Company",
+              "value": "13 weeks",
+              "date": "2023-10-27",
+              "detail": "2023-08-04 through 2023-10-27",
+              "ticker": "BA",
+              "raw": null
+            },
+            {
+              "feat": "Longest streak of positive months",
+              "holder": "AKS \u2014 AK Steel Holding Corporation",
+              "value": "12 months",
+              "date": "2007-10-31",
+              "detail": "2006-11-30 through 2007-10-31",
+              "ticker": "AKS",
+              "raw": null
+            },
+            {
+              "feat": "Longest streak of negative months",
+              "holder": "GM \u2014 General Motors Corporation",
+              "value": "13 months",
+              "date": "2009-05-29",
+              "detail": "2008-05-30 through 2009-05-29",
+              "ticker": "GM",
+              "raw": null
+            },
+            {
+              "feat": "Longest streak as the day\u2019s biggest positive contributor",
+              "holder": "DE \u2014 Deere & Company",
+              "value": "5 sessions",
+              "date": "2022-03-23",
+              "detail": "2022-03-17 through 2022-03-23",
+              "ticker": "DE",
+              "raw": null
+            },
+            {
+              "feat": "Longest streak as the day\u2019s biggest negative contributor",
+              "holder": "CME \u2014 CME Group Inc.",
+              "value": "7 sessions",
+              "date": "2008-10-27",
+              "detail": "2008-10-17 through 2008-10-27",
+              "ticker": "CME",
+              "raw": null
+            },
+            {
+              "feat": "Longest streak as the GLI\u2019s largest-weighted component",
+              "holder": "CF \u2014 CF Industries Holdings, Inc.",
+              "value": "729 sessions",
+              "date": "2015-06-16",
+              "detail": "2012-07-23 through 2015-06-16",
+              "ticker": "CF",
+              "raw": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "volume",
+      "title": "Volume & Trading Activity",
+      "sections": [
+        {
+          "title": "GLI Aggregate Volume",
+          "records": [
+            {
+              "feat": "Highest aggregate component volume in one session",
+              "holder": "GLI",
+              "value": "1,153,730,762",
+              "date": "2008-10-10",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Lowest valid aggregate component volume in one session",
+              "holder": "GLI",
+              "value": "31,736,867",
+              "date": "2005-08-15",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Highest-volume week",
+              "holder": "GLI",
+              "value": "4,213,911,433",
+              "date": "2008-10-10",
+              "detail": "2008-10-04/2008-10-10",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Lowest-volume week",
+              "holder": "GLI",
+              "value": "182,382,101",
+              "date": "2005-08-19",
+              "detail": "2005-08-13/2005-08-19",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Highest-volume month",
+              "holder": "GLI",
+              "value": "16,187,356,445",
+              "date": "2008-10-31",
+              "detail": "2008-10",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Lowest-volume month",
+              "holder": "GLI",
+              "value": "1,022,491,849",
+              "date": "2005-08-31",
+              "detail": "2005-08",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Highest-volume calendar year",
+              "holder": "GLI",
+              "value": "118,554,170,883",
+              "date": "2008-12-31",
+              "detail": "2008",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Lowest-volume calendar year",
+              "holder": "GLI",
+              "value": "37,220,046,621",
+              "date": "2006-12-29",
+              "detail": "2006",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Highest 5-session aggregate volume",
+              "holder": "GLI",
+              "value": "4,378,255,732",
+              "date": "2008-10-14",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Highest 20-session aggregate volume",
+              "holder": "GLI",
+              "value": "14,442,961,036",
+              "date": "2008-10-24",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Largest one-session increase in aggregate volume",
+              "holder": "GLI",
+              "value": "629,139,502",
+              "date": "2010-11-18",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Largest one-session decrease in aggregate volume",
+              "holder": "GLI",
+              "value": "-514,811,478",
+              "date": "2010-11-19",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Largest volume multiple versus previous session",
+              "holder": "GLI",
+              "value": "3.28\u00d7",
+              "date": "2015-11-30",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Highest aggregate relative volume versus prior 20-session average",
+              "holder": "GLI",
+              "value": "4.69\u00d7",
+              "date": "2005-10-10",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Lowest aggregate relative volume versus prior 20-session average",
+              "holder": "GLI",
+              "value": "0.27\u00d7",
+              "date": "2008-12-24",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Highest-volume advancing session",
+              "holder": "GLI",
+              "value": "1,153,730,762",
+              "date": "2008-10-10",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Highest-volume declining session",
+              "holder": "GLI",
+              "value": "1,074,862,179",
+              "date": "2009-05-13",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Highest-volume session ending nearly unchanged",
+              "holder": "GLI",
+              "value": "679,937,300",
+              "date": "2008-12-19",
+              "detail": "Close within \u00b10.10%",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Highest volume on an all-time-high close",
+              "holder": "GLI",
+              "value": "538,687,237",
+              "date": "2022-01-04",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Highest volume on a new 52-week high",
+              "holder": "GLI",
+              "value": "652,144,415",
+              "date": "2010-12-17",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            }
+          ]
+        },
+        {
+          "title": "GLI Volume Streaks",
+          "records": [
+            {
+              "feat": "Longest streak of above-average volume",
+              "holder": "GLI",
+              "value": "24 sessions",
+              "date": "2020-03-26",
+              "detail": "2020-02-24 through 2020-03-26",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Longest streak of below-average volume",
+              "holder": "GLI",
+              "value": "24 sessions",
+              "date": "2014-11-28",
+              "detail": "2014-10-27 through 2014-11-28",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Longest streak of rising aggregate volume",
+              "holder": "GLI",
+              "value": "8 sessions",
+              "date": "2014-01-09",
+              "detail": "2013-12-30 through 2014-01-09",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Longest streak of falling aggregate volume",
+              "holder": "GLI",
+              "value": "8 sessions",
+              "date": "2009-11-27",
+              "detail": "2009-11-17 through 2009-11-27",
+              "ticker": "",
+              "raw": null
+            }
+          ]
+        },
+        {
+          "title": "Component Volume",
+          "records": [
+            {
+              "feat": "Highest single-session component volume",
+              "holder": "NCC \u2014 National City Corporation",
+              "value": "581,719,693",
+              "date": "2008-10-01",
+              "detail": "",
+              "ticker": "NCC",
+              "raw": null
+            },
+            {
+              "feat": "Lowest valid single-session component volume",
+              "holder": "KOSS \u2014 Koss Corporation",
+              "value": "1",
+              "date": "2007-02-02",
+              "detail": "",
+              "ticker": "KOSS",
+              "raw": null
+            },
+            {
+              "feat": "Highest-volume component week",
+              "holder": "F \u2014 Ford Motor Company",
+              "value": "1,568,301,441",
+              "date": "2025-10-24",
+              "detail": "2025-10-18/2025-10-24",
+              "ticker": "F",
+              "raw": null
+            },
+            {
+              "feat": "Highest-volume component month",
+              "holder": "NCC \u2014 National City Corporation",
+              "value": "3,485,442,250",
+              "date": "2008-10-31",
+              "detail": "2008-10",
+              "ticker": "NCC",
+              "raw": null
+            },
+            {
+              "feat": "Highest-volume component calendar year",
+              "holder": "F \u2014 Ford Motor Company",
+              "value": "23,799,936,100",
+              "date": "2010-12-31",
+              "detail": "2010",
+              "ticker": "F",
+              "raw": null
+            },
+            {
+              "feat": "Highest average daily component volume in a calendar year",
+              "holder": "F \u2014 Ford Motor Company",
+              "value": "94,444,191",
+              "date": "2010-12-31",
+              "detail": "2010",
+              "ticker": "F",
+              "raw": null
+            },
+            {
+              "feat": "Largest one-session component volume multiple vs prior session",
+              "holder": "SGA \u2014 Saga Communications, Inc.",
+              "value": "1586.00\u00d7",
+              "date": "2021-08-23",
+              "detail": "",
+              "ticker": "SGA",
+              "raw": null
+            },
+            {
+              "feat": "Highest component relative volume versus prior 20-session average",
+              "holder": "SJOE \u2014 St. Joseph Capital Corporation",
+              "value": "614.59\u00d7",
+              "date": "2006-10-23",
+              "detail": "",
+              "ticker": "SJOE",
+              "raw": null
+            },
+            {
+              "feat": "Lowest component relative volume versus prior 20-session average",
+              "holder": "KOSS \u2014 Koss Corporation",
+              "value": "0.00\u00d7",
+              "date": "2008-05-22",
+              "detail": "",
+              "ticker": "KOSS",
+              "raw": null
+            },
+            {
+              "feat": "Largest share of total GLI component volume in one session",
+              "holder": "DPH \u2014 Delphi Corporation",
+              "value": "73.29%",
+              "date": "2005-10-10",
+              "detail": "",
+              "ticker": "DPH",
+              "raw": null
+            },
+            {
+              "feat": "Most sessions as the GLI\u2019s highest-volume component",
+              "holder": "F \u2014 Ford Motor Company",
+              "value": "4,707 sessions",
+              "date": "",
+              "detail": "",
+              "ticker": "F",
+              "raw": null
+            },
+            {
+              "feat": "Longest streak as the GLI\u2019s highest-volume component",
+              "holder": "F \u2014 Ford Motor Company",
+              "value": "309 sessions",
+              "date": "2023-08-21",
+              "detail": "2022-05-27 through 2023-08-21",
+              "ticker": "F",
+              "raw": null
+            },
+            {
+              "feat": "Most #1-volume finishes in a calendar year",
+              "holder": "F \u2014 Ford Motor Company",
+              "value": "250 sessions",
+              "date": "2022",
+              "detail": "",
+              "ticker": "F",
+              "raw": null
+            },
+            {
+              "feat": "Most shares traded during one continuous GLI tenure",
+              "holder": "F \u2014 Ford Motor Company",
+              "value": "292,455,492,620",
+              "date": "2026-08-11",
+              "detail": "2005-08-01 through 2026-08-11",
+              "ticker": "F",
+              "raw": null
+            },
+            {
+              "feat": "Most shares traded across all GLI tenures",
+              "holder": "F \u2014 Ford Motor Company",
+              "value": "292,455,492,620",
+              "date": "",
+              "detail": "",
+              "ticker": "F",
+              "raw": null
+            },
+            {
+              "feat": "Highest average daily volume during one continuous GLI tenure",
+              "holder": "F \u2014 Ford Motor Company",
+              "value": "55,284,592",
+              "date": "2026-08-11",
+              "detail": "2005-08-01 through 2026-08-11",
+              "ticker": "F",
+              "raw": null
+            },
+            {
+              "feat": "Largest one-session increase in component volume",
+              "holder": "F \u2014 Ford Motor Company",
+              "value": "413,167,800",
+              "date": "2011-01-28",
+              "detail": "",
+              "ticker": "F",
+              "raw": null
+            },
+            {
+              "feat": "Highest-volume first session after joining",
+              "holder": "GM \u2014 General Motors Company",
+              "value": "457,044,300",
+              "date": "2010-11-18",
+              "detail": "",
+              "ticker": "GM",
+              "raw": null
+            },
+            {
+              "feat": "Highest-volume final session before removal",
+              "holder": "WBA \u2014 Walgreens Boots Alliance, Inc.",
+              "value": "452,081,061",
+              "date": "2025-08-27",
+              "detail": "",
+              "ticker": "WBA",
+              "raw": null
+            },
+            {
+              "feat": "Highest-volume session following a return to the GLI",
+              "holder": "GM \u2014 General Motors Company",
+              "value": "457,044,300",
+              "date": "2010-11-18",
+              "detail": "",
+              "ticker": "GM",
+              "raw": null
+            },
+            {
+              "feat": "Longest above-average-volume streak",
+              "holder": "H \u2014 Hyatt Hotels Corporation",
+              "value": "27 sessions",
+              "date": "2020-03-25",
+              "detail": "2020-02-18 through 2020-03-25",
+              "ticker": "H",
+              "raw": null
+            },
+            {
+              "feat": "Longest streak of increasing component volume",
+              "holder": "ANF \u2014 Abercrombie & Fitch Co.",
+              "value": "9 sessions",
+              "date": "2009-01-08",
+              "detail": "2008-12-26 through 2009-01-08",
+              "ticker": "ANF",
+              "raw": null
+            }
+          ]
+        },
+        {
+          "title": "Price + Volume Feats",
+          "records": [
+            {
+              "feat": "Largest component gain on at least 2\u00d7 normal volume",
+              "holder": "BIG \u2014 Big Lots, Inc.",
+              "value": "+120.00%",
+              "date": "2024-12-30",
+              "detail": "RVOL 5.25\u00d7",
+              "ticker": "BIG",
+              "raw": null
+            },
+            {
+              "feat": "Largest component decline on at least 2\u00d7 normal volume",
+              "holder": "MWY \u2014 Midway Games Inc.",
+              "value": "-69.23%",
+              "date": "2008-11-12",
+              "detail": "RVOL 6.70\u00d7",
+              "ticker": "MWY",
+              "raw": null
+            },
+            {
+              "feat": "Largest component gain on at least 3\u00d7 normal volume",
+              "holder": "BIG \u2014 Big Lots, Inc.",
+              "value": "+120.00%",
+              "date": "2024-12-30",
+              "detail": "RVOL 5.25\u00d7",
+              "ticker": "BIG",
+              "raw": null
+            },
+            {
+              "feat": "Largest component decline on at least 3\u00d7 normal volume",
+              "holder": "MWY \u2014 Midway Games Inc.",
+              "value": "-69.23%",
+              "date": "2008-11-12",
+              "detail": "RVOL 6.70\u00d7",
+              "ticker": "MWY",
+              "raw": null
+            },
+            {
+              "feat": "Largest component gain on at least 5\u00d7 normal volume",
+              "holder": "BIG \u2014 Big Lots, Inc.",
+              "value": "+120.00%",
+              "date": "2024-12-30",
+              "detail": "RVOL 5.25\u00d7",
+              "ticker": "BIG",
+              "raw": null
+            },
+            {
+              "feat": "Largest component decline on at least 5\u00d7 normal volume",
+              "holder": "MWY \u2014 Midway Games Inc.",
+              "value": "-69.23%",
+              "date": "2008-11-12",
+              "detail": "RVOL 6.70\u00d7",
+              "ticker": "MWY",
+              "raw": null
+            },
+            {
+              "feat": "Longest streak with both price and volume rising",
+              "holder": "DOW \u2014 Dow Inc.",
+              "value": "7 sessions",
+              "date": "2023-01-11",
+              "detail": "2023-01-03 through 2023-01-11",
+              "ticker": "DOW",
+              "raw": null
+            },
+            {
+              "feat": "Longest streak with both price and volume falling",
+              "holder": "ADM \u2014 Archer-Daniels-Midland Company",
+              "value": "5 sessions",
+              "date": "2017-03-07",
+              "detail": "2017-03-01 through 2017-03-07",
+              "ticker": "ADM",
+              "raw": null
+            },
+            {
+              "feat": "Longest winning streak accompanied by above-average volume",
+              "holder": "SUI \u2014 Sun Communities, Inc.",
+              "value": "11 sessions",
+              "date": "2010-03-18",
+              "detail": "2010-03-04 through 2010-03-18",
+              "ticker": "SUI",
+              "raw": null
+            },
+            {
+              "feat": "Longest losing streak accompanied by above-average volume",
+              "holder": "CNSL \u2014 Consolidated Communications Holdings, Inc.",
+              "value": "14 sessions",
+              "date": "2019-05-02",
+              "detail": "2019-04-12 through 2019-05-02",
+              "ticker": "CNSL",
+              "raw": null
+            },
+            {
+              "feat": "Highest relative volume on a new GLI-tenure high",
+              "holder": "SJOE \u2014 St. Joseph Capital Corporation",
+              "value": "614.59\u00d7",
+              "date": "2006-10-23",
+              "detail": "",
+              "ticker": "SJOE",
+              "raw": null
+            },
+            {
+              "feat": "Highest relative volume on a new GLI-tenure low",
+              "holder": "ESI \u2014 ITT Educational Services, Inc.",
+              "value": "77.32\u00d7",
+              "date": "2016-08-26",
+              "detail": "",
+              "ticker": "ESI",
+              "raw": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "membership",
+      "title": "Membership & Longevity",
+      "sections": [
+        {
+          "title": "Tenure",
+          "records": [
+            {
+              "feat": "Longest continuous GLI tenure",
+              "holder": "AEP \u2014 American Electric Power Company",
+              "value": "5,290 sessions",
+              "date": "2026-08-11",
+              "detail": "2005-08-01 through 2026-08-11",
+              "ticker": "AEP",
+              "raw": null
+            },
+            {
+              "feat": "Most total sessions as a GLI component",
+              "holder": "AEP \u2014 American Electric Power Company",
+              "value": "5,290 sessions",
+              "date": "",
+              "detail": "",
+              "ticker": "AEP",
+              "raw": null
+            },
+            {
+              "feat": "Shortest completed GLI tenure",
+              "holder": "AXL \u2014 American Axle & Manufacturing Holdings, Inc.",
+              "value": "2 sessions",
+              "date": "2007-01-22",
+              "detail": "2007-01-19 through 2007-01-22",
+              "ticker": "AXL",
+              "raw": null
+            },
+            {
+              "feat": "Oldest continuously active GLI component",
+              "holder": "AEP \u2014 American Electric Power Company",
+              "value": "5,290 sessions",
+              "date": "2005-08-01",
+              "detail": "Active through 2026-08-11",
+              "ticker": "AEP",
+              "raw": null
+            },
+            {
+              "feat": "Original components still active",
+              "holder": "Multiple",
+              "value": "8 components",
+              "date": "2026-08-11",
+              "detail": "AEP, F, FITB, LKFN, MCD, SKY, SRCE, WHR",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Most calendar years represented in the index",
+              "holder": "ADM \u2014 Archer-Daniels-Midland Company",
+              "value": "22 years",
+              "date": "",
+              "detail": "",
+              "ticker": "ADM",
+              "raw": null
+            }
+          ]
+        },
+        {
+          "title": "Departures & Returns",
+          "records": [
+            {
+              "feat": "Most separate GLI tenures",
+              "holder": "DOW \u2014 Dow Inc.",
+              "value": "2 tenures",
+              "date": "",
+              "detail": "",
+              "ticker": "DOW",
+              "raw": null
+            },
+            {
+              "feat": "First component to leave and later return",
+              "holder": "SYK \u2014 Stryker Corporation",
+              "value": "261 sessions absent",
+              "date": "2007-07-31",
+              "detail": "Previous tenure ended 2006-07-14",
+              "ticker": "SYK",
+              "raw": null
+            },
+            {
+              "feat": "Most recent returning component",
+              "holder": "FISV \u2014 Fiserv, Inc.",
+              "value": "610 sessions absent",
+              "date": "2025-11-11",
+              "detail": "",
+              "ticker": "FISV",
+              "raw": null
+            },
+            {
+              "feat": "Longest absence before returning",
+              "holder": "PATK \u2014 Patrick Industries, Inc.",
+              "value": "2,432 sessions",
+              "date": "2018-12-06",
+              "detail": "Absent after 2009-04-08",
+              "ticker": "PATK",
+              "raw": null
+            },
+            {
+              "feat": "Shortest absence before returning",
+              "holder": "SYK \u2014 Stryker Corporation",
+              "value": "261 sessions",
+              "date": "2007-07-31",
+              "detail": "",
+              "ticker": "SYK",
+              "raw": null
+            },
+            {
+              "feat": "Most total sessions spent outside the index between active tenures",
+              "holder": "PATK \u2014 Patrick Industries, Inc.",
+              "value": "2,432 sessions",
+              "date": "",
+              "detail": "",
+              "ticker": "PATK",
+              "raw": null
+            },
+            {
+              "feat": "Best first session after returning",
+              "holder": "DOW \u2014 Dow Inc.",
+              "value": "+2.05%",
+              "date": "2019-04-02",
+              "detail": "",
+              "ticker": "DOW",
+              "raw": null
+            },
+            {
+              "feat": "Worst first session after returning",
+              "holder": "SYK \u2014 Stryker Corporation",
+              "value": "-2.59%",
+              "date": "2007-07-31",
+              "detail": "",
+              "ticker": "SYK",
+              "raw": null
+            },
+            {
+              "feat": "Best first month after returning",
+              "holder": "SYK \u2014 Stryker Corporation",
+              "value": "+5.32%",
+              "date": "2007-08-28",
+              "detail": "Returned 2007-07-31; first 21 sessions",
+              "ticker": "SYK",
+              "raw": null
+            },
+            {
+              "feat": "Largest gain from return-date price",
+              "holder": "SYK \u2014 Stryker Corporation",
+              "value": "+558.56%",
+              "date": "2025-07-25",
+              "detail": "Returned 2007-07-31",
+              "ticker": "SYK",
+              "raw": null
+            }
+          ]
+        },
+        {
+          "title": "Identity & Corporate History",
+          "records": [
+            {
+              "feat": "Most ticker changes while represented in GLI history",
+              "holder": "INGREDION",
+              "value": "1 changes",
+              "date": "",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Most company-name changes while represented in GLI history",
+              "holder": "ALLSCRIPTS",
+              "value": "2 changes",
+              "date": "",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Most separate historical symbols associated with one corporate lineage",
+              "holder": "ELV",
+              "value": "3 symbols",
+              "date": "",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Longest continuously represented corporate lineage",
+              "holder": "AEP",
+              "value": "7,457 calendar days",
+              "date": "2025-12-31",
+              "detail": "Since 2005-08-01",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Longest tenure under one ticker",
+              "holder": "AEP \u2014 American Electric Power Company, Inc.",
+              "value": "7,457 calendar days",
+              "date": "2025-12-31",
+              "detail": "Since 2005-08-01",
+              "ticker": "AEP",
+              "raw": null
+            },
+            {
+              "feat": "Longest tenure under one company name",
+              "holder": "American Electric Power Company, Inc.",
+              "value": "7,457 calendar days",
+              "date": "2025-12-31",
+              "detail": "Since 2005-08-01",
+              "ticker": "AEP",
+              "raw": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rare",
+      "title": "Rare Feats",
+      "sections": [
+        {
+          "title": "Rare Feats",
+          "records": [
+            {
+              "feat": "GLI advances despite a majority of components declining",
+              "holder": "GLI",
+              "value": "+1.94%",
+              "date": "2008-10-10",
+              "detail": "47 up / 53 down",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "GLI declines despite a majority of components advancing",
+              "holder": "GLI",
+              "value": "-1.23%",
+              "date": "2019-08-30",
+              "detail": "58 up / 36 down",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Biggest gainer and biggest positive contributor on the same session",
+              "holder": "MPC \u2014 Marathon Petroleum Corporation",
+              "value": "700 sessions",
+              "date": "2026-08-11",
+              "detail": "Most recent qualifying session",
+              "ticker": "MPC",
+              "raw": null
+            },
+            {
+              "feat": "Biggest decliner and biggest negative contributor on the same session",
+              "holder": "MOD \u2014 Modine Manufacturing Company",
+              "value": "674 sessions",
+              "date": "2026-07-28",
+              "detail": "Most recent qualifying session",
+              "ticker": "MOD",
+              "raw": null
+            },
+            {
+              "feat": "Highest-volume component and biggest gainer on the same session",
+              "holder": "F \u2014 Ford Motor Company",
+              "value": "75 sessions",
+              "date": "2026-05-22",
+              "detail": "Most recent qualifying session",
+              "ticker": "F",
+              "raw": null
+            },
+            {
+              "feat": "Highest-volume component and biggest decliner on the same session",
+              "holder": "RKT \u2014 Rocket Companies, Inc.",
+              "value": "91 sessions",
+              "date": "2026-04-22",
+              "detail": "Most recent qualifying session",
+              "ticker": "RKT",
+              "raw": null
+            },
+            {
+              "feat": "One component accounts for more than 50% of the GLI\u2019s daily advance",
+              "holder": "ULTA \u2014 Ulta Beauty, Inc.",
+              "value": "489 sessions",
+              "date": "2026-08-07",
+              "detail": "Most recent: 69.9% of the index move",
+              "ticker": "ULTA",
+              "raw": null
+            },
+            {
+              "feat": "One component accounts for more than 50% of the GLI\u2019s daily decline",
+              "holder": "SYK \u2014 Stryker Corporation",
+              "value": "419 sessions",
+              "date": "2026-07-31",
+              "detail": "Most recent: 84.5% of the index move",
+              "ticker": "SYK",
+              "raw": null
+            },
+            {
+              "feat": "Perfect five-session week",
+              "holder": "ANGI \u2014 Angie's List, Inc.",
+              "value": "5 straight advancing sessions",
+              "date": "2017-05-05",
+              "detail": "2017-04-29/2017-05-05",
+              "ticker": "ANGI",
+              "raw": null
+            },
+            {
+              "feat": "Perfect negative five-session week",
+              "holder": "PATK \u2014 Patrick Industries, Inc.",
+              "value": "5 straight declining sessions",
+              "date": "2008-10-10",
+              "detail": "2008-10-04/2008-10-10",
+              "ticker": "PATK",
+              "raw": null
+            },
+            {
+              "feat": "Back-to-back double-digit percentage gains",
+              "holder": "BIG \u2014 Big Lots, Inc.",
+              "value": "+120.0% then +55.1%",
+              "date": "2024-12-31",
+              "detail": "",
+              "ticker": "BIG",
+              "raw": null
+            },
+            {
+              "feat": "Back-to-back double-digit percentage declines",
+              "holder": "RJET \u2014 Republic Airways Holdings Inc.",
+              "value": "-73.3% then -31.5%",
+              "date": "2016-02-29",
+              "detail": "",
+              "ticker": "RJET",
+              "raw": null
+            },
+            {
+              "feat": "Back-to-back opposite-direction double-digit moves",
+              "holder": "DBI \u2014 Designer Brands Inc.",
+              "value": "-22.3% then +85.2%",
+              "date": "2020-03-19",
+              "detail": "",
+              "ticker": "DBI",
+              "raw": null
+            },
+            {
+              "feat": "Largest intraday comeback ending at a record high",
+              "holder": "GLI",
+              "value": "9.41 points",
+              "date": "2026-01-06",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Highest-volume record-high session",
+              "holder": "GLI",
+              "value": "538,687,237",
+              "date": "2022-01-04",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Most consecutive sessions setting both closing and intraday highs",
+              "holder": "GLI",
+              "value": "6 sessions",
+              "date": "2018-01-09",
+              "detail": "2018-01-02 through 2018-01-09",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Largest breadth reversal from one session to the next",
+              "holder": "GLI",
+              "value": "99.00 percentage points",
+              "date": "2011-08-09",
+              "detail": "0.0% advancing \u2192 99.0%",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "GLI advances while all five largest-weighted components decline",
+              "holder": "GLI",
+              "value": "+0.47%",
+              "date": "2016-07-26",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "GLI declines while all five largest-weighted components advance",
+              "holder": "GLI",
+              "value": "-0.80%",
+              "date": "2021-03-18",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            },
+            {
+              "feat": "Best first session after entering the GLI",
+              "holder": "BOT \u2014 CBOT Holdings, Inc.",
+              "value": "+16.67%",
+              "date": "2005-10-21",
+              "detail": "",
+              "ticker": "BOT",
+              "raw": null
+            },
+            {
+              "feat": "Worst first session after entering the GLI",
+              "holder": "AXE \u2014 Anixter International Inc.",
+              "value": "-8.27%",
+              "date": "2008-10-07",
+              "detail": "",
+              "ticker": "AXE",
+              "raw": null
+            },
+            {
+              "feat": "Best first month as a GLI component",
+              "holder": "RCRC \u2014 RC2 Corporation",
+              "value": "+48.92%",
+              "date": "2008-08-15",
+              "detail": "Entry 2008-07-18; first 21 sessions",
+              "ticker": "RCRC",
+              "raw": null
+            },
+            {
+              "feat": "Worst first month as a GLI component",
+              "holder": "MI \u2014 Marshall & Ilsley Corporation",
+              "value": "-37.23%",
+              "date": "2009-06-16",
+              "detail": "Entry 2009-05-18; first 21 sessions",
+              "ticker": "MI",
+              "raw": null
+            },
+            {
+              "feat": "Largest gain on the final session before removal",
+              "holder": "BIG \u2014 Big Lots, Inc.",
+              "value": "+42.89%",
+              "date": "2024-12-31",
+              "detail": "",
+              "ticker": "BIG",
+              "raw": null
+            },
+            {
+              "feat": "First component to double while in the GLI",
+              "holder": "CF \u2014 CF Industries Holdings, Inc.",
+              "value": "2.00\u00d7 entry price",
+              "date": "2007-02-20",
+              "detail": "Entry 2005-08-12; 381 sessions",
+              "ticker": "CF",
+              "raw": null
+            },
+            {
+              "feat": "Fastest component to double",
+              "holder": "AKS \u2014 AK Steel Holding Corporation",
+              "value": "105 sessions",
+              "date": "2007-04-25",
+              "detail": "Entry 2006-11-20",
+              "ticker": "AKS",
+              "raw": null
+            },
+            {
+              "feat": "Component with the most separate doublings during one tenure",
+              "holder": "DPZ \u2014 Domino's Pizza, Inc.",
+              "value": "5 doubling levels",
+              "date": "2024-06-18",
+              "detail": "Entry 2005-09-22; peak 41.11\u00d7 entry",
+              "ticker": "DPZ",
+              "raw": null
+            }
+          ]
+        },
+        {
+          "title": "Record-Book Meta Feats",
+          "records": [
+            {
+              "feat": "Company holding the most current all-time records",
+              "holder": "BIG",
+              "value": "15 records",
+              "date": "",
+              "detail": "",
+              "ticker": "BIG",
+              "raw": null
+            },
+            {
+              "feat": "Company appearing in the most feat categories",
+              "holder": "BIG",
+              "value": "3 categories",
+              "date": "",
+              "detail": "15 total record appearances",
+              "ticker": "BIG",
+              "raw": null
+            },
+            {
+              "feat": "Company with records spanning the most different years",
+              "holder": "F \u2014 Ford Motor Company",
+              "value": "6 years",
+              "date": "",
+              "detail": "2010\u20132026",
+              "ticker": "F",
+              "raw": null
+            },
+            {
+              "feat": "Company with the widest span between its oldest and newest record",
+              "holder": "AEP \u2014 American Electric Power Company",
+              "value": "7,680 calendar days",
+              "date": "2026-08-11",
+              "detail": "Oldest record 2005-08-01",
+              "ticker": "AEP",
+              "raw": null
+            },
+            {
+              "feat": "Most record-book feats dated to one calendar year",
+              "holder": "GLI record book",
+              "value": "44 records",
+              "date": "2008",
+              "detail": "",
+              "ticker": "",
+              "raw": null
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
