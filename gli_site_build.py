@@ -23,6 +23,8 @@ from typing import Any, Iterable
 
 import pandas as pd
 
+import gli_feats
+
 BASE_DATE = "2005-08-01"
 BASE_VALUE = Decimal("100")
 
@@ -45,6 +47,7 @@ NAV_ITEMS = [
     ("index.html", "Home"),
     ("history.html", "Historical Values"),
     ("market-moves.html", "Market Moves"),
+    ("feats.html", "Feats & Records"),
     ("milestones.html", "Closing Milestones"),
     ("weights.html", "Component Weights"),
     ("components.html", "Component History"),
@@ -1337,6 +1340,12 @@ def main() -> None:
     write_history_data(records)
     write_history_page(records)
     write_market_moves(records, full_rows)
+    feats_payload = gli_feats.build(ROOT, SITE_DATA, full_rows)
+    write_json(REPORT_DATA / "feats.json", feats_payload, pretty=True)
+    (REPORT / "feats.html").write_text(
+        page("GLI Feats & Records", gli_feats.render(feats_payload), "feats.html"),
+        encoding="utf-8",
+    )
     write_milestones(full_rows)
     write_weights_page(constituents)
     write_component_history(full_rows, constituents)
