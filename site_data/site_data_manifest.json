@@ -1,14 +1,16 @@
 {
   "schema_version": 1,
-  "generated_utc": "2026-08-06T05:20:30Z",
+  "generated_utc": "2026-08-13T03:34:44.591099+00:00",
   "historical_ohlcv": {
     "file": "gli_historical_ohlcv_through_2025.csv",
     "rows": 5138,
     "first_date": "2005-08-01",
     "last_date": "2025-12-31",
-    "sha256": "26976edbe0657836591bbe59d40754c1dd3d2a78f4d9b2104d861a78e5e1aaed",
+    "sha256": "4869ad3bf032944222ed092b21293b8861ac4ddce8ac2b76716f36b04cf7347c",
     "source_workbook_sha256": "3e98167ef83c2b2557ab1b11e10cd273ef73e06ae76d25e359b29a4a390820f0",
-    "source_manifest_sha256": "cada878f0ffcda25d802d01e13e5c635e7e996d2cbddc8829f1e22d01ab71e46"
+    "source_manifest_sha256": "cada878f0ffcda25d802d01e13e5c635e7e996d2cbddc8829f1e22d01ab71e46",
+    "superseding_repair": "BIG_OTC_ELIGIBILITY_REPAIR_2026-08-13",
+    "repair_scope": "2024-09-09 through 2025-12-31; earlier historical sessions unchanged"
   },
   "component_history": {
     "file": "component_roster_history_through_2025.json",

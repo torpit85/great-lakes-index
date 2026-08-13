@@ -23,7 +23,7 @@
             {
               "feat": "Highest closing value",
               "holder": "GLI",
-              "value": "411.78",
+              "value": "411.79",
               "date": "2026-08-12",
               "detail": "",
               "ticker": "",
@@ -32,7 +32,7 @@
             {
               "feat": "Highest intraday value",
               "holder": "GLI",
-              "value": "418.35",
+              "value": "418.36",
               "date": "2026-08-06",
               "detail": "",
               "ticker": "",
@@ -88,7 +88,7 @@
               "holder": "GLI",
               "value": "2 sessions",
               "date": "2026-02-04",
-              "detail": "2026-02-02 (381.72) \u2192 2026-02-04 (391.95)",
+              "detail": "2026-02-02 (381.73) \u2192 2026-02-04 (391.95)",
               "ticker": "",
               "raw": null
             },
@@ -106,7 +106,7 @@
               "holder": "GLI",
               "value": "59 sessions",
               "date": "2026-02-20",
-              "detail": "2025-11-24 (348.41) \u2192 2026-02-20 (400.37)",
+              "detail": "2025-11-24 (348.42) \u2192 2026-02-20 (400.37)",
               "ticker": "",
               "raw": null
             },
@@ -115,7 +115,7 @@
               "holder": "GLI",
               "value": "511 sessions",
               "date": "2026-02-13",
-              "detail": "2024-01-31 (295.18) \u2192 2026-02-13 (398.71)",
+              "detail": "2024-01-31 (295.18) \u2192 2026-02-13 (398.72)",
               "ticker": "",
               "raw": null
             },
@@ -145,7 +145,7 @@
             {
               "feat": "Largest intraday point range",
               "holder": "GLI",
-              "value": "30.54",
+              "value": "30.55",
               "date": "2025-04-09",
               "detail": "",
               "ticker": "",
@@ -593,7 +593,7 @@
             },
             {
               "feat": "Best 2-session performance",
-              "holder": "BIG \u2014 Big Lots, Inc.",
+              "holder": "BIG",
               "value": "+120.00%",
               "date": "2024-12-30",
               "detail": "",
@@ -602,7 +602,7 @@
             },
             {
               "feat": "Worst 2-session performance",
-              "holder": "BIG \u2014 Big Lots, Inc.",
+              "holder": "BIG",
               "value": "-78.20%",
               "date": "2024-09-10",
               "detail": "",
@@ -611,7 +611,7 @@
             },
             {
               "feat": "Best 5-session performance",
-              "holder": "BIG \u2014 Big Lots, Inc.",
+              "holder": "BIG",
               "value": "+256.02%",
               "date": "2024-12-31",
               "detail": "",
@@ -620,7 +620,7 @@
             },
             {
               "feat": "Worst 5-session performance",
-              "holder": "BIG \u2014 Big Lots, Inc.",
+              "holder": "BIG",
               "value": "-86.17%",
               "date": "2024-09-12",
               "detail": "",
@@ -629,7 +629,7 @@
             },
             {
               "feat": "Best 10-session performance",
-              "holder": "BIG \u2014 Big Lots, Inc.",
+              "holder": "BIG",
               "value": "+341.52%",
               "date": "2024-12-04",
               "detail": "",
@@ -638,7 +638,7 @@
             },
             {
               "feat": "Worst 10-session performance",
-              "holder": "BIG \u2014 Big Lots, Inc.",
+              "holder": "BIG",
               "value": "-91.34%",
               "date": "2024-09-11",
               "detail": "",
@@ -656,7 +656,7 @@
             },
             {
               "feat": "Worst week",
-              "holder": "BIG \u2014 Big Lots, Inc.",
+              "holder": "BIG",
               "value": "-81.88%",
               "date": "2024-09-13",
               "detail": "2024-09-07/2024-09-13",
@@ -710,7 +710,7 @@
             },
             {
               "feat": "Worst calendar year",
-              "holder": "BIG \u2014 Big Lots, Inc.",
+              "holder": "BIG",
               "value": "-96.71%",
               "date": "2024-12-31",
               "detail": "2024",
@@ -747,7 +747,7 @@
             {
               "feat": "Largest rally from a GLI-tenure low",
               "holder": "MOD \u2014 Modine Manufacturing Company",
-              "value": "+37,447.97%",
+              "value": "+37,328.85%",
               "date": "2026-06-02",
               "detail": "Tenure low 2009-02-12",
               "ticker": "MOD",
@@ -755,7 +755,7 @@
             },
             {
               "feat": "Largest drawdown while in the index",
-              "holder": "BIG \u2014 Big Lots, Inc.",
+              "holder": "BIG",
               "value": "-99.92%",
               "date": "2024-11-01",
               "detail": "Peak 2021-06-08",
@@ -805,7 +805,7 @@
             },
             {
               "feat": "Lowest nonzero component weight ever",
-              "holder": "BIG \u2014 Big Lots, Inc.",
+              "holder": "BIG",
               "value": "0.0005%",
               "date": "2024-12-26",
               "detail": "",
@@ -878,7 +878,7 @@
             {
               "feat": "Largest cumulative positive contribution in a calendar year",
               "holder": "CAT \u2014 Caterpillar, Inc.",
-              "value": "+9.33 points",
+              "value": "+10.09 points",
               "date": "2026",
               "detail": "2026",
               "ticker": "CAT",
@@ -896,7 +896,7 @@
             {
               "feat": "Largest cumulative contribution over all GLI sessions",
               "holder": "LLY \u2014 Eli Lilly and Company",
-              "value": "+30.67 points",
+              "value": "+30.53 points",
               "date": "",
               "detail": "",
               "ticker": "LLY",
@@ -1675,7 +1675,7 @@
           "records": [
             {
               "feat": "Largest component gain on at least 2\u00d7 normal volume",
-              "holder": "BIG \u2014 Big Lots, Inc.",
+              "holder": "BIG",
               "value": "+120.00%",
               "date": "2024-12-30",
               "detail": "RVOL 5.25\u00d7",
@@ -1693,7 +1693,7 @@
             },
             {
               "feat": "Largest component gain on at least 3\u00d7 normal volume",
-              "holder": "BIG \u2014 Big Lots, Inc.",
+              "holder": "BIG",
               "value": "+120.00%",
               "date": "2024-12-30",
               "detail": "RVOL 5.25\u00d7",
@@ -1711,7 +1711,7 @@
             },
             {
               "feat": "Largest component gain on at least 5\u00d7 normal volume",
-              "holder": "BIG \u2014 Big Lots, Inc.",
+              "holder": "BIG",
               "value": "+120.00%",
               "date": "2024-12-30",
               "detail": "RVOL 5.25\u00d7",
@@ -1935,7 +1935,7 @@
             {
               "feat": "Largest gain from return-date price",
               "holder": "SYK \u2014 Stryker Corporation",
-              "value": "+558.56%",
+              "value": "+554.36%",
               "date": "2025-07-25",
               "detail": "Returned 2007-07-31",
               "ticker": "SYK",
@@ -2103,7 +2103,7 @@
             },
             {
               "feat": "Back-to-back double-digit percentage gains",
-              "holder": "BIG \u2014 Big Lots, Inc.",
+              "holder": "BIG",
               "value": "+120.0% then +55.1%",
               "date": "2024-12-31",
               "detail": "",
@@ -2220,7 +2220,7 @@
             },
             {
               "feat": "Largest gain on the final session before removal",
-              "holder": "BIG \u2014 Big Lots, Inc.",
+              "holder": "BIG",
               "value": "+42.89%",
               "date": "2024-12-31",
               "detail": "",

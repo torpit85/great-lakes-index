@@ -7,12 +7,11 @@
   "accepted_through": "2026-08-04",
   "opening_carry": {
     "date": "2025-12-31",
-    "index_close": "357.86720538887630959161352343389782650721584932949378434508511053659336555716041747820084178876612419313324931705830443763287141841219195528977026941507308552683706137768324127592",
-    "divisor": "33.7956499446706002838859716141994157216096299957072018669876537563610790765284561350478560750557870086856826936717590039529782815318717391862180720094532377639646432442306780009025",
-    "component_sum": "12094.3548",
+    "index_close": "358.380254498568884751033333256869135142063012453255340437293681798403746208645465293700460462703098309094259504634464139037138883003438094762433105937687192628141413841809513280366",
+    "divisor": "33.7001680432933249797094952205310595826246884631853732090609159049995100957535527042695185551771558976103842265826889883428601899682992692427642989951500382409017236081383681295148",
+    "component_sum": "12077.4748",
     "roster_count": 86,
-    "recalculated_component_sum": "12094.3548",
-    "continuity_error": "0.0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002106909661188781643194040532951734278333"
+    "basis": "BIG OTC eligibility repair propagated from corrected 2024 chain"
   },
   "accepted_closing_checkpoint": {
     "date": "2026-08-04",
@@ -28,8 +27,36 @@
   "daily_reconstruction_zip_sha256": "47a8f93745d2ea86409f5cce753bf994b5571a5425f69eb9533a4a0134ce028b",
   "daily_acceptance_sha256": "2b73be50b36283f1d0ffb58c99d9df80a002a0aedcf7bab9c2cf825be7b7385d",
   "daily_audit_sha256": "9ad3c3266c614d8ec1e89798b9385814166cb895d652a756140f5687c86da6d1",
-  "policy": "Accepted closes and divisors through 2026-08-04 are immutable. Later sessions use the active 86-name roster and the accepted post-2026-07-10 divisor until a new documented control is installed.",
+  "policy": "The source acceptance cutoff remains 2026-08-04. This candidate supersedes the BIG membership history beginning 2024-09-09 and propagates that repair through the current live branch. Sessions 2026-08-05 through 2026-08-12 remain live, not formally accepted by this package.",
   "accepted_ohlcv_chain_file": "GLI_2026_accepted_daily_ohlcv_chain.csv",
   "accepted_ohlcv_chain_sha256": "8d487b85c38f10b8384b290fc906b16eaea2508dff47824c400502ed059cab72",
-  "accepted_ohlcv_policy": "Exact frozen aggregate OHLCV from accepted component raw sources is immutable through 2026-08-04. Public-vendor bars are used only for sessions after the accepted cutoff."
+  "accepted_ohlcv_policy": "Exact frozen aggregate OHLCV from accepted component raw sources is immutable through 2026-08-04. Public-vendor bars are used only for sessions after the accepted cutoff.",
+  "status": "BIG_OTC_ELIGIBILITY_REPAIR_INSTALLED",
+  "repair": {
+    "component": "BIG",
+    "last_eligible_exchange_session": "2024-09-06",
+    "removal_effective": "2024-09-09",
+    "reason": "OTC securities are ineligible for the Great Lakes Index"
+  },
+  "installation_scope": {
+    "formal_accepted_cutoff": "2026-08-04",
+    "live_repaired_through": "2026-08-12",
+    "accepted_cutoff_policy": "The accepted cutoff remains 2026-08-04; 2026-08-05 through 2026-08-12 are live repaired sessions."
+  },
+  "repaired_accepted_checkpoint": {
+    "date": "2026-08-04",
+    "component_sum": "13705.72",
+    "divisor": "33.7446818036474799215589752183343431726902836865115467882999574496548904970795480197887599042738354723971462729623867931356914640348219979541621121036975056894497367037834426615724",
+    "index_close": "406.159408458803179844897657378502135518639147137075209285508535155764771406776716293291760336461828662105856724655057717691832524012300276339908366368991792628118743265856437494210",
+    "roster_count": 86,
+    "note": "Superseding BIG eligibility repair value for the formally accepted-through date."
+  },
+  "repaired_live_checkpoint": {
+    "date": "2026-08-12",
+    "component_sum": "14807.300065755844083",
+    "divisor": "35.9582759614189215523841523650545961097331939976817544254469599681854206594347012040661603774625548885044379638082400171561048547103711765007586136937169650044924291124507170934425",
+    "index_close": "411.791157107843296475398444310754011800213130366323967745890707050073537179426108475236175831540318596536963959163920475658810381648465524140576057558486902536926508558788703450175",
+    "roster_count": 90,
+    "note": "Installed live repaired checkpoint after the formal 2026-08-04 accepted cutoff."
+  }
 }
