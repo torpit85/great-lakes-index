@@ -943,6 +943,154 @@ def _membership_sections(comp,idx,label):
                 q=firsts.loc[firsts.oc_ret.idxmin()];r.append(_rec('Worst first session after returning',label(q.Ticker,q.Date),_fmt_num(q.oc_ret*100,2,True,'%'),q.Date,ticker=q.Ticker))
     sections.append(('Departures & Returns',r));return sections,rdf
 
+
+def _price_start_ok(value: Any, min_price: float | None) -> bool:
+    """Return whether a Price Performance candidate clears the start-price floor."""
+    if min_price is None:
+        return True
+    try:
+        value = float(value)
+    except (TypeError, ValueError):
+        return False
+    return bool(np.isfinite(value) and value > min_price)
+
+
+def _filtered_price_performance_records(
+    comp: pd.DataFrame,
+    idx: pd.DataFrame,
+    label,
+    min_price: float,
+) -> list[dict[str, Any]]:
+    """Recompute Price Performance records with a strict starting-price floor.
+
+    The filter is deliberately scoped to Component Feats -> Price Performance.
+    It tests the price at the start/reference point of the measured feat:
+    session Open for single-session records; starting Close for rolling/calendar
+    returns; entry Close for entry/doubling records; tenure-low Close for rallies;
+    and governing-peak Close for drawdown/recovery records.
+    """
+    records: list[dict[str, Any]] = []
+
+    def rr(feat, q, val, detail='', start_price=None):
+        ticker = str(q.Ticker)
+        raw={'start_price':float(start_price),'min_price':float(min_price)} if start_price is not None else None
+        return _rec(feat, label(ticker, str(q.Date)), val, str(q.Date), detail, ticker, raw)
+
+    # Single-session records: test that session's Open.
+    s = comp[(comp.Open > 0) & (comp.Open > min_price)]
+    if len(s):
+        q=s.loc[s.oc_ret.idxmax()];records.append(rr('Largest single-session percentage gain',q,_fmt_num(q.oc_ret*100,2,True,'%'),'Open-to-close; avoids split/re-entry discontinuities',q.Open))
+        q=s.loc[s.oc_ret.idxmin()];records.append(rr('Largest single-session percentage decline',q,_fmt_num(q.oc_ret*100,2,True,'%'),'Open-to-close; avoids split/re-entry discontinuities',q.Open))
+        q=s.loc[s.intraday_range_pct.idxmax()];records.append(rr('Largest intraday percentage range',q,_fmt_num(q.intraday_range_pct*100,2,suffix='%'),start_price=q.Open))
+
+    # Rolling multi-session records: test the actual Close at the start of the window.
+    tenure_grp=comp.groupby('_tenure_id',sort=False)
+    for n in [2,5,10]:
+        prior_adj=tenure_grp.adj_price.shift(n-1)
+        prior_si=tenure_grp.session_i.shift(n-1)
+        prior_close=tenure_grp.Close.shift(n-1)
+        valid=(comp.session_i-prior_si==n-1) & (prior_close > min_price)
+        vals=(comp.adj_price/prior_adj-1).where(valid)
+        good=vals.dropna()
+        if len(good):
+            for best,txt in [(True,'Best'),(False,'Worst')]:
+                qi=good.idxmax() if best else good.idxmin();q=comp.loc[qi]
+                records.append(rr(f'{txt} {n}-session performance',q,_fmt_num(vals.loc[qi]*100,2,True,'%'),start_price=prior_close.loc[qi]))
+
+    # Calendar-period records: test the first actual Close in the qualifying tenure-period.
+    c=comp.copy();c['dt']=pd.to_datetime(c.Date)
+    period_specs=[
+        ('week',c.dt.dt.to_period('W-FRI'),4),
+        ('month',c.dt.dt.to_period('M'),15),
+        ('quarter',c.dt.dt.to_period('Q'),45),
+        ('calendar year',c.dt.dt.to_period('Y'),180),
+    ]
+    for pname,per,min_sessions in period_specs:
+        cp=c.assign(period=per.astype(str)).copy()
+        x=cp.groupby(['_tenure_id','Ticker','period'],sort=False).agg(
+            first=('adj_price','first'), last=('adj_price','last'),
+            start_close=('Close','first'), date=('Date','last'),
+            sessions=('adj_price','size')
+        ).reset_index()
+        x=x[(x.sessions>=min_sessions) & (x.start_close > min_price)]
+        x['ret']=x['last']/x['first']-1
+        if len(x):
+            for best,txt in [(True,'Best'),(False,'Worst')]:
+                q=x.loc[x.ret.idxmax() if best else x.ret.idxmin()]
+                obj=type('Q',(),{'Ticker':q.Ticker,'Date':q.date})
+                records.append(rr(f'{txt} {pname}',obj,_fmt_num(q.ret*100,2,True,'%'),q.period,q.start_close))
+
+    # Continuous-tenure records.
+    c,_=_tenure_frame(comp)
+    best_entry=None; best_rally=None; worst_dd=None; fastest_double=None
+    recoveries={.20:None,.30:None,.50:None}
+    for tid,g in c.groupby('tenure_id',sort=False):
+        g=g.sort_values('session_i').reset_index(drop=True)
+        ticker=g.Ticker.iloc[0]
+        arr=g.adj_price.to_numpy(float)
+        raw_close=g.Close.to_numpy(float)
+        if not len(arr):
+            continue
+
+        entry=float(raw_close[0])
+        if _price_start_ok(entry,min_price):
+            ratios=arr/arr[0]
+            j=int(np.nanargmax(ratios))
+            cand=(ratios[j]-1,ticker,g.Date.iloc[j],g.Date.iloc[0],ratios[j],tid)
+            if best_entry is None or cand[0]>best_entry[0]: best_entry=cand
+            hit=np.flatnonzero(ratios>=2)
+            if len(hit):
+                j=int(hit[0]);elapsed=j;cand2=(elapsed,ticker,g.Date.iloc[j],g.Date.iloc[0],tid)
+                if fastest_double is None or cand2[0]<fastest_double[0] or (cand2[0]==fastest_double[0] and cand2[2]<fastest_double[2]): fastest_double=cand2
+
+        runmin=np.minimum.accumulate(arr)
+        rally=arr/runmin-1
+        j=int(np.nanargmax(rally));low_i=int(np.argmin(arr[:j+1]))
+        if _price_start_ok(raw_close[low_i],min_price):
+            cand=(rally[j],ticker,g.Date.iloc[j],g.Date.iloc[low_i],tid)
+            if best_rally is None or cand[0]>best_rally[0]:best_rally=cand
+
+        runmax=np.maximum.accumulate(arr)
+        dd=arr/runmax-1
+        j=int(np.nanargmin(dd));peak_i=int(np.argmax(arr[:j+1]))
+        if _price_start_ok(raw_close[peak_i],min_price):
+            cand=(dd[j],ticker,g.Date.iloc[j],g.Date.iloc[peak_i],tid)
+            if worst_dd is None or cand[0]<worst_dd[0]:worst_dd=cand
+
+        # Recovery threshold is governed by the prior peak; apply the floor there.
+        for th in recoveries:
+            peak=arr[0];peak_i=0;trigger=None;target=None;target_i=None
+            for i in range(1,len(arr)):
+                if trigger is None:
+                    if arr[i]>=peak:
+                        peak=arr[i];peak_i=i
+                    elif arr[i]/peak-1<=-th:
+                        trigger=i;target=peak;target_i=peak_i
+                else:
+                    if arr[i]>=target:
+                        if target_i is not None and _price_start_ok(raw_close[target_i],min_price):
+                            elapsed=i-trigger;cand=(elapsed,ticker,g.Date.iloc[i],g.Date.iloc[trigger],g.Date.iloc[target_i],tid)
+                            if recoveries[th] is None or elapsed<recoveries[th][0]:recoveries[th]=cand
+                        peak=arr[i];peak_i=i;trigger=None;target=None;target_i=None
+
+    if best_entry:
+        gain,t,d,start,mult,tid=best_entry
+        entry_row=c[(c.tenure_id==tid) & (c.Date==start)].iloc[0] if ((c.tenure_id==tid) & (c.Date==start)).any() else None
+        start_price=float(entry_row.Close) if entry_row is not None else None
+        raw={'start_price':start_price,'min_price':float(min_price)}
+        records += [_rec('Largest gain from GLI entry price',label(t,d),_fmt_num(gain*100,2,True,'%'),d,f'Entry {start}',t,raw),
+                    _rec('Largest multiple of GLI entry price',label(t,d),f'{mult:.2f}×',d,f'Entry {start}',t,raw)]
+    if fastest_double:
+        n,t,d,start,tid=fastest_double;sp=float(c[(c.tenure_id==tid)&(c.Date==start)].iloc[0].Close);records.append(_rec('Fastest doubling from GLI entry price',label(t,d),f'{n} sessions',d,f'Entry {start}',t,{'start_price':sp,'min_price':float(min_price)}))
+    if best_rally:
+        v,t,d,low,tid=best_rally;sp=float(c[(c.tenure_id==tid)&(c.Date==low)].iloc[0].Close);records.append(_rec('Largest rally from a GLI-tenure low',label(t,d),_fmt_num(v*100,2,True,'%'),d,f'Tenure low {low}',t,{'start_price':sp,'min_price':float(min_price)}))
+    if worst_dd:
+        v,t,d,peak,tid=worst_dd;sp=float(c[(c.tenure_id==tid)&(c.Date==peak)].iloc[0].Close);records.append(_rec('Largest drawdown while in the index',label(t,d),_fmt_num(v*100,2,True,'%'),d,f'Peak {peak}',t,{'start_price':sp,'min_price':float(min_price)}))
+    for th,z in recoveries.items():
+        if z:
+            n,t,d,trigger,peak,tid=z;sp=float(c[(c.tenure_id==tid)&(c.Date==peak)].iloc[0].Close);records.append(_rec(f'Fastest recovery from a {int(th*100)}% component drawdown',label(t,d),f'{n} sessions',d,f'Threshold hit {trigger}; recovered prior peak from {peak}',t,{'start_price':sp,'min_price':float(min_price)}))
+    return records
+
 def build(root:Path,site_data:Path,full_rows:list[dict[str,str]]):
     name,label=_name_maps(site_data,root)
     idx=pd.DataFrame(full_rows).rename(columns={'GLI_Open':'Open','GLI_High':'High','GLI_Low':'Low','GLI_Close':'Close','TotalVolume':'Volume'})
@@ -961,15 +1109,21 @@ def build(root:Path,site_data:Path,full_rows:list[dict[str,str]]):
     membership,_=_membership_sections(comp,idx,label);membership.extend(_identity_section(site_data,label));cats.append({'id':'membership','title':'Membership & Longevity','sections':[{'title':t,'records':r} for t,r in membership]})
     cats.append({'id':'rare','title':'Rare Feats','sections':[{'title':t,'records':r} for t,r in rare] + [{'title':'Record-Book Meta Feats','records':[]}]})
     _augment_categories(cats,comp,idx,label,site_data)
+    price_performance_filters={
+        'gt1':_filtered_price_performance_records(comp,idx,label,1.0),
+        'gt5':_filtered_price_performance_records(comp,idx,label,5.0),
+    }
     return {
         'schema_version':2,'generated_through':idx.Date.iloc[-1],'component_data_through':comp.Date.max() if len(comp) else '',
         'component_membership_filter':membership_audit,
+        'price_performance_filters':price_performance_filters,
         'definitions':[
             'Index daily point/percentage gains and losses are intentionally excluded; those remain on Market Moves.',
             'All component-derived feats use only dates when the ticker was an eligible GLI component: historical membership through 2025 comes from historical_company_names.csv and 2026 membership comes from constituents_great_lakes.csv. Pre-entry and post-removal quotes, including OTC trading, are excluded.',
             'Component single-session gain/loss records use open-to-close returns so splits, ticker re-entries, and overnight identity discontinuities do not masquerade as trading-session feats.',
             'Component return chains require consecutive GLI trading sessions within the same ticker tenure. On GLI divisor-reset sessions, the return chain uses open-to-close movement to neutralize mechanical split/reconstitution discontinuities; contribution records exclude those reset sessions.',
             'Multi-session component price records use uninterrupted active-ticker sessions and cannot cross a removal/re-entry boundary. Calendar week/month/quarter/year rankings require at least 4/15/45/180 active sessions respectively so very short entry/removal fragments do not compete as full periods.',
+            'The Component Feats → Price Performance minimum-price dropdown is scoped only to that section. All is the default; >$1 and >$5 require the feat starting/reference price to be strictly above the selected floor (session Open for single-session records; starting Close for rolling/calendar returns; entry Close for entry/doubling records; tenure-low Close for rallies; governing-peak Close for drawdown/recovery records).',
             'Relative volume (RVOL) compares the current session with the prior 20 active sessions for that component; GLI RVOL uses the prior 20 index sessions.',
             'Raw share-volume records use the accepted reported share counts and are therefore sensitive to stock splits and long-run changes in shares outstanding; RVOL records provide a within-era comparison.',
             'Lowest week/month volume records require at least 4/15 sessions respectively. Partial 2005 and the current partial calendar year are excluded from lowest annual-volume comparisons.',
@@ -980,16 +1134,39 @@ def build(root:Path,site_data:Path,full_rows:list[dict[str,str]]):
 # Final optimized membership scan.
 
 def render(payload:dict)->str:
+    def render_rows(records):
+        rows=''.join(f'<tr><td>{html.escape(str(r["feat"]))}</td><td><b>{html.escape(str(r.get("holder","") or "—"))}</b></td><td>{html.escape(str(r.get("value","") or "—"))}</td><td>{html.escape(str(r.get("date","") or "—"))}</td><td class="muted feat-detail">{html.escape(str(r.get("detail","") or ""))}</td></tr>' for r in records)
+        return rows or '<tr><td colspan="5" class="empty">No qualifying record is currently available.</td></tr>'
+
     tabs=''.join(f'<button class="tab {"active" if i==0 else ""}" data-feat-tab="{html.escape(c["id"])}">{html.escape(c["title"])}</button>' for i,c in enumerate(payload['categories']))
     panels=[]
+    price_row_html={}
+    price_variants=payload.get('price_performance_filters',{})
     for i,c in enumerate(payload['categories']):
         secs=[]
-        for s in c['sections']:
-            rows=''.join(f'<tr><td>{html.escape(str(r["feat"]))}</td><td><b>{html.escape(str(r.get("holder","") or "—"))}</b></td><td>{html.escape(str(r.get("value","") or "—"))}</td><td>{html.escape(str(r.get("date","") or "—"))}</td><td class="muted feat-detail">{html.escape(str(r.get("detail","") or ""))}</td></tr>' for r in s['records'])
-            if not rows: rows='<tr><td colspan="5" class="empty">No qualifying record is currently available.</td></tr>'
-            secs.append(f'<section class="panel feat-section"><h2>{html.escape(s["title"])}</h2><div class="table-wrap"><table><thead><tr><th>Feat</th><th>Record holder</th><th>Record</th><th>Date / Period</th><th>Details</th></tr></thead><tbody>{rows}</tbody></table></div></section>')
+        for sec in c['sections']:
+            rows=render_rows(sec['records'])
+            is_price=(c['id']=='component' and sec['title']=='Price Performance')
+            if is_price:
+                price_row_html['all']=rows
+                price_row_html['gt1']=render_rows(price_variants.get('gt1',[]))
+                price_row_html['gt5']=render_rows(price_variants.get('gt5',[]))
+                controls=(
+                    '<div class="controls" style="margin-top:0">'
+                    '<label>Minimum starting price <select id="price-performance-min">'
+                    '<option value="all" selected>All</option>'
+                    '<option value="gt1">&gt;$1</option>'
+                    '<option value="gt5">&gt;$5</option>'
+                    '</select></label></div>'
+                )
+                tbody=f'<tbody id="price-performance-body">{rows}</tbody>'
+            else:
+                controls=''
+                tbody=f'<tbody>{rows}</tbody>'
+            secs.append(f'<section class="panel feat-section"><h2>{html.escape(sec["title"])}</h2>{controls}<div class="table-wrap"><table><thead><tr><th>Feat</th><th>Record holder</th><th>Record</th><th>Date / Period</th><th>Details</th></tr></thead>{tbody}</table></div></section>')
         panels.append(f'<div class="feat-panel" data-feat-panel="{html.escape(c["id"])}" style="display:{"block" if i==0 else "none"}">{"".join(secs)}</div>')
     defs=''.join(f'<li>{html.escape(x)}</li>' for x in payload['definitions'])
+    price_rows_json=json.dumps(price_row_html,separators=(',',':'),ensure_ascii=False).replace('</','<\\/')
     return f'''<div class="page-head"><div><h1>GLI Feats & Records</h1><div class="muted">Index, component, streak, volume, membership and rare-feat record book • through {html.escape(payload['generated_through'])}</div></div><a href="./market-moves.html" style="font-weight:800;text-decoration:none">Daily gain/loss records → Market Moves</a></div>
 <div class="source-note"><b>Record-book definitions</b><ul style="margin:7px 0 0 18px;padding:0">{defs}</ul></div>
 <div class="controls"><input id="feat-search" type="search" placeholder="Search feats, companies, symbols…" style="min-width:min(420px,100%)"></div>
@@ -997,8 +1174,10 @@ def render(payload:dict)->str:
 {''.join(panels)}
 <script>
 const fs=document.getElementById('feat-search');let activeFeat='index';
+const priceRows={price_rows_json};
+const priceSelect=document.getElementById('price-performance-min');
 function featApply(){{const q=(fs.value||'').trim().toLowerCase();document.querySelectorAll('.feat-panel').forEach(p=>p.style.display=p.dataset.featPanel===activeFeat?'block':'none');document.querySelectorAll(`.feat-panel[data-feat-panel="${{activeFeat}}"] .feat-section`).forEach(sec=>{{let any=false;sec.querySelectorAll('tbody tr').forEach(tr=>{{const ok=!q||tr.textContent.toLowerCase().includes(q);tr.style.display=ok?'':'none';if(ok)any=true;}});sec.style.display=any?'':'none';}});}}
-document.getElementById('feat-tabs').addEventListener('click',e=>{{if(!e.target.matches('[data-feat-tab]'))return;document.querySelectorAll('[data-feat-tab]').forEach(x=>x.classList.remove('active'));e.target.classList.add('active');activeFeat=e.target.dataset.featTab;featApply();}});fs.addEventListener('input',featApply);
+function pricePerformanceApply(){{if(!priceSelect)return;const body=document.getElementById('price-performance-body');if(!body)return;body.innerHTML=priceRows[priceSelect.value]||priceRows.all||'';featApply();}}
+document.getElementById('feat-tabs').addEventListener('click',e=>{{if(!e.target.matches('[data-feat-tab]'))return;document.querySelectorAll('[data-feat-tab]').forEach(x=>x.classList.remove('active'));e.target.classList.add('active');activeFeat=e.target.dataset.featTab;featApply();}});fs.addEventListener('input',featApply);if(priceSelect)priceSelect.addEventListener('change',pricePerformanceApply);
 </script>'''
-
 # --- Optimized record scans (override the reference implementations above). ---
