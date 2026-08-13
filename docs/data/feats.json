@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
-  "generated_through": "2026-08-11",
-  "component_data_through": "2026-08-11",
+  "generated_through": "2026-08-12",
+  "component_data_through": "2026-08-12",
   "definitions": [
     "Index daily point/percentage gains and losses are intentionally excluded; those remain on Market Moves.",
     "Component single-session gain/loss records use open-to-close returns so splits, ticker re-entries, and overnight identity discontinuities do not masquerade as trading-session feats.",
@@ -23,8 +23,8 @@
             {
               "feat": "Highest closing value",
               "holder": "GLI",
-              "value": "411.01",
-              "date": "2026-08-11",
+              "value": "411.78",
+              "date": "2026-08-12",
               "detail": "",
               "ticker": "",
               "raw": null
@@ -896,7 +896,7 @@
             {
               "feat": "Largest cumulative contribution over all GLI sessions",
               "holder": "LLY \u2014 Eli Lilly and Company",
-              "value": "+30.53 points",
+              "value": "+30.67 points",
               "date": "",
               "detail": "",
               "ticker": "LLY",
@@ -1563,7 +1563,7 @@
             {
               "feat": "Most sessions as the GLI\u2019s highest-volume component",
               "holder": "F \u2014 Ford Motor Company",
-              "value": "4,707 sessions",
+              "value": "4,708 sessions",
               "date": "",
               "detail": "",
               "ticker": "F",
@@ -1590,16 +1590,16 @@
             {
               "feat": "Most shares traded during one continuous GLI tenure",
               "holder": "F \u2014 Ford Motor Company",
-              "value": "292,455,492,620",
-              "date": "2026-08-11",
-              "detail": "2005-08-01 through 2026-08-11",
+              "value": "292,485,497,163",
+              "date": "2026-08-12",
+              "detail": "2005-08-01 through 2026-08-12",
               "ticker": "F",
               "raw": null
             },
             {
               "feat": "Most shares traded across all GLI tenures",
               "holder": "F \u2014 Ford Motor Company",
-              "value": "292,455,492,620",
+              "value": "292,485,497,163",
               "date": "",
               "detail": "",
               "ticker": "F",
@@ -1608,9 +1608,9 @@
             {
               "feat": "Highest average daily volume during one continuous GLI tenure",
               "holder": "F \u2014 Ford Motor Company",
-              "value": "55,284,592",
-              "date": "2026-08-11",
-              "detail": "2005-08-01 through 2026-08-11",
+              "value": "55,279,814",
+              "date": "2026-08-12",
+              "detail": "2005-08-01 through 2026-08-12",
               "ticker": "F",
               "raw": null
             },
@@ -1795,16 +1795,16 @@
             {
               "feat": "Longest continuous GLI tenure",
               "holder": "AEP \u2014 American Electric Power Company",
-              "value": "5,290 sessions",
-              "date": "2026-08-11",
-              "detail": "2005-08-01 through 2026-08-11",
+              "value": "5,291 sessions",
+              "date": "2026-08-12",
+              "detail": "2005-08-01 through 2026-08-12",
               "ticker": "AEP",
               "raw": null
             },
             {
               "feat": "Most total sessions as a GLI component",
               "holder": "AEP \u2014 American Electric Power Company",
-              "value": "5,290 sessions",
+              "value": "5,291 sessions",
               "date": "",
               "detail": "",
               "ticker": "AEP",
@@ -1822,9 +1822,9 @@
             {
               "feat": "Oldest continuously active GLI component",
               "holder": "AEP \u2014 American Electric Power Company",
-              "value": "5,290 sessions",
+              "value": "5,291 sessions",
               "date": "2005-08-01",
-              "detail": "Active through 2026-08-11",
+              "detail": "Active through 2026-08-12",
               "ticker": "AEP",
               "raw": null
             },
@@ -1832,7 +1832,7 @@
               "feat": "Original components still active",
               "holder": "Multiple",
               "value": "8 components",
-              "date": "2026-08-11",
+              "date": "2026-08-12",
               "detail": "AEP, F, FITB, LKFN, MCD, SKY, SRCE, WHR",
               "ticker": "",
               "raw": null
@@ -2289,8 +2289,8 @@
             {
               "feat": "Company with the widest span between its oldest and newest record",
               "holder": "AEP \u2014 American Electric Power Company",
-              "value": "7,680 calendar days",
-              "date": "2026-08-11",
+              "value": "7,681 calendar days",
+              "date": "2026-08-12",
               "detail": "Oldest record 2005-08-01",
               "ticker": "AEP",
               "raw": null
