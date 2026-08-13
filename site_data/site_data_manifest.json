@@ -15,11 +15,11 @@
   "component_history": {
     "file": "component_roster_history_through_2025.json",
     "legacy_snapshots": 54,
-    "derived_snapshots": 46,
-    "total_snapshots": 100,
+    "derived_snapshots": 47,
+    "total_snapshots": 101,
     "first_date": "2005-08-01",
     "last_date": "2025-12-11",
-    "sha256": "8cc83ed80d2d19e563e8275689d70938ef44bde60972182798cf6021c9f2b1ae",
+    "sha256": "93133f39920705cf12671d1c66d2b24a635737c17db9f771db0b16ca202cf507",
     "legacy_csv_sha256": "89c4a9635243b88de3a2330150db925f0553bb2d8565833e4c6ee9dccf6269b1"
   },
   "weights": {
