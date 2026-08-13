@@ -56,6 +56,121 @@ def _name_maps(site_data: Path, root: Path):
     return name,label
 
 
+def _component_membership_ranges(root: Path, site_data: Path) -> dict[str, list[tuple[str, str]]]:
+    """Return eligible GLI membership date ranges keyed by ticker.
+
+    Historical ranges come from ``historical_company_names.csv`` through 2025.
+    Live/current ranges come from ``constituents_great_lakes.csv`` beginning in
+    2026.  The split prevents an open-ended historical name row from overriding
+    a later 2026 roster removal.
+    """
+    ranges: dict[str, list[tuple[str, str]]] = defaultdict(list)
+    hist_cutoff = "2025-12-31"
+
+    hp = site_data / "historical_company_names.csv"
+    if not hp.exists():
+        raise SystemExit(f"Missing component membership source: {hp}")
+    with hp.open(newline="", encoding="utf-8-sig") as stream:
+        reader = csv.DictReader(stream)
+        required = {"Ticker", "StartDate", "EndDate"}
+        missing = required - set(reader.fieldnames or [])
+        if missing:
+            raise SystemExit(f"Historical membership source lacks columns: {sorted(missing)}")
+        for row in reader:
+            ticker = (row.get("Ticker") or "").strip().upper()
+            if not ticker:
+                continue
+            start = (row.get("StartDate") or "0001-01-01").strip() or "0001-01-01"
+            end = (row.get("EndDate") or hist_cutoff).strip() or hist_cutoff
+            if start > hist_cutoff:
+                continue
+            end = min(end, hist_cutoff)
+            if start <= end:
+                ranges[ticker].append((start, end))
+
+    cp = root / "constituents_great_lakes.csv"
+    if not cp.exists():
+        raise SystemExit(f"Missing live component membership source: {cp}")
+    with cp.open(newline="", encoding="utf-8-sig") as stream:
+        reader = csv.DictReader(stream)
+        required = {"Ticker", "StartDate", "EndDate"}
+        missing = required - set(reader.fieldnames or [])
+        if missing:
+            raise SystemExit(f"Live membership source lacks columns: {sorted(missing)}")
+        for row in reader:
+            ticker = (row.get("Ticker") or "").strip().upper()
+            if not ticker:
+                continue
+            start = (row.get("StartDate") or "0001-01-01").strip() or "0001-01-01"
+            end = (row.get("EndDate") or "9999-12-31").strip() or "9999-12-31"
+            if end < "2026-01-01":
+                continue
+            start = max(start, "2026-01-01")
+            if start <= end:
+                ranges[ticker].append((start, end))
+
+    for ticker in ranges:
+        ranges[ticker].sort()
+    return dict(ranges)
+
+
+def _filter_components_to_membership(
+    comp: pd.DataFrame,
+    root: Path,
+    site_data: Path,
+) -> tuple[pd.DataFrame, dict[str, Any]]:
+    """Remove component price rows outside the ticker's eligible GLI membership.
+
+    The returned frame is the only component input used by the record book.
+    This excludes pre-entry/post-removal quotes (including OTC trading) before
+    any return, volume, weight, breadth, streak, or tenure metric is computed.
+    """
+    if comp.empty:
+        return comp.copy(), {
+            "raw_rows": 0,
+            "eligible_rows": 0,
+            "excluded_rows": 0,
+            "excluded_tickers": [],
+        }
+
+    ranges = _component_membership_ranges(root, site_data)
+    kept: list[pd.DataFrame] = []
+    excluded_tickers: set[str] = set()
+    excluded_rows = 0
+
+    for ticker, group in comp.groupby("Ticker", sort=False):
+        spans = ranges.get(str(ticker).upper(), [])
+        if not spans:
+            excluded_rows += len(group)
+            excluded_tickers.add(str(ticker).upper())
+            continue
+        dates = group["Date"].astype(str)
+        mask = pd.Series(False, index=group.index)
+        for start, end in spans:
+            mask |= dates.ge(start) & dates.le(end)
+        if (~mask).any():
+            excluded_rows += int((~mask).sum())
+            excluded_tickers.add(str(ticker).upper())
+        kept.append(group.loc[mask])
+
+    if kept:
+        filtered = pd.concat(kept, ignore_index=True)
+        filtered = filtered.sort_values(["Date", "Ticker"]).reset_index(drop=True)
+    else:
+        filtered = comp.iloc[0:0].copy()
+
+    if filtered.empty:
+        raise SystemExit("Membership filtering removed every component OHLCV row.")
+
+    audit = {
+        "raw_rows": int(len(comp)),
+        "eligible_rows": int(len(filtered)),
+        "excluded_rows": int(excluded_rows),
+        "excluded_tickers": sorted(excluded_tickers),
+    }
+    return filtered, audit
+
+
 def _load_components(root: Path, site_data: Path) -> pd.DataFrame:
     parts=[]
     hist=site_data/HIST_GZ
@@ -239,14 +354,24 @@ def _prepare_component_metrics(comp: pd.DataFrame, idx: pd.DataFrame):
     comp=comp.copy().sort_values(['Ticker','Date']).reset_index(drop=True)
     session_map={d:i for i,d in enumerate(idx.Date)}
     comp['session_i']=comp.Date.map(session_map)
-    comp['prev_close']=comp.groupby('Ticker').Close.shift(1)
-    comp['prev_session_i']=comp.groupby('Ticker').session_i.shift(1)
+    # Quotes outside the completed GLI session calendar must not enter any feat.
+    comp=comp[comp.session_i.notna()].copy().reset_index(drop=True)
+
+    # A ticker tenure is continuous only across consecutive GLI sessions.  Since
+    # component rows are membership-filtered before this function, a removal and
+    # later re-entry necessarily creates a session gap and therefore a new tenure.
+    tenure_break=comp.Ticker.ne(comp.Ticker.shift())|comp.session_i.ne(comp.session_i.shift()+1)
+    comp['_tenure_id']=tenure_break.cumsum()
+    tenure_grp=comp.groupby('_tenure_id',sort=False)
+
+    comp['prev_close']=tenure_grp.Close.shift(1)
+    comp['prev_session_i']=tenure_grp.session_i.shift(1)
     comp['continuous']=comp.session_i.eq(comp.prev_session_i+1)
     comp['cc_ret']=np.where(comp.continuous,comp.Close/comp.prev_close-1,np.nan)
     comp['oc_ret']=np.where(comp.Open>0,comp.Close/comp.Open-1,np.nan)
     comp['intraday_range_pct']=np.where(comp.Open>0,(comp.High-comp.Low)/comp.Open,np.nan)
-    comp['rvol20']=comp.groupby('Ticker',group_keys=False).Volume.apply(lambda s:s/s.shift(1).rolling(20,min_periods=20).mean())
-    comp['prev_volume']=comp.groupby('Ticker').Volume.shift(1)
+    comp['rvol20']=tenure_grp.Volume.transform(lambda s:s/s.shift(1).rolling(20,min_periods=20).mean())
+    comp['prev_volume']=tenure_grp.Volume.shift(1)
     comp['volume_mult_prev']=np.where(comp.continuous & (comp.prev_volume>0),comp.Volume/comp.prev_volume,np.nan)
     div_map=idx.set_index('Date')['Divisor'] if 'Divisor' in idx.columns else pd.Series(dtype=float)
     if len(div_map):
@@ -259,8 +384,6 @@ def _prepare_component_metrics(comp: pd.DataFrame, idx: pd.DataFrame):
     # and use that reset session's open-to-close move when the divisor changes.
     reset_ret=comp.oc_ret.where(comp.oc_ret.notna(),comp.cc_ret)
     comp['clean_ret']=np.where(comp.continuous,np.where(comp.stable_divisor,comp.cc_ret,reset_ret),np.nan)
-    tenure_break=comp.Ticker.ne(comp.Ticker.shift())|comp.session_i.ne(comp.session_i.shift()+1)
-    comp['_tenure_id']=tenure_break.cumsum()
     factor=(1+comp.clean_ret).where(comp.clean_ret.notna(),1.0)
     comp['perf_index']=factor.groupby(comp._tenure_id).cumprod()
     first_close=comp.groupby('_tenure_id').Close.transform('first')
@@ -310,8 +433,9 @@ def _component_sections(comp, idx, label):
     q=s.loc[s.oc_ret.idxmin()];r.append(rr('Largest single-session percentage decline',q,_fmt_num(q.oc_ret*100,2,True,'%'),'Open-to-close; avoids split/re-entry discontinuities'))
     q=s.loc[s.intraday_range_pct.idxmax()];r.append(rr('Largest intraday percentage range',q,_fmt_num(q.intraday_range_pct*100,2,suffix='%')))
     grp=comp.groupby('Ticker',sort=False)
+    tenure_grp=comp.groupby('_tenure_id',sort=False)
     for n in [2,5,10]:
-        prior_close=grp.adj_price.shift(n-1);prior_si=grp.session_i.shift(n-1)
+        prior_close=tenure_grp.adj_price.shift(n-1);prior_si=tenure_grp.session_i.shift(n-1)
         # Component price records depend on an uninterrupted active ticker tenure,
         # not on GLI divisor changes caused by unrelated roster events.
         valid=(comp.session_i-prior_si==n-1)
@@ -330,7 +454,7 @@ def _component_sections(comp, idx, label):
     ]
     for pname,per,min_sessions in period_specs:
         cp=c.assign(period=per.astype(str)).copy()
-        x=cp.groupby(['Ticker','period'],sort=False).agg(first=('adj_price','first'),last=('adj_price','last'),date=('Date','last'),sessions=('adj_price','size')).reset_index()
+        x=cp.groupby(['_tenure_id','Ticker','period'],sort=False).agg(first=('adj_price','first'),last=('adj_price','last'),date=('Date','last'),sessions=('adj_price','size')).reset_index()
         # Avoid letting a handful of sessions immediately before removal or
         # after entry compete against substantially complete calendar periods.
         x=x[x.sessions>=min_sessions]
@@ -825,7 +949,9 @@ def build(root:Path,site_data:Path,full_rows:list[dict[str,str]]):
     for col in ['Open','High','Low','Close','Volume','Divisor']:
         idx[col]=pd.to_numeric(idx[col],errors='coerce')
     idx=idx.dropna(subset=['Date','Close']).sort_values('Date').reset_index(drop=True)
-    comp=_prepare_component_metrics(_load_components(root,site_data),idx)
+    raw_comp=_load_components(root,site_data)
+    eligible_comp,membership_audit=_filter_components_to_membership(raw_comp,root,site_data)
+    comp=_prepare_component_metrics(eligible_comp,idx)
     cats=[]
     index_sections=_index_feats(idx);breadth,rare=_breadth_and_rare(comp,idx,label);index_sections.extend(breadth)
     cats.append({'id':'index','title':'Index Feats','sections':[{'title':t,'records':r} for t,r in index_sections]})
@@ -837,11 +963,13 @@ def build(root:Path,site_data:Path,full_rows:list[dict[str,str]]):
     _augment_categories(cats,comp,idx,label,site_data)
     return {
         'schema_version':2,'generated_through':idx.Date.iloc[-1],'component_data_through':comp.Date.max() if len(comp) else '',
+        'component_membership_filter':membership_audit,
         'definitions':[
             'Index daily point/percentage gains and losses are intentionally excluded; those remain on Market Moves.',
+            'All component-derived feats use only dates when the ticker was an eligible GLI component: historical membership through 2025 comes from historical_company_names.csv and 2026 membership comes from constituents_great_lakes.csv. Pre-entry and post-removal quotes, including OTC trading, are excluded.',
             'Component single-session gain/loss records use open-to-close returns so splits, ticker re-entries, and overnight identity discontinuities do not masquerade as trading-session feats.',
             'Component return chains require consecutive GLI trading sessions within the same ticker tenure. On GLI divisor-reset sessions, the return chain uses open-to-close movement to neutralize mechanical split/reconstitution discontinuities; contribution records exclude those reset sessions.',
-            'Multi-session component price records use uninterrupted active-ticker sessions. Calendar week/month/quarter/year rankings require at least 4/15/45/180 active sessions respectively so very short entry/removal fragments do not compete as full periods.',
+            'Multi-session component price records use uninterrupted active-ticker sessions and cannot cross a removal/re-entry boundary. Calendar week/month/quarter/year rankings require at least 4/15/45/180 active sessions respectively so very short entry/removal fragments do not compete as full periods.',
             'Relative volume (RVOL) compares the current session with the prior 20 active sessions for that component; GLI RVOL uses the prior 20 index sessions.',
             'Raw share-volume records use the accepted reported share counts and are therefore sensitive to stock splits and long-run changes in shares outstanding; RVOL records provide a within-era comparison.',
             'Lowest week/month volume records require at least 4/15 sessions respectively. Partial 2005 and the current partial calendar year are excluded from lowest annual-volume comparisons.',

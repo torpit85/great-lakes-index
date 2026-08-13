@@ -2,11 +2,30 @@
   "schema_version": 2,
   "generated_through": "2026-08-12",
   "component_data_through": "2026-08-12",
+  "component_membership_filter": {
+    "raw_rows": 503169,
+    "eligible_rows": 503066,
+    "excluded_rows": 103,
+    "excluded_tickers": [
+      "BIG",
+      "CDW",
+      "DTE",
+      "DTM",
+      "LE",
+      "MPLX",
+      "RAIL",
+      "TWI",
+      "VTR",
+      "WNC",
+      "ZBRA"
+    ]
+  },
   "definitions": [
     "Index daily point/percentage gains and losses are intentionally excluded; those remain on Market Moves.",
+    "All component-derived feats use only dates when the ticker was an eligible GLI component: historical membership through 2025 comes from historical_company_names.csv and 2026 membership comes from constituents_great_lakes.csv. Pre-entry and post-removal quotes, including OTC trading, are excluded.",
     "Component single-session gain/loss records use open-to-close returns so splits, ticker re-entries, and overnight identity discontinuities do not masquerade as trading-session feats.",
     "Component return chains require consecutive GLI trading sessions within the same ticker tenure. On GLI divisor-reset sessions, the return chain uses open-to-close movement to neutralize mechanical split/reconstitution discontinuities; contribution records exclude those reset sessions.",
-    "Multi-session component price records use uninterrupted active-ticker sessions. Calendar week/month/quarter/year rankings require at least 4/15/45/180 active sessions respectively so very short entry/removal fragments do not compete as full periods.",
+    "Multi-session component price records use uninterrupted active-ticker sessions and cannot cross a removal/re-entry boundary. Calendar week/month/quarter/year rankings require at least 4/15/45/180 active sessions respectively so very short entry/removal fragments do not compete as full periods.",
     "Relative volume (RVOL) compares the current session with the prior 20 active sessions for that component; GLI RVOL uses the prior 20 index sessions.",
     "Raw share-volume records use the accepted reported share counts and are therefore sensitive to stock splits and long-run changes in shares outstanding; RVOL records provide a within-era comparison.",
     "Lowest week/month volume records require at least 4/15 sessions respectively. Partial 2005 and the current partial calendar year are excluded from lowest annual-volume comparisons.",
@@ -593,56 +612,56 @@
             },
             {
               "feat": "Best 2-session performance",
-              "holder": "BIG",
-              "value": "+120.00%",
-              "date": "2024-12-30",
+              "holder": "QUIX \u2014 Quixote Corporation",
+              "value": "+115.93%",
+              "date": "2009-12-31",
               "detail": "",
-              "ticker": "BIG",
+              "ticker": "QUIX",
               "raw": null
             },
             {
               "feat": "Worst 2-session performance",
-              "holder": "BIG",
-              "value": "-78.20%",
-              "date": "2024-09-10",
+              "holder": "RJET \u2014 Republic Airways Holdings Inc.",
+              "value": "-73.26%",
+              "date": "2016-02-26",
               "detail": "",
-              "ticker": "BIG",
+              "ticker": "RJET",
               "raw": null
             },
             {
               "feat": "Best 5-session performance",
-              "holder": "BIG",
-              "value": "+256.02%",
-              "date": "2024-12-31",
+              "holder": "ESI \u2014 ITT Educational Services, Inc.",
+              "value": "+231.94%",
+              "date": "2014-10-20",
               "detail": "",
-              "ticker": "BIG",
+              "ticker": "ESI",
               "raw": null
             },
             {
               "feat": "Worst 5-session performance",
-              "holder": "BIG",
-              "value": "-86.17%",
-              "date": "2024-09-12",
+              "holder": "ESI \u2014 ITT Educational Services, Inc.",
+              "value": "-83.09%",
+              "date": "2016-08-30",
               "detail": "",
-              "ticker": "BIG",
+              "ticker": "ESI",
               "raw": null
             },
             {
               "feat": "Best 10-session performance",
-              "holder": "BIG",
-              "value": "+341.52%",
-              "date": "2024-12-04",
+              "holder": "LEA \u2014 Lear Corporation",
+              "value": "+329.03%",
+              "date": "2009-03-19",
               "detail": "",
-              "ticker": "BIG",
+              "ticker": "LEA",
               "raw": null
             },
             {
               "feat": "Worst 10-session performance",
-              "holder": "BIG",
-              "value": "-91.34%",
-              "date": "2024-09-11",
+              "holder": "ESI \u2014 ITT Educational Services, Inc.",
+              "value": "-86.22%",
+              "date": "2016-09-01",
               "detail": "",
-              "ticker": "BIG",
+              "ticker": "ESI",
               "raw": null
             },
             {
@@ -656,11 +675,11 @@
             },
             {
               "feat": "Worst week",
-              "holder": "BIG",
-              "value": "-81.88%",
-              "date": "2024-09-13",
-              "detail": "2024-09-07/2024-09-13",
-              "ticker": "BIG",
+              "holder": "ESI \u2014 ITT Educational Services, Inc.",
+              "value": "-74.88%",
+              "date": "2016-08-26",
+              "detail": "2016-08-20/2016-08-26",
+              "ticker": "ESI",
               "raw": null
             },
             {
@@ -710,11 +729,11 @@
             },
             {
               "feat": "Worst calendar year",
-              "holder": "BIG",
-              "value": "-96.71%",
-              "date": "2024-12-31",
-              "detail": "2024",
-              "ticker": "BIG",
+              "holder": "BGP \u2014 Borders Group, Inc.",
+              "value": "-96.57%",
+              "date": "2008-12-31",
+              "detail": "2008",
+              "ticker": "BGP",
               "raw": null
             },
             {
@@ -755,11 +774,11 @@
             },
             {
               "feat": "Largest drawdown while in the index",
-              "holder": "BIG",
-              "value": "-99.92%",
-              "date": "2024-11-01",
-              "detail": "Peak 2021-06-08",
-              "ticker": "BIG",
+              "holder": "ESI \u2014 ITT Educational Services, Inc.",
+              "value": "-99.77%",
+              "date": "2016-09-01",
+              "detail": "Peak 2007-11-08",
+              "ticker": "ESI",
               "raw": null
             },
             {
@@ -805,9 +824,9 @@
             },
             {
               "feat": "Lowest nonzero component weight ever",
-              "holder": "BIG",
-              "value": "0.0005%",
-              "date": "2024-12-26",
+              "holder": "BIG \u2014 Big Lots, Inc.",
+              "value": "0.0040%",
+              "date": "2024-09-05",
               "detail": "",
               "ticker": "BIG",
               "raw": null
@@ -1675,11 +1694,11 @@
           "records": [
             {
               "feat": "Largest component gain on at least 2\u00d7 normal volume",
-              "holder": "BIG",
-              "value": "+120.00%",
-              "date": "2024-12-30",
-              "detail": "RVOL 5.25\u00d7",
-              "ticker": "BIG",
+              "holder": "MWY \u2014 Midway Games Inc.",
+              "value": "+94.12%",
+              "date": "2008-12-01",
+              "detail": "RVOL 2.53\u00d7",
+              "ticker": "MWY",
               "raw": null
             },
             {
@@ -1693,11 +1712,11 @@
             },
             {
               "feat": "Largest component gain on at least 3\u00d7 normal volume",
-              "holder": "BIG",
-              "value": "+120.00%",
-              "date": "2024-12-30",
-              "detail": "RVOL 5.25\u00d7",
-              "ticker": "BIG",
+              "holder": "ZEUS \u2014 Olympic Steel, Inc.",
+              "value": "+90.51%",
+              "date": "2015-08-06",
+              "detail": "RVOL 4.00\u00d7",
+              "ticker": "ZEUS",
               "raw": null
             },
             {
@@ -1711,11 +1730,11 @@
             },
             {
               "feat": "Largest component gain on at least 5\u00d7 normal volume",
-              "holder": "BIG",
-              "value": "+120.00%",
-              "date": "2024-12-30",
-              "detail": "RVOL 5.25\u00d7",
-              "ticker": "BIG",
+              "holder": "LEA \u2014 Lear Corporation",
+              "value": "+77.33%",
+              "date": "2009-03-19",
+              "detail": "RVOL 9.04\u00d7",
+              "ticker": "LEA",
               "raw": null
             },
             {
@@ -2032,7 +2051,7 @@
             {
               "feat": "Biggest gainer and biggest positive contributor on the same session",
               "holder": "MPC \u2014 Marathon Petroleum Corporation",
-              "value": "700 sessions",
+              "value": "702 sessions",
               "date": "2026-08-11",
               "detail": "Most recent qualifying session",
               "ticker": "MPC",
@@ -2103,11 +2122,11 @@
             },
             {
               "feat": "Back-to-back double-digit percentage gains",
-              "holder": "BIG",
-              "value": "+120.0% then +55.1%",
-              "date": "2024-12-31",
+              "holder": "LEA \u2014 Lear Corporation",
+              "value": "+50.0% then +84.7%",
+              "date": "2009-03-19",
               "detail": "",
-              "ticker": "BIG",
+              "ticker": "LEA",
               "raw": null
             },
             {
@@ -2220,11 +2239,11 @@
             },
             {
               "feat": "Largest gain on the final session before removal",
-              "holder": "BIG",
-              "value": "+42.89%",
-              "date": "2024-12-31",
+              "holder": "DBI \u2014 Designer Brands Inc.",
+              "value": "+13.61%",
+              "date": "2021-01-11",
               "detail": "",
-              "ticker": "BIG",
+              "ticker": "DBI",
               "raw": null
             },
             {
@@ -2261,20 +2280,20 @@
           "records": [
             {
               "feat": "Company holding the most current all-time records",
-              "holder": "BIG",
-              "value": "15 records",
+              "holder": "CME \u2014 CME Group Inc.",
+              "value": "12 records",
               "date": "",
               "detail": "",
-              "ticker": "BIG",
+              "ticker": "CME",
               "raw": null
             },
             {
               "feat": "Company appearing in the most feat categories",
-              "holder": "BIG",
+              "holder": "CF \u2014 CF Industries Holdings, Inc.",
               "value": "3 categories",
               "date": "",
-              "detail": "15 total record appearances",
-              "ticker": "BIG",
+              "detail": "4 total record appearances",
+              "ticker": "CF",
               "raw": null
             },
             {
@@ -2298,7 +2317,7 @@
             {
               "feat": "Most record-book feats dated to one calendar year",
               "holder": "GLI record book",
-              "value": "44 records",
+              "value": "46 records",
               "date": "2008",
               "detail": "",
               "ticker": "",
