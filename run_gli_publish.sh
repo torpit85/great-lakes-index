@@ -105,9 +105,9 @@ if int(checkpoint["RowsLoaded"]) != int(checkpoint_roster):
     raise SystemExit("Hard guard: August 5 roster coverage drifted")
 if Decimal(checkpoint["Divisor"]) != Decimal(accepted_divisor):
     raise SystemExit("Hard guard: August 5 divisor drifted")
-if checkpoint.get("CloseSource") != "PINNED_LIVE_CHECKPOINT":
+if checkpoint.get("CloseSource") != "SUPERSEDING_BIG_OTC_REPAIR_PINNED_LIVE_CHECKPOINT":
     raise SystemExit("Hard guard: August 5 close is not pinned checkpoint data")
-if checkpoint.get("OHLCVSource") != "PINNED_LIVE_CHECKPOINT":
+if checkpoint.get("OHLCVSource") != "SUPERSEDING_BIG_OTC_REPAIR_PINNED_LIVE_CHECKPOINT":
     raise SystemExit("Hard guard: August 5 OHLCV is not pinned checkpoint data")
 
 with open("constituents_great_lakes.csv", newline="", encoding="utf-8") as stream:
