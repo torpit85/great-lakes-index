@@ -10,6 +10,20 @@ import pandas as pd
 
 HIST_GZ = "component_ohlcv_history_2005_2025.csv.gz"
 
+# Corporate-action boundaries that are embedded in accepted component
+# price lineage but are not represented by a same-day GLI divisor change.
+#
+# JCI 2007-10-03:
+# Old Johnson Controls 3-for-1 split.  Accepted raw component history
+# correctly changes from the pre-split price scale to the post-split
+# price scale on this date.  Component performance metrics must use
+# open-to-close for the reset session rather than interpreting the
+# mechanical 3-for-1 price change as an investment return.
+EXPLICIT_COMPONENT_RETURN_RESETS = {
+    ("ACV", "2006-11-17"),
+    ("JCI", "2007-10-03"),
+}
+
 
 def _fmt_num(v, decimals=2, sign=False, suffix=""):
     if v is None or not np.isfinite(float(v)):
@@ -380,10 +394,33 @@ def _prepare_component_metrics(comp: pd.DataFrame, idx: pd.DataFrame):
     else:
         comp['stable_divisor']=True
     # Raw historical closes can jump mechanically on split/divisor-reset dates.
-    # For return chains, keep normal close-to-close returns on stable sessions
-    # and use that reset session's open-to-close move when the divisor changes.
+    #
+    # Most such boundaries are identified by a GLI divisor change.  A small
+    # number of accepted component lineages contain an explicit corporate-action
+    # boundary without a same-day divisor change; those are listed above in
+    # EXPLICIT_COMPONENT_RETURN_RESETS.
+    #
+    # For either kind of reset, use that session's open-to-close move instead
+    # of the mechanical close-to-close price discontinuity.
+    explicit_component_reset = pd.Series(
+        [
+            (ticker, day) in EXPLICIT_COMPONENT_RETURN_RESETS
+            for ticker, day in zip(comp.Ticker, comp.Date)
+        ],
+        index=comp.index,
+        dtype=bool,
+    )
+    comp['explicit_component_reset']=explicit_component_reset
     reset_ret=comp.oc_ret.where(comp.oc_ret.notna(),comp.cc_ret)
-    comp['clean_ret']=np.where(comp.continuous,np.where(comp.stable_divisor,comp.cc_ret,reset_ret),np.nan)
+    comp['clean_ret']=np.where(
+        comp.continuous,
+        np.where(
+            comp.stable_divisor & ~comp.explicit_component_reset,
+            comp.cc_ret,
+            reset_ret,
+        ),
+        np.nan,
+    )
     factor=(1+comp.clean_ret).where(comp.clean_ret.notna(),1.0)
     comp['perf_index']=factor.groupby(comp._tenure_id).cumprod()
     first_close=comp.groupby('_tenure_id').Close.transform('first')

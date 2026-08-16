@@ -374,13 +374,13 @@
       },
       {
         "feat": "Worst 2-session performance",
-        "holder": "JCI \u2014 Johnson Controls, Inc.",
-        "value": "-64.56%",
-        "date": "2007-01-03",
+        "holder": "RJET \u2014 Republic Airways Holdings Inc.",
+        "value": "-55.65%",
+        "date": "2015-07-27",
         "detail": "",
-        "ticker": "JCI",
+        "ticker": "RJET",
         "raw": {
-          "start_price": 85.92,
+          "start_price": 8.5,
           "min_price": 5.0
         }
       },
@@ -446,13 +446,13 @@
       },
       {
         "feat": "Worst week",
-        "holder": "ACV \u2014 Alberto-Culver Company",
-        "value": "-57.23%",
-        "date": "2006-11-17",
-        "detail": "2006-11-11/2006-11-17",
-        "ticker": "ACV",
+        "holder": "LBY \u2014 Libbey Inc.",
+        "value": "-54.42%",
+        "date": "2008-10-17",
+        "detail": "2008-10-11/2008-10-17",
+        "ticker": "LBY",
         "raw": {
-          "start_price": 50.11,
+          "start_price": 6.56,
           "min_price": 5.0
         }
       },
@@ -1423,7 +1423,7 @@
             {
               "feat": "Highest component weight ever",
               "holder": "CME \u2014 CME Group Inc.",
-              "value": "16.25%",
+              "value": "16.32%",
               "date": "2007-12-17",
               "detail": "",
               "ticker": "CME",
@@ -1477,7 +1477,7 @@
             {
               "feat": "Largest weight gap between #1 and #2 components",
               "holder": "CME \u2014 CME Group Inc.",
-              "value": "13.81 pp",
+              "value": "13.86 pp",
               "date": "2007-12-17",
               "detail": "Runner-up: SHLD \u2014 Sears Holdings Corporation",
               "ticker": "CME",
@@ -2667,7 +2667,7 @@
             {
               "feat": "Biggest decliner and biggest negative contributor on the same session",
               "holder": "MOD \u2014 Modine Manufacturing Company",
-              "value": "674 sessions",
+              "value": "673 sessions",
               "date": "2026-07-28",
               "detail": "Most recent qualifying session",
               "ticker": "MOD",
