@@ -181,7 +181,7 @@
       {
         "feat": "Best quarter",
         "holder": "RAIL \u2014 FreightCar America, Inc.",
-        "value": "+216.20%",
+        "value": "+217.35%",
         "date": "2024-09-30",
         "detail": "2024Q3",
         "ticker": "RAIL",
@@ -205,7 +205,7 @@
       {
         "feat": "Best calendar year",
         "holder": "RRD \u2014 R.R. Donnelley & Sons Company",
-        "value": "+321.99%",
+        "value": "+325.16%",
         "date": "2021-12-31",
         "detail": "2021",
         "ticker": "RRD",
@@ -229,7 +229,7 @@
       {
         "feat": "Largest gain from GLI entry price",
         "holder": "DPZ \u2014 Domino's Pizza, Inc.",
-        "value": "+4,010.97%",
+        "value": "+3,977.22%",
         "date": "2024-06-18",
         "detail": "Entry 2005-09-22",
         "ticker": "DPZ",
@@ -241,7 +241,7 @@
       {
         "feat": "Largest multiple of GLI entry price",
         "holder": "DPZ \u2014 Domino's Pizza, Inc.",
-        "value": "41.11\u00d7",
+        "value": "40.77\u00d7",
         "date": "2024-06-18",
         "detail": "Entry 2005-09-22",
         "ticker": "DPZ",
@@ -265,7 +265,7 @@
       {
         "feat": "Largest rally from a GLI-tenure low",
         "holder": "DPZ \u2014 Domino's Pizza, Inc.",
-        "value": "+19,652.41%",
+        "value": "+19,250.34%",
         "date": "2024-06-18",
         "detail": "Tenure low 2008-11-20",
         "ticker": "DPZ",
@@ -531,7 +531,7 @@
       {
         "feat": "Largest gain from GLI entry price",
         "holder": "DPZ \u2014 Domino's Pizza, Inc.",
-        "value": "+4,010.97%",
+        "value": "+3,977.22%",
         "date": "2024-06-18",
         "detail": "Entry 2005-09-22",
         "ticker": "DPZ",
@@ -543,7 +543,7 @@
       {
         "feat": "Largest multiple of GLI entry price",
         "holder": "DPZ \u2014 Domino's Pizza, Inc.",
-        "value": "41.11\u00d7",
+        "value": "40.77\u00d7",
         "date": "2024-06-18",
         "detail": "Entry 2005-09-22",
         "ticker": "DPZ",
@@ -567,7 +567,7 @@
       {
         "feat": "Largest rally from a GLI-tenure low",
         "holder": "LLY \u2014 Eli Lilly and Company",
-        "value": "+4,559.09%",
+        "value": "+4,642.88%",
         "date": "2026-08-10",
         "detail": "Tenure low 2009-03-05",
         "ticker": "LLY",
@@ -667,7 +667,7 @@
             {
               "feat": "Lowest closing value since inception",
               "holder": "GLI",
-              "value": "45.34",
+              "value": "46.90",
               "date": "2009-03-09",
               "detail": "",
               "ticker": "",
@@ -676,7 +676,7 @@
             {
               "feat": "Lowest intraday value since inception",
               "holder": "GLI",
-              "value": "44.34",
+              "value": "45.86",
               "date": "2009-03-09",
               "detail": "",
               "ticker": "",
@@ -694,7 +694,7 @@
             {
               "feat": "Most record-high closes in a calendar year",
               "holder": "GLI",
-              "value": "41 closes",
+              "value": "39 closes",
               "date": "2021",
               "detail": "",
               "ticker": "",
@@ -703,18 +703,18 @@
             {
               "feat": "Longest span without a new all-time closing high",
               "holder": "GLI",
-              "value": "2250 calendar days",
-              "date": "2013-08-01",
-              "detail": "Previous record: 2007-06-04",
+              "value": "2283 calendar days",
+              "date": "2013-10-18",
+              "detail": "Previous record: 2007-07-19",
               "ticker": "",
               "raw": null
             },
             {
               "feat": "Fastest 10-point advance",
               "holder": "GLI",
-              "value": "2 sessions",
-              "date": "2026-02-04",
-              "detail": "2026-02-02 (381.73) \u2192 2026-02-04 (391.95)",
+              "value": "1 sessions",
+              "date": "2022-01-03",
+              "detail": "2021-12-31 (261.80) \u2192 2022-01-03 (274.20)",
               "ticker": "",
               "raw": null
             },
@@ -732,7 +732,7 @@
               "holder": "GLI",
               "value": "59 sessions",
               "date": "2026-02-20",
-              "detail": "2025-11-24 (348.42) \u2192 2026-02-20 (400.37)",
+              "detail": "2025-11-24 (347.90) \u2192 2026-02-20 (400.37)",
               "ticker": "",
               "raw": null
             },
@@ -741,7 +741,7 @@
               "holder": "GLI",
               "value": "511 sessions",
               "date": "2026-02-13",
-              "detail": "2024-01-31 (295.18) \u2192 2026-02-13 (398.72)",
+              "detail": "2024-01-31 (295.10) \u2192 2026-02-13 (398.72)",
               "ticker": "",
               "raw": null
             },
@@ -757,8 +757,8 @@
             {
               "feat": "Longest time between 100-point milestones",
               "holder": "GLI",
-              "value": "3593 sessions",
-              "date": "2019-11-07",
+              "value": "3851 sessions",
+              "date": "2020-11-16",
               "detail": "100 \u2192 200",
               "ticker": "",
               "raw": null
@@ -771,7 +771,7 @@
             {
               "feat": "Largest intraday point range",
               "holder": "GLI",
-              "value": "30.55",
+              "value": "30.56",
               "date": "2025-04-09",
               "detail": "",
               "ticker": "",
@@ -780,7 +780,7 @@
             {
               "feat": "Largest intraday percentage range",
               "holder": "GLI",
-              "value": "17.09%",
+              "value": "17.11%",
               "date": "2008-10-10",
               "detail": "",
               "ticker": "",
@@ -789,8 +789,8 @@
             {
               "feat": "Largest gap up",
               "holder": "GLI",
-              "value": "+10.71",
-              "date": "2020-11-09",
+              "value": "+12.59",
+              "date": "2022-01-03",
               "detail": "",
               "ticker": "",
               "raw": null
@@ -798,7 +798,7 @@
             {
               "feat": "Largest gap down",
               "holder": "GLI",
-              "value": "-17.22",
+              "value": "-16.43",
               "date": "2020-03-16",
               "detail": "",
               "ticker": "",
@@ -807,7 +807,7 @@
             {
               "feat": "Biggest open-to-close rally",
               "holder": "GLI",
-              "value": "+23.79",
+              "value": "+23.80",
               "date": "2025-04-09",
               "detail": "",
               "ticker": "",
@@ -816,7 +816,7 @@
             {
               "feat": "Biggest open-to-close decline",
               "holder": "GLI",
-              "value": "-13.82",
+              "value": "-13.83",
               "date": "2025-04-08",
               "detail": "",
               "ticker": "",
@@ -834,7 +834,7 @@
             {
               "feat": "Largest high-to-close reversal",
               "holder": "GLI",
-              "value": "-16.77",
+              "value": "-16.78",
               "date": "2025-04-08",
               "detail": "",
               "ticker": "",
@@ -843,7 +843,7 @@
             {
               "feat": "Largest gain after opening lower",
               "holder": "GLI",
-              "value": "+7.21%",
+              "value": "+7.22%",
               "date": "2025-04-09",
               "detail": "Opened -1.12% vs prior close",
               "ticker": "",
@@ -852,7 +852,7 @@
             {
               "feat": "Largest loss after opening higher",
               "holder": "GLI",
-              "value": "-8.20%",
+              "value": "-8.22%",
               "date": "2008-10-09",
               "detail": "Opened +1.35% vs prior close",
               "ticker": "",
@@ -861,9 +861,9 @@
             {
               "feat": "Closest finish to unchanged",
               "holder": "GLI",
-              "value": "-0.0001%",
-              "date": "2022-06-23",
-              "detail": "-0.0003 points",
+              "value": "-0.0003%",
+              "date": "2025-06-05",
+              "detail": "-0.0010 points",
               "ticker": "",
               "raw": null
             },
@@ -884,7 +884,7 @@
             {
               "feat": "Best 2-session performance",
               "holder": "GLI",
-              "value": "+10.99%",
+              "value": "+10.83%",
               "date": "2020-03-24",
               "detail": "Ending 2020-03-24",
               "ticker": "",
@@ -893,7 +893,7 @@
             {
               "feat": "Worst 2-session performance",
               "holder": "GLI",
-              "value": "-12.13%",
+              "value": "-12.16%",
               "date": "2020-03-16",
               "detail": "Ending 2020-03-16",
               "ticker": "",
@@ -902,7 +902,7 @@
             {
               "feat": "Best 5-session performance",
               "holder": "GLI",
-              "value": "+19.89%",
+              "value": "+19.79%",
               "date": "2008-11-26",
               "detail": "Ending 2008-11-26",
               "ticker": "",
@@ -911,7 +911,7 @@
             {
               "feat": "Worst 5-session performance",
               "holder": "GLI",
-              "value": "-19.94%",
+              "value": "-20.08%",
               "date": "2020-03-16",
               "detail": "Ending 2020-03-16",
               "ticker": "",
@@ -920,7 +920,7 @@
             {
               "feat": "Best 10-session performance",
               "holder": "GLI",
-              "value": "+17.40%",
+              "value": "+17.49%",
               "date": "2009-03-18",
               "detail": "Ending 2009-03-18",
               "ticker": "",
@@ -929,7 +929,7 @@
             {
               "feat": "Worst 10-session performance",
               "holder": "GLI",
-              "value": "-28.39%",
+              "value": "-28.40%",
               "date": "2020-03-23",
               "detail": "Ending 2020-03-23",
               "ticker": "",
@@ -938,7 +938,7 @@
             {
               "feat": "Best week",
               "holder": "GLI",
-              "value": "+17.11%",
+              "value": "+17.04%",
               "date": "2020-03-27",
               "detail": "2020-03-21/2020-03-27",
               "ticker": "",
@@ -947,7 +947,7 @@
             {
               "feat": "Worst week",
               "holder": "GLI",
-              "value": "-14.85%",
+              "value": "-14.75%",
               "date": "2008-10-24",
               "detail": "2008-10-18/2008-10-24",
               "ticker": "",
@@ -956,7 +956,7 @@
             {
               "feat": "Best month",
               "holder": "GLI",
-              "value": "+18.50%",
+              "value": "+18.48%",
               "date": "2020-04-30",
               "detail": "2020-04",
               "ticker": "",
@@ -965,7 +965,7 @@
             {
               "feat": "Worst month",
               "holder": "GLI",
-              "value": "-21.68%",
+              "value": "-21.63%",
               "date": "2020-03-31",
               "detail": "2020-03",
               "ticker": "",
@@ -974,7 +974,7 @@
             {
               "feat": "Best quarter",
               "holder": "GLI",
-              "value": "+24.26%",
+              "value": "+24.85%",
               "date": "2020-06-30",
               "detail": "2020Q2",
               "ticker": "",
@@ -983,7 +983,7 @@
             {
               "feat": "Worst quarter",
               "holder": "GLI",
-              "value": "-27.72%",
+              "value": "-27.89%",
               "date": "2008-12-31",
               "detail": "2008Q4",
               "ticker": "",
@@ -992,7 +992,7 @@
             {
               "feat": "Best calendar year",
               "holder": "GLI",
-              "value": "+29.26%",
+              "value": "+28.62%",
               "date": "2021-12-31",
               "detail": "2021",
               "ticker": "",
@@ -1001,7 +1001,7 @@
             {
               "feat": "Worst calendar year",
               "holder": "GLI",
-              "value": "-43.34%",
+              "value": "-43.32%",
               "date": "2008-12-31",
               "detail": "2008",
               "ticker": "",
@@ -1015,7 +1015,7 @@
             {
               "feat": "Largest decline from an all-time high",
               "holder": "GLI",
-              "value": "-62.54%",
+              "value": "-62.05%",
               "date": "2009-03-09",
               "detail": "",
               "ticker": "",
@@ -1024,7 +1024,7 @@
             {
               "feat": "Largest calendar-year drawdown",
               "holder": "GLI",
-              "value": "-54.67%",
+              "value": "-54.48%",
               "date": "2008-11-20",
               "detail": "2008",
               "ticker": "",
@@ -1033,9 +1033,9 @@
             {
               "feat": "Longest drawdown",
               "holder": "GLI",
-              "value": "1552 sessions",
-              "date": "2013-08-01",
-              "detail": "2007-06-04 through 2013-08-01",
+              "value": "1575 sessions",
+              "date": "2013-10-18",
+              "detail": "2007-07-19 through 2013-10-18",
               "ticker": "",
               "raw": null
             },
@@ -1128,7 +1128,7 @@
             {
               "feat": "Largest GLI gain with a majority of components declining",
               "holder": "GLI",
-              "value": "+1.94%",
+              "value": "+1.93%",
               "date": "2008-10-10",
               "detail": "47 up / 53 down",
               "ticker": "",
@@ -1137,9 +1137,9 @@
             {
               "feat": "Largest GLI decline with a majority of components advancing",
               "holder": "GLI",
-              "value": "-1.23%",
-              "date": "2019-08-30",
-              "detail": "58 up / 36 down",
+              "value": "-4.57%",
+              "date": "2019-01-02",
+              "detail": "60 up / 38 down",
               "ticker": "",
               "raw": null
             },
@@ -1173,8 +1173,8 @@
             {
               "feat": "Lowest percentage of advancing sessions in a calendar year",
               "holder": "GLI",
-              "value": "47.01%",
-              "date": "2022",
+              "value": "47.22%",
+              "date": "2015",
               "detail": "",
               "ticker": "",
               "raw": null
@@ -1328,7 +1328,7 @@
             {
               "feat": "Best calendar year",
               "holder": "RRD \u2014 R.R. Donnelley & Sons Company",
-              "value": "+321.99%",
+              "value": "+325.16%",
               "date": "2021-12-31",
               "detail": "2021",
               "ticker": "RRD",
@@ -1346,7 +1346,7 @@
             {
               "feat": "Largest gain from GLI entry price",
               "holder": "DPZ \u2014 Domino's Pizza, Inc.",
-              "value": "+4,010.97%",
+              "value": "+3,977.22%",
               "date": "2024-06-18",
               "detail": "Entry 2005-09-22",
               "ticker": "DPZ",
@@ -1355,7 +1355,7 @@
             {
               "feat": "Largest multiple of GLI entry price",
               "holder": "DPZ \u2014 Domino's Pizza, Inc.",
-              "value": "41.11\u00d7",
+              "value": "40.77\u00d7",
               "date": "2024-06-18",
               "detail": "Entry 2005-09-22",
               "ticker": "DPZ",
@@ -1373,9 +1373,9 @@
             {
               "feat": "Largest rally from a GLI-tenure low",
               "holder": "MOD \u2014 Modine Manufacturing Company",
-              "value": "+37,328.85%",
+              "value": "+37,059.33%",
               "date": "2026-06-02",
-              "detail": "Tenure low 2009-02-12",
+              "detail": "Tenure low 2009-03-06",
               "ticker": "MOD",
               "raw": null
             },
@@ -1495,7 +1495,7 @@
             {
               "feat": "Largest negative one-session contribution to the GLI",
               "holder": "LLY \u2014 Eli Lilly and Company",
-              "value": "-3.10 points",
+              "value": "-3.09 points",
               "date": "2025-08-07",
               "detail": "",
               "ticker": "LLY",
@@ -1504,7 +1504,7 @@
             {
               "feat": "Largest cumulative positive contribution in a calendar year",
               "holder": "CAT \u2014 Caterpillar, Inc.",
-              "value": "+10.09 points",
+              "value": "+9.33 points",
               "date": "2026",
               "detail": "2026",
               "ticker": "CAT",
@@ -1513,7 +1513,7 @@
             {
               "feat": "Largest cumulative negative contribution in a calendar year",
               "holder": "CME \u2014 CME Group Inc.",
-              "value": "-12.56 points",
+              "value": "-13.02 points",
               "date": "2008",
               "detail": "2008",
               "ticker": "CME",
@@ -1522,7 +1522,7 @@
             {
               "feat": "Largest cumulative contribution over all GLI sessions",
               "holder": "LLY \u2014 Eli Lilly and Company",
-              "value": "+29.42 points",
+              "value": "+29.48 points",
               "date": "",
               "detail": "",
               "ticker": "LLY",
@@ -1531,7 +1531,7 @@
             {
               "feat": "Most sessions as the largest positive contributor",
               "holder": "CME \u2014 CME Group Inc.",
-              "value": "428 sessions",
+              "value": "426 sessions",
               "date": "",
               "detail": "",
               "ticker": "CME",
@@ -1566,20 +1566,20 @@
             },
             {
               "feat": "Highest percentage of a single day\u2019s GLI move attributable to one component",
-              "holder": "CME \u2014 CME Group Inc.",
-              "value": "276.26%",
-              "date": "2008-11-03",
-              "detail": "+0.50 contribution points; sessions with |GLI move| \u2265 0.25%",
-              "ticker": "CME",
+              "holder": "JCI \u2014 Johnson Controls, Inc.",
+              "value": "392.77%",
+              "date": "2007-01-03",
+              "detail": "-1.71 contribution points; sessions with |GLI move| \u2265 0.25%",
+              "ticker": "JCI",
               "raw": null
             },
             {
               "feat": "Highest percentage of a calendar year\u2019s GLI gain attributable to one component",
-              "holder": "CME \u2014 CME Group Inc.",
-              "value": "56.87%",
+              "holder": "DE \u2014 Deere & Company",
+              "value": "36.11%",
               "date": "2007",
-              "detail": "+2.26 component points vs +3.98 GLI points",
-              "ticker": "CME",
+              "detail": "+2.18 component points vs +6.04 GLI points",
+              "ticker": "DE",
               "raw": null
             }
           ]
@@ -1722,9 +1722,9 @@
             {
               "feat": "Longest streak below the 20-session moving average",
               "holder": "GLI",
-              "value": "42 sessions",
+              "value": "31 sessions",
               "date": "2008-07-21",
-              "detail": "2008-05-21 through 2008-07-21",
+              "detail": "2008-06-06 through 2008-07-21",
               "ticker": "",
               "raw": null
             }
@@ -1873,7 +1873,7 @@
             {
               "feat": "Highest aggregate component volume in one session",
               "holder": "GLI",
-              "value": "1,153,730,762",
+              "value": "1,153,375,297",
               "date": "2008-10-10",
               "detail": "",
               "ticker": "",
@@ -1891,7 +1891,7 @@
             {
               "feat": "Highest-volume week",
               "holder": "GLI",
-              "value": "4,213,911,433",
+              "value": "4,212,199,954",
               "date": "2008-10-10",
               "detail": "2008-10-04/2008-10-10",
               "ticker": "",
@@ -1909,7 +1909,7 @@
             {
               "feat": "Highest-volume month",
               "holder": "GLI",
-              "value": "16,187,356,445",
+              "value": "16,180,929,502",
               "date": "2008-10-31",
               "detail": "2008-10",
               "ticker": "",
@@ -1927,7 +1927,7 @@
             {
               "feat": "Highest-volume calendar year",
               "holder": "GLI",
-              "value": "118,554,170,883",
+              "value": "118,510,187,630",
               "date": "2008-12-31",
               "detail": "2008",
               "ticker": "",
@@ -1945,7 +1945,7 @@
             {
               "feat": "Highest 5-session aggregate volume",
               "holder": "GLI",
-              "value": "4,378,255,732",
+              "value": "4,378,541,410",
               "date": "2008-10-14",
               "detail": "",
               "ticker": "",
@@ -1954,7 +1954,7 @@
             {
               "feat": "Highest 20-session aggregate volume",
               "holder": "GLI",
-              "value": "14,442,961,036",
+              "value": "14,438,936,625",
               "date": "2008-10-24",
               "detail": "",
               "ticker": "",
@@ -2008,7 +2008,7 @@
             {
               "feat": "Highest-volume advancing session",
               "holder": "GLI",
-              "value": "1,153,730,762",
+              "value": "1,153,375,297",
               "date": "2008-10-10",
               "detail": "",
               "ticker": "",
@@ -2017,7 +2017,7 @@
             {
               "feat": "Highest-volume declining session",
               "holder": "GLI",
-              "value": "1,074,862,179",
+              "value": "1,074,926,311",
               "date": "2009-05-13",
               "detail": "",
               "ticker": "",
@@ -2026,7 +2026,7 @@
             {
               "feat": "Highest-volume session ending nearly unchanged",
               "holder": "GLI",
-              "value": "679,937,300",
+              "value": "680,102,352",
               "date": "2008-12-19",
               "detail": "Close within \u00b10.10%",
               "ticker": "",
@@ -2067,9 +2067,9 @@
             {
               "feat": "Longest streak of below-average volume",
               "holder": "GLI",
-              "value": "24 sessions",
-              "date": "2014-11-28",
-              "detail": "2014-10-27 through 2014-11-28",
+              "value": "25 sessions",
+              "date": "2019-04-22",
+              "detail": "2019-03-18 through 2019-04-22",
               "ticker": "",
               "raw": null
             },
@@ -2561,7 +2561,7 @@
             {
               "feat": "Largest gain from return-date price",
               "holder": "SYK \u2014 Stryker Corporation",
-              "value": "+554.36%",
+              "value": "+547.71%",
               "date": "2025-07-25",
               "detail": "Returned 2007-07-31",
               "ticker": "SYK",
@@ -2640,7 +2640,7 @@
             {
               "feat": "GLI advances despite a majority of components declining",
               "holder": "GLI",
-              "value": "+1.94%",
+              "value": "+1.93%",
               "date": "2008-10-10",
               "detail": "47 up / 53 down",
               "ticker": "",
@@ -2649,9 +2649,9 @@
             {
               "feat": "GLI declines despite a majority of components advancing",
               "holder": "GLI",
-              "value": "-1.23%",
-              "date": "2019-08-30",
-              "detail": "58 up / 36 down",
+              "value": "-4.57%",
+              "date": "2019-01-02",
+              "detail": "60 up / 38 down",
               "ticker": "",
               "raw": null
             },
@@ -2667,7 +2667,7 @@
             {
               "feat": "Biggest decliner and biggest negative contributor on the same session",
               "holder": "MOD \u2014 Modine Manufacturing Company",
-              "value": "674 sessions",
+              "value": "672 sessions",
               "date": "2026-07-28",
               "detail": "Most recent qualifying session",
               "ticker": "MOD",
@@ -2694,7 +2694,7 @@
             {
               "feat": "One component accounts for more than 50% of the GLI\u2019s daily advance",
               "holder": "ULTA \u2014 Ulta Beauty, Inc.",
-              "value": "489 sessions",
+              "value": "486 sessions",
               "date": "2026-08-07",
               "detail": "Most recent: 69.9% of the index move",
               "ticker": "ULTA",
@@ -2802,7 +2802,7 @@
             {
               "feat": "GLI declines while all five largest-weighted components advance",
               "holder": "GLI",
-              "value": "-0.80%",
+              "value": "-0.73%",
               "date": "2021-03-18",
               "detail": "",
               "ticker": "",
@@ -2876,7 +2876,7 @@
               "holder": "DPZ \u2014 Domino's Pizza, Inc.",
               "value": "5 doubling levels",
               "date": "2024-06-18",
-              "detail": "Entry 2005-09-22; peak 41.11\u00d7 entry",
+              "detail": "Entry 2005-09-22; peak 40.77\u00d7 entry",
               "ticker": "DPZ",
               "raw": null
             }
@@ -2887,11 +2887,11 @@
           "records": [
             {
               "feat": "Company holding the most current all-time records",
-              "holder": "CME \u2014 CME Group Inc.",
-              "value": "12 records",
+              "holder": "F \u2014 Ford Motor Company",
+              "value": "11 records",
               "date": "",
               "detail": "",
-              "ticker": "CME",
+              "ticker": "F",
               "raw": null
             },
             {
@@ -2924,7 +2924,7 @@
             {
               "feat": "Most record-book feats dated to one calendar year",
               "holder": "GLI record book",
-              "value": "46 records",
+              "value": "45 records",
               "date": "2008",
               "detail": "",
               "ticker": "",

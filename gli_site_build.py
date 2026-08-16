@@ -207,7 +207,8 @@ def load_full_history(live_rows: list[dict[str, str]]) -> list[dict[str, str]]:
             by_date[row["Date"]] = row
     for row in live_rows:
         canonical = canonical_live_row(row)
-        if canonical["Date"] and completed_close(canonical["GLI_Close"]) is not None:
+        if (canonical["Date"] > "2025-12-31"
+                and completed_close(canonical["GLI_Close"]) is not None):
             by_date[canonical["Date"]] = canonical
     return [by_date[d] for d in sorted(by_date)]
 
