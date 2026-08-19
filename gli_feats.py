@@ -436,9 +436,9 @@ def _identity_section(site_data:Path,label):
     events=df[df.EventType!=''] if 'EventType' in df.columns else pd.DataFrame()
     if len(events):
         tc=events[events.EventType.str.contains('ticker',case=False,na=False)].groupby('Identity').size()
-        if len(tc):i=tc.idxmax();row=df[df.Identity==i].iloc[-1];r.append(_rec('Most ticker changes while represented in GLI history',i,f'{int(tc.max())} changes'))
+        if len(tc):i=tc.idxmax();row=df[df.Identity==i].iloc[-1];n=int(tc.max());r.append(_rec('Most ticker changes while represented in GLI history',i,f'{n} change' if n==1 else f'{n} changes'))
         nc=events[events.EventType.str.contains('name',case=False,na=False)].groupby('Identity').size()
-        if len(nc):i=nc.idxmax();r.append(_rec('Most company-name changes while represented in GLI history',i,f'{int(nc.max())} changes'))
+        if len(nc):i=nc.idxmax();n=int(nc.max());r.append(_rec('Most company-name changes while represented in GLI history',i,f'{n} change' if n==1 else f'{n} changes'))
     # symbols per identity
     sy=df.groupby('Identity').Ticker.nunique();
     if len(sy):i=sy.idxmax();r.append(_rec('Most separate historical symbols associated with one corporate lineage',i,f'{int(sy.max())} symbols'))
@@ -697,8 +697,330 @@ def _tenure_frame(comp: pd.DataFrame) -> tuple[pd.DataFrame,pd.DataFrame]:
     return c,t
 
 
-def _augment_categories(categories, comp, idx, label, site_data):
+def _normalized_membership_states(root: Path, idx: pd.DataFrame) -> list[tuple[str, dict[str, str]]]:
+    """Return normalized Component History membership states keyed by identity.
+
+    This deliberately reuses the Component History builder's accepted
+    normalization layer.  That layer distinguishes true membership turnover
+    from name/ticker continuity and from same-ticker security replacement.
+    Keeping Feats on the same chronology prevents quote gaps or the broader
+    historical name table from inventing departures/returns.
+    """
+    if idx.empty:
+        return []
+    try:
+        import importlib
+        site_builder = importlib.import_module('gli_site_build')
+    except Exception as exc:
+        raise SystemExit(f'Unable to import GLI site builder for membership chronology: {exc}') from exc
+
+    required = [
+        'extend_component_history',
+        'historical_component_identity_metadata',
+        '_ticker_identity_meta_at',
+        '_normalize_component_identity_label',
+    ]
+    missing = [name for name in required if not hasattr(site_builder, name)]
+    if missing:
+        raise SystemExit(f'GLI site builder lacks normalized membership helpers: {missing}')
+
+    cp = root / 'constituents_great_lakes.csv'
+    if not cp.exists():
+        raise SystemExit(f'Missing live component membership source: {cp}')
+    with cp.open(newline='', encoding='utf-8-sig') as stream:
+        constituents = list(csv.DictReader(stream))
+
+    # Component History only needs the GLI session dates when extending 2026.
+    history_rows = [{'Date': str(day)} for day in idx.Date.astype(str)]
+    payload = site_builder.extend_component_history(history_rows, constituents)
+    snapshots = sorted(payload.get('snapshots', []), key=lambda s: str(s.get('date', '')))
+    ticker_ranges, label_identity = site_builder.historical_component_identity_metadata()
+
+    states: list[tuple[str, dict[str, str]]] = []
+    for snapshot in snapshots:
+        day = str(snapshot.get('date', ''))
+        if not day:
+            continue
+        mode = snapshot.get('label_mode')
+        symbol_map = snapshot.get('component_symbols') or {}
+        current: dict[str, str] = {}
+        for raw in snapshot.get('components', []):
+            label_text = str(raw).strip()
+            if not label_text or label_text.upper().startswith('NAME CHANGE:'):
+                continue
+            if mode == 'ticker':
+                symbol = label_text.upper()
+            else:
+                symbol = str(symbol_map.get(label_text, '')).strip().upper()
+
+            if symbol:
+                meta = site_builder._ticker_identity_meta_at(
+                    symbol, day, ticker_ranges, allow_nearest=True
+                )
+                identity = str(meta.get('identity') or symbol).strip().upper()
+            else:
+                key = site_builder._normalize_component_identity_label(label_text)
+                identity = str(label_identity.get(key, f'LABEL:{key}')).strip().upper()
+
+            if identity:
+                # Match Component History's own identity enumeration behavior:
+                # one represented security/ticker per accepted identity at a
+                # checkpoint.  Continuity events can therefore change ticker
+                # without ending the identity's GLI tenure.
+                current[identity] = symbol or identity
+        states.append((day, current))
+    return states
+
+
+def _membership_tenure_frames(
+    root: Path,
+    site_data: Path,
+    idx: pd.DataFrame,
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Build identity-level and ticker-level GLI tenure frames from Component History."""
+    identity_cols = [
+        'tenure_id','Identity','Ticker','start_ticker','end_ticker',
+        'start','end','start_i','end_i','sessions'
+    ]
+    ticker_cols = ['tenure_id','Ticker','start','end','start_i','end_i','sessions']
+    if idx.empty:
+        return pd.DataFrame(columns=identity_cols), pd.DataFrame(columns=ticker_cols)
+
+    states = _normalized_membership_states(root, idx)
+    if not states:
+        raise SystemExit('Normalized Component History produced no membership states.')
+
+    dates = idx.Date.astype(str).tolist()
+    states = [(d, m) for d, m in states if d <= dates[-1]]
+    if not states:
+        raise SystemExit('Normalized Component History has no checkpoint on/before the GLI history.')
+
+    by_identity: dict[str, list[tuple[int, str]]] = defaultdict(list)
+    by_ticker: dict[str, list[int]] = defaultdict(list)
+    current: dict[str, str] = {}
+    j = 0
+    for i, day in enumerate(dates):
+        while j < len(states) and states[j][0] <= day:
+            current = states[j][1]
+            j += 1
+        for identity, ticker in current.items():
+            # Accepted 2005 base reconstruction supersedes the legacy Component
+            # History workbook's "Original 25" label for CF Industries.  CF was
+            # a deferred addition effective 2005-08-11, not an opening
+            # constituent on the corrected 2005-08-01 GLI base date.
+            if (identity == 'CF' or ticker == 'CF') and day < '2005-08-11':
+                continue
+            by_identity[identity].append((i, ticker))
+            if ticker:
+                by_ticker[ticker].append(i)
+
+    identity_rows = []
+    tenure_id = 0
+    for identity, obs in sorted(by_identity.items()):
+        if not obs:
+            continue
+        split_at = [k for k in range(1, len(obs)) if obs[k][0] != obs[k-1][0] + 1]
+        starts = [0] + split_at
+        ends = split_at + [len(obs)]
+        for a0, b0 in zip(starts, ends):
+            block = obs[a0:b0]
+            if not block:
+                continue
+            tenure_id += 1
+            a = int(block[0][0]); b = int(block[-1][0])
+            start_ticker = str(block[0][1]).upper()
+            end_ticker = str(block[-1][1]).upper()
+            identity_rows.append({
+                'tenure_id': tenure_id,
+                'Identity': identity,
+                # Backward-compatible display ticker: use the ticker at the end
+                # of the accepted identity tenure.
+                'Ticker': end_ticker,
+                'start_ticker': start_ticker,
+                'end_ticker': end_ticker,
+                'start': dates[a], 'end': dates[b],
+                'start_i': a, 'end_i': b, 'sessions': b-a+1,
+            })
+
+    ticker_rows = []
+    ticker_tid = 0
+    for ticker, members in sorted(by_ticker.items()):
+        arr = np.asarray(members, dtype=int)
+        if not len(arr):
+            continue
+        breaks = np.flatnonzero(np.diff(arr) > 1) + 1
+        for block in np.split(arr, breaks):
+            if not len(block):
+                continue
+            ticker_tid += 1
+            a = int(block[0]); b = int(block[-1])
+            ticker_rows.append({
+                'tenure_id': ticker_tid, 'Ticker': ticker,
+                'start': dates[a], 'end': dates[b],
+                'start_i': a, 'end_i': b, 'sessions': int(len(block)),
+            })
+
+    return (
+        pd.DataFrame(identity_rows, columns=identity_cols),
+        pd.DataFrame(ticker_rows, columns=ticker_cols),
+    )
+
+
+def _membership_tenure_frame(root: Path, site_data: Path, idx: pd.DataFrame) -> pd.DataFrame:
+    """Return true component/security-identity GLI tenures."""
+    return _membership_tenure_frames(root, site_data, idx)[0]
+
+
+def _membership_ticker_tenure_frame(root: Path, site_data: Path, idx: pd.DataFrame) -> pd.DataFrame:
+    """Return continuous membership spans under an individual ticker symbol."""
+    return _membership_tenure_frames(root, site_data, idx)[1]
+
+def _membership_boundary_rows(
+    comp: pd.DataFrame,
+    tenures: pd.DataFrame,
+    boundary: str,
+) -> pd.DataFrame:
+    """Return component rows that exactly coincide with membership boundaries."""
+    if comp.empty or tenures.empty:
+        return comp.iloc[0:0].copy()
+    if boundary not in {'start','end'}:
+        raise ValueError("boundary must be 'start' or 'end'")
+    key=f'{boundary}_i'
+    ticker_col = f'{boundary}_ticker' if f'{boundary}_ticker' in tenures.columns else 'Ticker'
+    right=tenures[['tenure_id',ticker_col,key]].rename(
+        columns={'tenure_id':'membership_tenure_id',ticker_col:'Ticker',key:'session_i'}
+    )
+    return comp.merge(right,on=['Ticker','session_i'],how='inner')
+
+
+def _active_roster_tickers(root: Path, day: str) -> set[str]:
+    p=root/'constituents_great_lakes.csv'
+    if not p.exists():
+        return set()
+    active=set()
+    with p.open(newline='',encoding='utf-8-sig') as stream:
+        for row in csv.DictReader(stream):
+            ticker=(row.get('Ticker') or '').strip().upper()
+            if not ticker:
+                continue
+            start=(row.get('StartDate') or '0001-01-01').strip() or '0001-01-01'
+            end=(row.get('EndDate') or '9999-12-31').strip() or '9999-12-31'
+            if start<=day<=end:
+                active.add(ticker)
+    return active
+
+
+def _current_company_names(root: Path) -> dict[str,str]:
+    p=root/'company_names.csv';names={}
+    if not p.exists():
+        return names
+    with p.open(newline='',encoding='utf-8-sig') as stream:
+        for row in csv.DictReader(stream):
+            ticker=(row.get('Ticker') or row.get('Symbol') or '').strip().upper()
+            company=(row.get('Company') or row.get('Name') or '').strip()
+            if ticker and company:
+                names[ticker]=company
+    return names
+
+
+def _identity_longest_records(
+    root: Path,
+    site_data: Path,
+    idx: pd.DataFrame,
+    label,
+    membership_tenures: pd.DataFrame,
+) -> list[dict[str,Any]]:
+    """Compute identity/ticker/name longevity through the current GLI session.
+
+    ``historical_company_names.csv`` is an archive through 2025, so a row that
+    ends at that archive boundary is extended only when the same ticker remains
+    a live member and the current company name still matches.  Ticker tenure is
+    taken directly from date-effective membership and therefore does not depend
+    on component-price coverage.
+    """
+    p=site_data/'historical_company_names.csv'
+    if not p.exists() or idx.empty:
+        return []
+    last=str(idx.Date.iloc[-1])
+    h=pd.read_csv(p,dtype=str).fillna('')
+    if h.empty:
+        return []
+    active=_active_roster_tickers(root,last)
+    current_names=_current_company_names(root)
+
+    def norm_name(v: Any) -> str:
+        # Company caches sometimes omit punctuation or a trailing legal suffix
+        # (for example, "American Electric Power Company" vs
+        # "American Electric Power Company, Inc.").  Ignore those cosmetic
+        # differences without treating a substantive renamed company as equal.
+        import re
+        words=re.findall(r'[a-z0-9]+',str(v).casefold().replace('&',' and '))
+        suffixes={'inc','incorporated','corp','corporation','co','company','plc','llc','lp','ltd','limited'}
+        while words and words[-1] in suffixes:
+            words.pop()
+        return ' '.join(words)
+
+    h['s']=pd.to_datetime(h['StartDate'],errors='coerce')
+    raw_end=h['EndDate'].replace('',last)
+    h['name_effective_end']=raw_end
+    h['identity_effective_end']=raw_end
+    # Corporate identity continues through a 2025 archive cutoff when the same
+    # ticker is still an eligible member.  Company-name tenure is more strict:
+    # extend it only when the current cached name still matches (allowing only
+    # cosmetic punctuation/legal-suffix differences).
+    for i,row in h.iterrows():
+        ticker=str(row.get('Ticker','')).strip().upper()
+        end=str(row.get('EndDate','')).strip()
+        company=str(row.get('Company','')).strip()
+        current=current_names.get(ticker,'')
+        archival_cutoff=(not end or end=='2025-12-31')
+        if ticker in active and archival_cutoff:
+            h.at[i,'identity_effective_end']=last
+            if current and norm_name(current)==norm_name(company):
+                h.at[i,'name_effective_end']=last
+    h['e']=pd.to_datetime(h['name_effective_end'].replace('',last),errors='coerce').fillna(pd.Timestamp(last))
+    h=h[h.s.notna()].copy()
+    h['days']=(h.e-h.s).dt.days
+
+    records=[]
+    # Corporate lineage: the normalized Component History identity tenure is
+    # authoritative.  True absences break continuity; ticker/name continuity does not.
+    if not membership_tenures.empty:
+        mt=membership_tenures.copy()
+        mt['days']=(pd.to_datetime(mt.end)-pd.to_datetime(mt.start)).dt.days
+        best=int(mt.days.max());ties=mt[mt.days==best].sort_values(['Identity','end_ticker'])
+        if len(ties)==1:
+            q=ties.iloc[0];holder=str(q.Identity);detail=f'Since {q.start}';date=q.end
+        else:
+            holder='Multiple';detail=f"Since {ties.start.iloc[0]}; " + ', '.join(ties.end_ticker.tolist());date=ties.end.iloc[0]
+        records.append(_rec('Longest continuously represented corporate lineage',holder,f'{best:,} calendar days',date,detail))
+
+    # One ticker: use ticker-specific roster spans, so a ticker change ends this
+    # record even when the underlying corporate/security identity continues.
+    ticker_tenures=_membership_ticker_tenure_frame(root,site_data,idx)
+    if not ticker_tenures.empty:
+        tt=ticker_tenures.copy();tt['days']=(pd.to_datetime(tt.end)-pd.to_datetime(tt.start)).dt.days
+        best=int(tt.days.max());ties=tt[tt.days==best].sort_values('Ticker')
+        if len(ties)==1:
+            q=ties.iloc[0];holder=label(q.Ticker,q.end);detail=f'Since {q.start}';ticker=q.Ticker;date=q.end
+        else:
+            holder='Multiple';detail=f"Since {ties.start.iloc[0]}; " + ', '.join(ties.Ticker.tolist());ticker='';date=ties.end.iloc[0]
+        records.append(_rec('Longest tenure under one ticker',holder,f'{best:,} calendar days',date,detail,ticker))
+
+    # One company name: extend a historical cutoff row only when the current name matches.
+    if not h.empty:
+        best=int(h.days.max());ties=h[h.days==best].sort_values(['Company','Ticker'])
+        if len(ties)==1:
+            q=ties.iloc[0];holder=q.Company;detail=f'Since {q.StartDate}';ticker=q.Ticker;date=str(q.e.date())
+        else:
+            holder='Multiple';detail=f"Since {ties.StartDate.iloc[0]}; " + ', '.join(ties.Company.tolist());ticker='';date=str(ties.e.iloc[0].date())
+        records.append(_rec('Longest tenure under one company name',holder,f'{best:,} calendar days',date,detail,ticker))
+    return records
+
+
+def _augment_categories(categories, comp, idx, label, root, site_data):
     c,tenures=_tenure_frame(comp)
+    membership_tenures=_membership_tenure_frame(root,site_data,idx)
     idx_last=idx.Date.iloc[-1]
 
     # Component price feats tied to a continuous tenure.
@@ -812,14 +1134,20 @@ def _augment_categories(categories, comp, idx, label, site_data):
     totals=comp.groupby('Ticker').Volume.sum();t=totals.idxmax();cv.append(_rec('Most shares traded across all GLI tenures',label(t),_fmt_int(totals.max()),ticker=t))
     tq=tenures.loc[tenures.avg_volume.idxmax()];cv.append(_rec('Highest average daily volume during one continuous GLI tenure',label(tq.Ticker,tq.end),_fmt_int(tq.avg_volume),tq.end,f'{tq.start} through {tq.end}',tq.Ticker))
     comp['volume_increase']=(comp.Volume-comp.prev_volume).where(comp.continuous);z=comp.volume_increase.dropna();q=comp.loc[z.idxmax()];cv.append(_rec('Largest one-session increase in component volume',label(q.Ticker,q.Date),_fmt_int(q.volume_increase),q.Date,ticker=q.Ticker))
-    # entry/final/return volume
-    first_rows=c.groupby('tenure_id').first(numeric_only=False);q=first_rows.loc[first_rows.Volume.idxmax()];cv.append(_rec('Highest-volume first session after joining',label(q.Ticker,q.Date),_fmt_int(q.Volume),q.Date,ticker=q.Ticker))
-    completed=tenures[tenures.end!=idx_last]
-    if len(completed):
-        last_rows=c[c.tenure_id.isin(completed.tenure_id)].groupby('tenure_id').last(numeric_only=False);q=last_rows.loc[last_rows.Volume.idxmax()];cv.append(_rec('Highest-volume final session before removal',label(q.Ticker,q.Date),_fmt_int(q.Volume),q.Date,ticker=q.Ticker))
-    counts=tenures.groupby('Ticker').cumcount();ret_ids=set(tenures.loc[counts>0,'tenure_id'])
-    if ret_ids:
-        rr=c[c.tenure_id.isin(ret_ids)].groupby('tenure_id').first(numeric_only=False);q=rr.loc[rr.Volume.idxmax()];cv.append(_rec('Highest-volume session following a return to the GLI',label(q.Ticker,q.Date),_fmt_int(q.Volume),q.Date,ticker=q.Ticker))
+    # Entry/final/return volume uses actual membership boundaries.  A quote gap
+    # cannot masquerade as an index entry, removal, or return.
+    membership_first_rows=_membership_boundary_rows(c,membership_tenures,'start')
+    if len(membership_first_rows):
+        q=membership_first_rows.loc[membership_first_rows.Volume.idxmax()];cv.append(_rec('Highest-volume first session after joining',label(q.Ticker,q.Date),_fmt_int(q.Volume),q.Date,ticker=q.Ticker))
+    completed=membership_tenures[membership_tenures.end!=idx_last]
+    completed_rows=_membership_boundary_rows(c,completed,'end')
+    if len(completed_rows):
+        q=completed_rows.loc[completed_rows.Volume.idxmax()];cv.append(_rec('Highest-volume final session before removal',label(q.Ticker,q.Date),_fmt_int(q.Volume),q.Date,ticker=q.Ticker))
+    membership_counts=membership_tenures.groupby('Identity').cumcount() if len(membership_tenures) else pd.Series(dtype=int)
+    returned_membership=membership_tenures.loc[membership_counts>0] if len(membership_tenures) else membership_tenures
+    return_rows=_membership_boundary_rows(c,returned_membership,'start')
+    if len(return_rows):
+        q=return_rows.loc[return_rows.Volume.idxmax()];cv.append(_rec('Highest-volume session following a return to the GLI',label(q.Ticker,q.Date),_fmt_int(q.Volume),q.Date,ticker=q.Ticker))
     # component volume streaks
     for feat,cond in [('Longest above-average-volume streak',comp.rvol20>1),('Longest streak of increasing component volume',comp.Volume>comp.prev_volume)]:
         z=_best_true_component_run(comp,cond & comp.continuous)
@@ -834,33 +1162,38 @@ def _augment_categories(categories, comp, idx, label, site_data):
     s=c[(c.adj_price<=tenure_low)&c.rvol20.notna()];
     if len(s):q=s.loc[s.rvol20.idxmax()];pv.append(_rec('Highest relative volume on a new GLI-tenure low',label(q.Ticker,q.Date),f'{q.rvol20:.2f}×',q.Date,ticker=q.Ticker))
 
-    # Membership fixes/additions.
+    # Membership fixes/additions.  Membership facts come from roster intervals,
+    # never from whether a component quote happens to be present on a session.
     tr=_get_section(categories,'membership','Tenure')
-    continuous_original=tenures[(tenures.start==idx.Date.iloc[0])&(tenures.end==idx_last)]
-    tickers=sorted(continuous_original.Ticker.tolist())
+    continuous_original=membership_tenures[(membership_tenures.start==idx.Date.iloc[0])&(membership_tenures.end==idx_last)]
+    tickers=sorted(continuous_original.end_ticker.tolist())
     _replace_record(tr,'Original components still active',_rec('Original components still active','Multiple',f'{len(tickers)} components',idx_last,', '.join(tickers)))
     dr=_get_section(categories,'membership','Departures & Returns')
     returns=[]
-    for t,g in tenures.sort_values(['Ticker','start_i']).groupby('Ticker'):
+    for identity,g in membership_tenures.sort_values(['Identity','start_i']).groupby('Identity'):
         rows=list(g.itertuples(index=False))
-        for a,b in zip(rows,rows[1:]):returns.append((t,a,b))
+        for a,b in zip(rows,rows[1:]):returns.append((identity,a,b))
     month_stats=[];return_gain=[]
-    for t,a,b in returns:
-        g=c[c.tenure_id==b.tenure_id].sort_values('session_i').reset_index(drop=True)
-        if len(g)>=21:month_stats.append((g.adj_price.iloc[20]/g.adj_price.iloc[0]-1,t,g.Date.iloc[20],g.Date.iloc[0]))
-        j=g.adj_price.idxmax();mx=float(g.adj_price.max()/g.adj_price.iloc[0]-1);return_gain.append((mx,t,g.loc[j,'Date'],g.Date.iloc[0]))
+    for identity,a,b in returns:
+        # Use only a price segment that starts on the true roster return date;
+        # a later quote gap must not create a synthetic return period.
+        t=b.start_ticker
+        price_match=tenures[(tenures.Ticker==t)&(tenures.start_i==b.start_i)]
+        if price_match.empty:
+            continue
+        price_tid=price_match.iloc[0].tenure_id
+        g=c[c.tenure_id==price_tid].sort_values('session_i').reset_index(drop=True)
+        if len(g)>=21 and int(g.session_i.iloc[20])-int(g.session_i.iloc[0])==20:
+            month_stats.append((g.adj_price.iloc[20]/g.adj_price.iloc[0]-1,t,g.Date.iloc[20],g.Date.iloc[0]))
+        if len(g):
+            j=g.adj_price.idxmax();mx=float(g.adj_price.max()/g.adj_price.iloc[0]-1);return_gain.append((mx,t,g.loc[j,'Date'],g.Date.iloc[0]))
     if month_stats:
         z=max(month_stats);dr.append(_rec('Best first month after returning',label(z[1],z[2]),_fmt_num(z[0]*100,2,True,'%'),z[2],f'Returned {z[3]}; first 21 sessions',z[1]))
     if return_gain:
         z=max(return_gain);dr.append(_rec('Largest gain from return-date price',label(z[1],z[2]),_fmt_num(z[0]*100,2,True,'%'),z[2],f'Returned {z[3]}',z[1]))
     ir=_get_section(categories,'membership','Identity & Corporate History')
-    hp=site_data/'historical_company_names.csv'
-    if hp.exists():
-        h=pd.read_csv(hp,dtype=str).fillna('');h['s']=pd.to_datetime(h.StartDate,errors='coerce');h['e']=pd.to_datetime(h.EndDate.replace('',idx_last),errors='coerce').fillna(pd.Timestamp(idx_last));h['days']=(h.e-h.s).dt.days
-        if 'Identity' in h:
-            x=h[h.Identity!=''].groupby('Identity').agg(s=('s','min'),e=('e','max'));x['days']=(x.e-x.s).dt.days;i=x.days.idxmax();ir.append(_rec('Longest continuously represented corporate lineage',i,f'{int(x.loc[i,"days"]):,} calendar days',str(x.loc[i,'e'].date()),f'Since {x.loc[i,"s"].date()}'))
-        q=h.loc[h.days.idxmax()];ir.append(_rec('Longest tenure under one ticker',label(q.Ticker,str(q.EndDate or idx_last)),f'{int(q.days):,} calendar days',q.EndDate or idx_last,f'Since {q.StartDate}',q.Ticker))
-        q=h.loc[h.days.idxmax()];ir.append(_rec('Longest tenure under one company name',q.Company,f'{int(q.days):,} calendar days',q.EndDate or idx_last,f'Since {q.StartDate}',q.Ticker))
+    for rec in _identity_longest_records(root,site_data,idx,label,membership_tenures):
+        _replace_record(ir,rec['feat'],rec)
 
     # Rare GLI feats and component entry/exit feats.
     rare=_get_section(categories,'rare','Rare Feats')
@@ -880,19 +1213,26 @@ def _augment_categories(categories, comp, idx, label, site_data):
     if len(s):q=s.loc[s.idxret.idxmax()];rare.append(_rec('GLI advances while all five largest-weighted components decline','GLI',_fmt_num(q.idxret*100,2,True,'%'),q.Date))
     s=z[(z.n==5)&z.all_up&(z.idxret<0)]
     if len(s):q=s.loc[s.idxret.idxmin()];rare.append(_rec('GLI declines while all five largest-weighted components advance','GLI',_fmt_num(q.idxret*100,2,True,'%'),q.Date))
-    # entry/final component feats
-    firsts=c.groupby('tenure_id').first(numeric_only=False)
-    q=firsts.loc[firsts.oc_ret.idxmax()];rare.append(_rec('Best first session after entering the GLI',label(q.Ticker,q.Date),_fmt_num(q.oc_ret*100,2,True,'%'),q.Date,ticker=q.Ticker))
-    q=firsts.loc[firsts.oc_ret.idxmin()];rare.append(_rec('Worst first session after entering the GLI',label(q.Ticker,q.Date),_fmt_num(q.oc_ret*100,2,True,'%'),q.Date,ticker=q.Ticker))
+    # Entry/final component feats are anchored to actual roster boundaries.
+    firsts=_membership_boundary_rows(c,membership_tenures,'start')
+    if len(firsts):
+        q=firsts.loc[firsts.oc_ret.idxmax()];rare.append(_rec('Best first session after entering the GLI',label(q.Ticker,q.Date),_fmt_num(q.oc_ret*100,2,True,'%'),q.Date,ticker=q.Ticker))
+        q=firsts.loc[firsts.oc_ret.idxmin()];rare.append(_rec('Worst first session after entering the GLI',label(q.Ticker,q.Date),_fmt_num(q.oc_ret*100,2,True,'%'),q.Date,ticker=q.Ticker))
     first_month=[]
-    for tid,g in c.groupby('tenure_id'):
-        g=g.sort_values('session_i').reset_index(drop=True)
-        if len(g)>=21:first_month.append((g.adj_price.iloc[20]/g.adj_price.iloc[0]-1,g.Ticker.iloc[0],g.Date.iloc[20],g.Date.iloc[0]))
+    for m in membership_tenures.itertuples(index=False):
+        price_match=tenures[(tenures.Ticker==m.start_ticker)&(tenures.start_i==m.start_i)]
+        if price_match.empty:
+            continue
+        tid=price_match.iloc[0].tenure_id
+        g=c[c.tenure_id==tid].sort_values('session_i').reset_index(drop=True)
+        if len(g)>=21 and int(g.session_i.iloc[20])-int(g.session_i.iloc[0])==20:
+            first_month.append((g.adj_price.iloc[20]/g.adj_price.iloc[0]-1,g.Ticker.iloc[0],g.Date.iloc[20],g.Date.iloc[0]))
     if first_month:
         z=max(first_month);rare.append(_rec('Best first month as a GLI component',label(z[1],z[2]),_fmt_num(z[0]*100,2,True,'%'),z[2],f'Entry {z[3]}; first 21 sessions',z[1]));z=min(first_month);rare.append(_rec('Worst first month as a GLI component',label(z[1],z[2]),_fmt_num(z[0]*100,2,True,'%'),z[2],f'Entry {z[3]}; first 21 sessions',z[1]))
-    if len(completed):
-        finals=c[c.tenure_id.isin(completed.tenure_id)].groupby('tenure_id').last(numeric_only=False);finals=finals[finals.oc_ret>0]
-        if len(finals):q=finals.loc[finals.oc_ret.idxmax()];rare.append(_rec('Largest gain on the final session before removal',label(q.Ticker,q.Date),_fmt_num(q.oc_ret*100,2,True,'%'),q.Date,ticker=q.Ticker))
+    finals=_membership_boundary_rows(c,completed,'end')
+    finals=finals[finals.oc_ret>0] if len(finals) else finals
+    if len(finals):
+        q=finals.loc[finals.oc_ret.idxmax()];rare.append(_rec('Largest gain on the final session before removal',label(q.Ticker,q.Date),_fmt_num(q.oc_ret*100,2,True,'%'),q.Date,ticker=q.Ticker))
     if first_double:
         d,t,start,n,_=first_double;rare.append(_rec('First component to double while in the GLI',label(t,d),'2.00× entry price',d,f'Entry {start}; {n} sessions',t))
     if fastest_double:
@@ -946,40 +1286,94 @@ def _augment_categories(categories, comp, idx, label, site_data):
 
 
 
-def _membership_sections(comp,idx,label):
-    c,rdf=_tenure_frame(comp);r=[];last=idx.Date.iloc[-1]
-    q=rdf.loc[rdf.sessions.idxmax()];r.append(_rec('Longest continuous GLI tenure',label(q.Ticker,q.end),f'{int(q.sessions):,} sessions',q.end,f'{q.start} through {q.end}',q.Ticker))
-    totals=rdf.groupby('Ticker').sessions.sum();t=totals.idxmax();r.append(_rec('Most total sessions as a GLI component',label(t),f'{int(totals.max()):,} sessions',ticker=t))
+def _membership_sections(comp,idx,label,root:Path,site_data:Path):
+    # Membership/return facts use the same normalized Component History identity
+    # chronology as the Component History page.  Component OHLCV is consulted
+    # only for records that explicitly require a boundary-day quote.
+    c,_price_tenures=_tenure_frame(comp);rdf=_membership_tenure_frame(root,site_data,idx);r=[];last=idx.Date.iloc[-1]
+    if rdf.empty:
+        return [('Tenure',r),('Departures & Returns',[])],rdf
+
+    def latest_ticker(identity: str) -> str:
+        g=rdf[rdf.Identity==identity].sort_values('end_i')
+        return str(g.iloc[-1].end_ticker) if len(g) else str(identity)
+
+    # Longest continuous identity tenure (tie-aware).
+    best=int(rdf.sessions.max());ties=rdf[rdf.sessions==best].sort_values(['Identity','end_ticker'])
+    if len(ties)==1:
+        q=ties.iloc[0];r.append(_rec('Longest continuous GLI tenure',label(q.end_ticker,q.end),f'{best:,} sessions',q.end,f'{q.start} through {q.end}',q.end_ticker))
+    else:
+        r.append(_rec('Longest continuous GLI tenure','Multiple',f'{best:,} sessions',ties.end.iloc[0],f"{ties.start.iloc[0]} through {ties.end.iloc[0]}; " + ', '.join(ties.end_ticker.tolist())))
+
+    # Most total represented sessions across all true identity tenures.
+    totals=rdf.groupby('Identity').sessions.sum();best_total=int(totals.max());ids=sorted(totals[totals==best_total].index.tolist())
+    tickers=sorted(dict.fromkeys(latest_ticker(i) for i in ids))
+    if len(ids)==1:
+        t=tickers[0];r.append(_rec('Most total sessions as a GLI component',label(t),f'{best_total:,} sessions',ticker=t))
+    else:
+        r.append(_rec('Most total sessions as a GLI component','Multiple',f'{best_total:,} sessions',detail=', '.join(tickers)))
+
     complete=rdf[rdf.end!=last]
-    if len(complete):q=complete.loc[complete.sessions.idxmin()];r.append(_rec('Shortest completed GLI tenure',label(q.Ticker,q.end),f'{int(q.sessions)} sessions',q.end,f'{q.start} through {q.end}',q.Ticker))
+    if len(complete):
+        best_short=int(complete.sessions.min());ties=complete[complete.sessions==best_short].sort_values(['end','Identity'])
+        q=ties.iloc[0]
+        detail=f'{q.start} through {q.end}' if len(ties)==1 else f'{q.start} through {q.end}; tied: ' + ', '.join(ties.end_ticker.tolist())
+        holder=label(q.end_ticker,q.end) if len(ties)==1 else 'Multiple'
+        r.append(_rec('Shortest completed GLI tenure',holder,f'{best_short} sessions',q.end,detail,q.end_ticker if len(ties)==1 else ''))
+
     active=rdf[rdf.end==last]
-    if len(active):q=active.loc[active.start_i.idxmin()];r.append(_rec('Oldest continuously active GLI component',label(q.Ticker,q.end),f'{int(q.sessions):,} sessions',q.start,f'Active through {q.end}',q.Ticker))
-    originals=rdf[(rdf.start==idx.Date.iloc[0])&(rdf.end==last)];ticks=sorted(originals.Ticker);r.append(_rec('Original components still active','Multiple',f'{len(ticks)} components',last,', '.join(ticks)))
-    years=comp.assign(year=comp.Date.str[:4]).groupby('Ticker').year.nunique();t=years.idxmax();r.append(_rec('Most calendar years represented in the index',label(t),f'{int(years.max())} years',ticker=t))
+    if len(active):
+        oldest_i=int(active.start_i.min());ties=active[active.start_i==oldest_i].sort_values(['Identity','end_ticker']);best_sessions=int(ties.sessions.max())
+        if len(ties)==1:
+            q=ties.iloc[0];r.append(_rec('Oldest continuously active GLI component',label(q.end_ticker,q.end),f'{int(q.sessions):,} sessions',q.start,f'Active through {q.end}',q.end_ticker))
+        else:
+            r.append(_rec('Oldest continuously active GLI component','Multiple',f'{best_sessions:,} sessions',ties.start.iloc[0],f'Active through {last}; ' + ', '.join(ties.end_ticker.tolist())))
+
+    originals=rdf[(rdf.start==idx.Date.iloc[0])&(rdf.end==last)];ticks=sorted(originals.end_ticker.tolist())
+    r.append(_rec('Original components still active','Multiple',f'{len(ticks)} components',last,', '.join(ticks)))
+
+    year_sets=defaultdict(set)
+    for row in rdf.itertuples(index=False):
+        for y in idx.iloc[int(row.start_i):int(row.end_i)+1].Date.astype(str).str[:4].unique():
+            year_sets[row.Identity].add(str(y))
+    if year_sets:
+        max_years=max(len(v) for v in year_sets.values());ids=sorted(i for i,v in year_sets.items() if len(v)==max_years)
+        yt=sorted(dict.fromkeys(latest_ticker(i) for i in ids))
+        if len(ids)==1:r.append(_rec('Most calendar years represented in the index',label(yt[0]),f'{max_years} years',ticker=yt[0]))
+        else:
+            detail=', '.join(yt) if len(yt)<=12 else f'{len(ids)} components tied'
+            r.append(_rec('Most calendar years represented in the index','Multiple',f'{max_years} years',detail=detail))
     sections=[('Tenure',r)]
-    r=[];counts=rdf.groupby('Ticker').size();ret=counts[counts>1]
+
+    r=[];counts=rdf.groupby('Identity').size();ret=counts[counts>1]
     if len(ret):
-        t=ret.idxmax();r.append(_rec('Most separate GLI tenures',label(t),f'{int(ret.max())} tenures',ticker=t))
+        max_tenures=int(ret.max());ids=sorted(ret[ret==max_tenures].index.tolist());tt=sorted(dict.fromkeys(latest_ticker(i) for i in ids))
+        if len(ids)==1:r.append(_rec('Most separate GLI tenures',label(tt[0]),f'{max_tenures} tenures',ticker=tt[0]))
+        else:r.append(_rec('Most separate GLI tenures','Multiple',f'{max_tenures} tenures',detail=', '.join(tt)))
         returns=[]
-        for t,g in rdf.sort_values(['Ticker','start_i']).groupby('Ticker'):
+        for identity,g in rdf.sort_values(['Identity','start_i']).groupby('Identity'):
             rows=list(g.itertuples(index=False))
-            for a,b in zip(rows,rows[1:]):returns.append((int(b.start_i-a.end_i-1),t,a,b))
+            for a,b in zip(rows,rows[1:]):returns.append((int(b.start_i-a.end_i-1),identity,a,b))
         returns.sort(key=lambda x:x[3].start_i)
         if returns:
-            x=returns[0];r.append(_rec('First component to leave and later return',label(x[1],x[3].start),f'{x[0]} sessions absent',x[3].start,f'Previous tenure ended {x[2].end}',x[1]))
-            x=returns[-1];r.append(_rec('Most recent returning component',label(x[1],x[3].start),f'{x[0]} sessions absent',x[3].start,ticker=x[1]))
-            x=max(returns,key=lambda z:z[0]);r.append(_rec('Longest absence before returning',label(x[1],x[3].start),f'{x[0]:,} sessions',x[3].start,f'Absent after {x[2].end}',x[1]))
-            x=min(returns,key=lambda z:z[0]);r.append(_rec('Shortest absence before returning',label(x[1],x[3].start),f'{x[0]} sessions',x[3].start,ticker=x[1]))
+            x=returns[0];t=x[3].start_ticker;r.append(_rec('First component to leave and later return',label(t,x[3].start),f'{x[0]} sessions absent',x[3].start,f'Previous tenure ended {x[2].end}',t))
+            latest=max(z[3].start_i for z in returns);latest_rows=[z for z in returns if z[3].start_i==latest]
+            x=sorted(latest_rows,key=lambda z:z[3].start_ticker)[0];t=x[3].start_ticker;holder=label(t,x[3].start) if len(latest_rows)==1 else 'Multiple';detail='' if len(latest_rows)==1 else ', '.join(sorted(z[3].start_ticker for z in latest_rows))
+            r.append(_rec('Most recent returning component',holder,f'{x[0]} sessions absent',x[3].start,detail,t if len(latest_rows)==1 else ''))
+            x=max(returns,key=lambda z:z[0]);t=x[3].start_ticker;r.append(_rec('Longest absence before returning',label(t,x[3].start),f'{x[0]:,} sessions',x[3].start,f'Absent after {x[2].end}',t))
+            x=min(returns,key=lambda z:z[0]);t=x[3].start_ticker;r.append(_rec('Shortest absence before returning',label(t,x[3].start),f'{x[0]} sessions',x[3].start,ticker=t))
             abs_tot=defaultdict(int)
             for x in returns:abs_tot[x[1]]+=x[0]
-            t=max(abs_tot,key=abs_tot.get);r.append(_rec('Most total sessions spent outside the index between active tenures',label(t),f'{abs_tot[t]:,} sessions',ticker=t))
-            ret_ids=[x[3].tenure_id for x in returns]
-            firsts=c[c.tenure_id.isin(ret_ids)].groupby('tenure_id',sort=False).first(numeric_only=False)
-            if len(firsts):
-                q=firsts.loc[firsts.oc_ret.idxmax()];r.append(_rec('Best first session after returning',label(q.Ticker,q.Date),_fmt_num(q.oc_ret*100,2,True,'%'),q.Date,ticker=q.Ticker))
-                q=firsts.loc[firsts.oc_ret.idxmin()];r.append(_rec('Worst first session after returning',label(q.Ticker,q.Date),_fmt_num(q.oc_ret*100,2,True,'%'),q.Date,ticker=q.Ticker))
-    sections.append(('Departures & Returns',r));return sections,rdf
+            identity=max(abs_tot,key=abs_tot.get);t=latest_ticker(identity);r.append(_rec('Most total sessions spent outside the index between active tenures',label(t),f'{abs_tot[identity]:,} sessions',ticker=t))
 
+            returned=rdf.loc[rdf.groupby('Identity').cumcount()>0]
+            firsts=_membership_boundary_rows(c,returned,'start')
+            if len(firsts):
+                z=firsts.oc_ret.dropna()
+                if len(z):
+                    q=firsts.loc[z.idxmax()];r.append(_rec('Best first session after returning',label(q.Ticker,q.Date),_fmt_num(q.oc_ret*100,2,True,'%'),q.Date,ticker=q.Ticker))
+                    q=firsts.loc[z.idxmin()];r.append(_rec('Worst first session after returning',label(q.Ticker,q.Date),_fmt_num(q.oc_ret*100,2,True,'%'),q.Date,ticker=q.Ticker))
+    sections.append(('Departures & Returns',r));return sections,rdf
 
 def _price_start_ok(value: Any, min_price: float | None) -> bool:
     """Return whether a Price Performance candidate clears the start-price floor."""
@@ -1143,9 +1537,9 @@ def build(root:Path,site_data:Path,full_rows:list[dict[str,str]]):
     component_sections,_=_component_sections(comp,idx,label);cats.append({'id':'component','title':'Component Feats','sections':[{'title':t,'records':r} for t,r in component_sections]})
     streak_sections=_streak_sections(comp,idx,label);cats.append({'id':'streaks','title':'Streaks','sections':[{'title':t,'records':r} for t,r in streak_sections]})
     volume_sections=_volume_sections(comp,idx,label);cats.append({'id':'volume','title':'Volume & Trading Activity','sections':[{'title':t,'records':r} for t,r in volume_sections]})
-    membership,_=_membership_sections(comp,idx,label);membership.extend(_identity_section(site_data,label));cats.append({'id':'membership','title':'Membership & Longevity','sections':[{'title':t,'records':r} for t,r in membership]})
+    membership,_=_membership_sections(comp,idx,label,root,site_data);membership.extend(_identity_section(site_data,label));cats.append({'id':'membership','title':'Membership & Longevity','sections':[{'title':t,'records':r} for t,r in membership]})
     cats.append({'id':'rare','title':'Rare Feats','sections':[{'title':t,'records':r} for t,r in rare] + [{'title':'Record-Book Meta Feats','records':[]}]})
-    _augment_categories(cats,comp,idx,label,site_data)
+    _augment_categories(cats,comp,idx,label,root,site_data)
     price_performance_filters={
         'gt1':_filtered_price_performance_records(comp,idx,label,1.0),
         'gt5':_filtered_price_performance_records(comp,idx,label,5.0),
@@ -1157,6 +1551,7 @@ def build(root:Path,site_data:Path,full_rows:list[dict[str,str]]):
         'definitions':[
             'Index daily point/percentage gains and losses are intentionally excluded; those remain on Market Moves.',
             'All component-derived feats use only dates when the ticker was an eligible GLI component: historical membership through 2025 comes from historical_company_names.csv and 2026 membership comes from constituents_great_lakes.csv. Pre-entry and post-removal quotes, including OTC trading, are excluded.',
+            'Membership and longevity records use the same normalized Component History chronology as the Component History page, projected onto the GLI session calendar. True removals/returns break a tenure; name/ticker continuity does not; missing component-price rows cannot create a departure or return.',
             'Component single-session gain/loss records use open-to-close returns so splits, ticker re-entries, and overnight identity discontinuities do not masquerade as trading-session feats.',
             'Component return chains require consecutive GLI trading sessions within the same ticker tenure. On GLI divisor-reset sessions, the return chain uses open-to-close movement to neutralize mechanical split/reconstitution discontinuities; contribution records exclude those reset sessions.',
             'Multi-session component price records use uninterrupted active-ticker sessions and cannot cross a removal/re-entry boundary. Calendar week/month/quarter/year rankings require at least 4/15/45/180 active sessions respectively so very short entry/removal fragments do not compete as full periods.',

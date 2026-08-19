@@ -619,6 +619,7 @@
   "definitions": [
     "Index daily point/percentage gains and losses are intentionally excluded; those remain on Market Moves.",
     "All component-derived feats use only dates when the ticker was an eligible GLI component: historical membership through 2025 comes from historical_company_names.csv and 2026 membership comes from constituents_great_lakes.csv. Pre-entry and post-removal quotes, including OTC trading, are excluded.",
+    "Membership and longevity records use the same normalized Component History chronology as the Component History page, projected onto the GLI session calendar. True removals/returns break a tenure; name/ticker continuity does not; missing component-price rows cannot create a departure or return.",
     "Component single-session gain/loss records use open-to-close returns so splits, ticker re-entries, and overnight identity discontinuities do not masquerade as trading-session feats.",
     "Component return chains require consecutive GLI trading sessions within the same ticker tenure. On GLI divisor-reset sessions, the return chain uses open-to-close movement to neutralize mechanical split/reconstitution discontinuities; contribution records exclude those reset sessions.",
     "Multi-session component price records use uninterrupted active-ticker sessions and cannot cross a removal/re-entry boundary. Calendar week/month/quarter/year rankings require at least 4/15/45/180 active sessions respectively so very short entry/removal fragments do not compete as full periods.",
@@ -2259,11 +2260,11 @@
             },
             {
               "feat": "Highest-volume session following a return to the GLI",
-              "holder": "GM \u2014 General Motors Company",
-              "value": "457,044,300",
-              "date": "2010-11-18",
+              "holder": "DOW \u2014 Dow Inc.",
+              "value": "17,414,153",
+              "date": "2019-04-02",
               "detail": "",
-              "ticker": "GM",
+              "ticker": "DOW",
               "raw": null
             },
             {
@@ -2410,20 +2411,20 @@
           "records": [
             {
               "feat": "Longest continuous GLI tenure",
-              "holder": "AEP \u2014 American Electric Power Company",
-              "value": "5,285 sessions",
-              "date": "2026-08-04",
-              "detail": "2005-08-01 through 2026-08-04",
-              "ticker": "AEP",
+              "holder": "Multiple",
+              "value": "5,295 sessions",
+              "date": "2026-08-18",
+              "detail": "2005-08-01 through 2026-08-18; AEP, F, FITB, LKFN, MCD, SKY, SRCE, WHR",
+              "ticker": "",
               "raw": null
             },
             {
               "feat": "Most total sessions as a GLI component",
-              "holder": "AEP \u2014 American Electric Power Company",
-              "value": "5,288 sessions",
+              "holder": "Multiple",
+              "value": "5,295 sessions",
               "date": "",
-              "detail": "",
-              "ticker": "AEP",
+              "detail": "AEP, F, FITB, LKFN, MCD, SKY, SRCE, WHR",
+              "ticker": "",
               "raw": null
             },
             {
@@ -2437,29 +2438,29 @@
             },
             {
               "feat": "Oldest continuously active GLI component",
-              "holder": "ADM \u2014 Archer-Daniels-Midland Company",
-              "value": "3 sessions",
-              "date": "2026-08-14",
-              "detail": "Active through 2026-08-18",
-              "ticker": "ADM",
+              "holder": "Multiple",
+              "value": "5,295 sessions",
+              "date": "2005-08-01",
+              "detail": "Active through 2026-08-18; AEP, F, FITB, LKFN, MCD, SKY, SRCE, WHR",
+              "ticker": "",
               "raw": null
             },
             {
               "feat": "Original components still active",
               "holder": "Multiple",
-              "value": "0 components",
+              "value": "8 components",
               "date": "2026-08-18",
-              "detail": "",
+              "detail": "AEP, F, FITB, LKFN, MCD, SKY, SRCE, WHR",
               "ticker": "",
               "raw": null
             },
             {
               "feat": "Most calendar years represented in the index",
-              "holder": "ADM \u2014 Archer-Daniels-Midland Company",
+              "holder": "Multiple",
               "value": "22 years",
               "date": "",
-              "detail": "",
-              "ticker": "ADM",
+              "detail": "29 components tied",
+              "ticker": "",
               "raw": null
             }
           ]
@@ -2469,11 +2470,11 @@
           "records": [
             {
               "feat": "Most separate GLI tenures",
-              "holder": "DOW \u2014 Dow Inc.",
-              "value": "3 tenures",
+              "holder": "Multiple",
+              "value": "2 tenures",
               "date": "",
-              "detail": "",
-              "ticker": "DOW",
+              "detail": "DOW, PATK, SYK, WEC",
+              "ticker": "",
               "raw": null
             },
             {
@@ -2487,11 +2488,11 @@
             },
             {
               "feat": "Most recent returning component",
-              "holder": "ZBH \u2014 Zimmer Biomet Holdings, Inc.",
-              "value": "7 sessions absent",
-              "date": "2026-08-14",
+              "holder": "DOW \u2014 Dow Inc.",
+              "value": "396 sessions absent",
+              "date": "2019-04-02",
               "detail": "",
-              "ticker": "ZBH",
+              "ticker": "DOW",
               "raw": null
             },
             {
@@ -2505,17 +2506,17 @@
             },
             {
               "feat": "Shortest absence before returning",
-              "holder": "ADM \u2014 Archer-Daniels-Midland Company",
-              "value": "7 sessions",
-              "date": "2026-08-14",
+              "holder": "SYK \u2014 Stryker Corporation",
+              "value": "261 sessions",
+              "date": "2007-07-31",
               "detail": "",
-              "ticker": "ADM",
+              "ticker": "SYK",
               "raw": null
             },
             {
               "feat": "Most total sessions spent outside the index between active tenures",
               "holder": "PATK \u2014 Patrick Industries, Inc.",
-              "value": "2,439 sessions",
+              "value": "2,432 sessions",
               "date": "",
               "detail": "",
               "ticker": "PATK",
@@ -2523,20 +2524,20 @@
             },
             {
               "feat": "Best first session after returning",
-              "holder": "MOD \u2014 Modine Manufacturing Company",
-              "value": "+3.85%",
-              "date": "2026-08-14",
+              "holder": "DOW \u2014 Dow Inc.",
+              "value": "+2.05%",
+              "date": "2019-04-02",
               "detail": "",
-              "ticker": "MOD",
+              "ticker": "DOW",
               "raw": null
             },
             {
               "feat": "Worst first session after returning",
-              "holder": "WHR \u2014 Whirlpool Corporation",
-              "value": "-2.66%",
-              "date": "2026-08-14",
+              "holder": "SYK \u2014 Stryker Corporation",
+              "value": "-2.59%",
+              "date": "2007-07-31",
               "detail": "",
-              "ticker": "WHR",
+              "ticker": "SYK",
               "raw": null
             },
             {
@@ -2565,7 +2566,7 @@
             {
               "feat": "Most ticker changes while represented in GLI history",
               "holder": "INGREDION",
-              "value": "1 changes",
+              "value": "1 change",
               "date": "",
               "detail": "",
               "ticker": "",
@@ -2591,29 +2592,29 @@
             },
             {
               "feat": "Longest continuously represented corporate lineage",
-              "holder": "AEP",
-              "value": "7,457 calendar days",
-              "date": "2025-12-31",
-              "detail": "Since 2005-08-01",
+              "holder": "Multiple",
+              "value": "7,687 calendar days",
+              "date": "2026-08-18",
+              "detail": "Since 2005-08-01; AEP, F, FITB, LKFN, MCD, SKY, SRCE, WHR",
               "ticker": "",
               "raw": null
             },
             {
               "feat": "Longest tenure under one ticker",
-              "holder": "AEP \u2014 American Electric Power Company, Inc.",
-              "value": "7,457 calendar days",
-              "date": "2025-12-31",
-              "detail": "Since 2005-08-01",
-              "ticker": "AEP",
+              "holder": "Multiple",
+              "value": "7,687 calendar days",
+              "date": "2026-08-18",
+              "detail": "Since 2005-08-01; AEP, F, FITB, LKFN, MCD, SKY, SRCE, WHR",
+              "ticker": "",
               "raw": null
             },
             {
               "feat": "Longest tenure under one company name",
-              "holder": "American Electric Power Company, Inc.",
-              "value": "7,457 calendar days",
-              "date": "2025-12-31",
-              "detail": "Since 2005-08-01",
-              "ticker": "AEP",
+              "holder": "Multiple",
+              "value": "7,687 calendar days",
+              "date": "2026-08-18",
+              "detail": "Since 2005-08-01; 1st Source Corporation, American Electric Power Company, Inc., Fifth Third Bancorp, Ford Motor Company, Lakeland Financial Corporation, McDonald's Corporation, Whirlpool Corporation",
+              "ticker": "",
               "raw": null
             }
           ]
@@ -2836,11 +2837,11 @@
             },
             {
               "feat": "Largest gain on the final session before removal",
-              "holder": "SEAT \u2014 Vivid Seats Inc.",
-              "value": "+14.39%",
-              "date": "2026-08-04",
+              "holder": "DBI \u2014 Designer Brands Inc.",
+              "value": "+13.61%",
+              "date": "2021-01-11",
               "detail": "",
-              "ticker": "SEAT",
+              "ticker": "DBI",
               "raw": null
             },
             {
