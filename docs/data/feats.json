@@ -171,7 +171,7 @@
       {
         "feat": "Best quarter",
         "holder": "RAIL \u2014 FreightCar America, Inc.",
-        "value": "+217.35%",
+        "value": "+216.20%",
         "date": "2024-09-30",
         "detail": "2024Q3",
         "ticker": "RAIL",
@@ -557,7 +557,7 @@
       {
         "feat": "Largest rally from a GLI-tenure low",
         "holder": "LLY \u2014 Eli Lilly and Company",
-        "value": "+4,654.29%",
+        "value": "+4,602.92%",
         "date": "2026-07-07",
         "detail": "Tenure low 2009-03-05",
         "ticker": "LLY",
@@ -705,7 +705,7 @@
               "holder": "GLI",
               "value": "2 sessions",
               "date": "2026-02-04",
-              "detail": "2026-02-02 (395.86) \u2192 2026-02-04 (406.46)",
+              "detail": "2026-02-02 (395.87) \u2192 2026-02-04 (406.47)",
               "ticker": "",
               "raw": null
             },
@@ -714,7 +714,7 @@
               "holder": "GLI",
               "value": "21 sessions",
               "date": "2026-02-04",
-              "detail": "2026-01-05 (378.30) \u2192 2026-02-04 (406.46)",
+              "detail": "2026-01-05 (378.31) \u2192 2026-02-04 (406.47)",
               "ticker": "",
               "raw": null
             },
@@ -723,7 +723,7 @@
               "holder": "GLI",
               "value": "55 sessions",
               "date": "2026-02-13",
-              "detail": "2025-11-24 (361.32) \u2192 2026-02-13 (413.48)",
+              "detail": "2025-11-24 (361.33) \u2192 2026-02-13 (413.49)",
               "ticker": "",
               "raw": null
             },
@@ -732,7 +732,7 @@
               "holder": "GLI",
               "value": "505 sessions",
               "date": "2026-02-11",
-              "detail": "2024-02-06 (310.44) \u2192 2026-02-11 (411.36)",
+              "detail": "2024-02-06 (310.44) \u2192 2026-02-11 (411.37)",
               "ticker": "",
               "raw": null
             },
@@ -1364,7 +1364,7 @@
             {
               "feat": "Largest rally from a GLI-tenure low",
               "holder": "MOD \u2014 Modine Manufacturing Company",
-              "value": "+39,683.94%",
+              "value": "+38,525.83%",
               "date": "2026-06-02",
               "detail": "Tenure low 2009-03-06",
               "ticker": "MOD",
@@ -1513,7 +1513,7 @@
             {
               "feat": "Largest cumulative contribution over all GLI sessions",
               "holder": "LLY \u2014 Eli Lilly and Company",
-              "value": "+32.92 points",
+              "value": "+32.76 points",
               "date": "",
               "detail": "",
               "ticker": "LLY",
@@ -2216,7 +2216,7 @@
             {
               "feat": "Most shares traded across all GLI tenures",
               "holder": "F \u2014 Ford Motor Company",
-              "value": "292,401,171,538",
+              "value": "292,406,552,488",
               "date": "",
               "detail": "",
               "ticker": "F",
@@ -2552,7 +2552,7 @@
             {
               "feat": "Largest gain from return-date price",
               "holder": "SYK \u2014 Stryker Corporation",
-              "value": "+568.15%",
+              "value": "+563.90%",
               "date": "2025-07-25",
               "detail": "Returned 2007-07-31",
               "ticker": "SYK",
