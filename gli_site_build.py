@@ -23,6 +23,7 @@ from typing import Any, Iterable
 
 import pandas as pd
 
+import gli_breadth
 import gli_feats
 
 BASE_DATE = "2005-08-01"
@@ -47,6 +48,7 @@ NAV_ITEMS = [
     ("index.html", "Home"),
     ("history.html", "Historical Values"),
     ("market-moves.html", "Market Moves"),
+    ("breadth.html", "Breadth"),
     ("feats.html", "Feats & Records"),
     ("milestones.html", "Closing Milestones"),
     ("weights.html", "Component Weights"),
@@ -774,7 +776,7 @@ def build_accepted_2026_weight_file(years: dict[str, Any], constituents: list[di
         if validation.get("status") != "PASS":
             raise SystemExit(f"Accepted 2026 component validation is not PASS: {validation_path}")
         coverage = validation.get("coverage", {})
-        if coverage.get("sessions") != 147 or coverage.get("component_rows") != 12642:
+        if coverage.get("sessions") != 154 or coverage.get("component_rows") != 13260:
             raise SystemExit(f"Unexpected accepted 2026 component coverage: {coverage}")
 
     prices = pd.read_csv(source, dtype=str).fillna("")
@@ -834,7 +836,7 @@ def build_accepted_2026_weight_file(years: dict[str, Any], constituents: list[di
         dates.append(day)
         snapshots.append(weights)
 
-    if len(dates) != 147 or dates[0] != "2026-01-02" or dates[-1] != "2026-08-04":
+    if len(dates) != 154 or dates[0] != "2026-01-02" or dates[-1] != "2026-08-13":
         raise SystemExit(
             f"Unexpected accepted 2026 weight coverage: "
             f"{len(dates)} dates {dates[0]}..{dates[-1]}"
@@ -854,7 +856,7 @@ def build_accepted_2026_weight_file(years: dict[str, Any], constituents: list[di
         "dates": len(dates),
         "first_date": dates[0],
         "last_date": dates[-1],
-        "status": "accepted component OHLCV through 2026-08-04",
+        "status": "accepted component OHLCV through 2026-08-13",
     }
 
 
@@ -1143,7 +1145,7 @@ def inject_home(full_rows: list[dict[str, str]]) -> None:
     change = close - prev_close if previous else Decimal(0)
     pct = change / prev_close * Decimal(100) if previous and prev_close else Decimal(0)
 
-    accepted_through = "2026-08-04"
+    accepted_through = "2026-08-13"
     if LIVE_ANCHOR.exists():
         try:
             anchor = json.loads(LIVE_ANCHOR.read_text(encoding="utf-8"))
@@ -1341,6 +1343,12 @@ def main() -> None:
     write_history_data(records)
     write_history_page(records)
     write_market_moves(records, full_rows)
+    breadth_payload = gli_breadth.build(ROOT, SITE_DATA, full_rows)
+    write_json(REPORT_DATA / "breadth.json", breadth_payload)
+    (REPORT / "breadth.html").write_text(
+        page("GLI Market Breadth", gli_breadth.render(breadth_payload), "breadth.html"),
+        encoding="utf-8",
+    )
     feats_payload = gli_feats.build(ROOT, SITE_DATA, full_rows)
     write_json(REPORT_DATA / "feats.json", feats_payload, pretty=True)
     (REPORT / "feats.html").write_text(

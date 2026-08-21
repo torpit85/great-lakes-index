@@ -2,19 +2,21 @@
   "status": "PASS",
   "year": 2026,
   "artifact": "GLI_2026_component_ohlcv_used.csv",
-  "sha256": "d6533d5d1b42d72a11b7edcf6e31965357a30aecd4a1ce12e3fd816ba17f3b40",
+  "sha256": "e0f6777f4957ffd0bfdc4f3812c7461a88a39ffbe47a73d503ce994c25241bec",
   "coverage": {
     "first_date": "2026-01-02",
-    "last_date": "2026-08-04",
-    "sessions": 147,
-    "component_rows": 12642,
+    "last_date": "2026-08-13",
+    "sessions": 154,
+    "component_rows": 13260,
     "roster_count_profile": {
-      "86": 147
+      "86": 150,
+      "90": 4
     }
   },
   "sources": {
     "TIINGO_RAW": 12513,
     "TIER1_SCVL_SHOE_RAW": 129,
+    "LIVE_YAHOO_UNADJUSTED": 618,
     "tiingo_json_files_loaded": 95,
     "tier1_raw_dates_loaded": 129
   },
@@ -32,11 +34,12 @@
     "candle_failures": 0,
     "daily_component_sum_mismatch_dates": 0,
     "max_daily_component_sum_residual": "0",
-    "all_dates_have_86_components": true
+    "roster_profile_matches_accepted_membership": true
   },
   "repaired_chain_checkpoints": {
     "2026-01-02_component_sum": "12221.6564",
-    "2026-08-04_component_sum": "13705.72"
+    "2026-08-04_component_sum": "13705.72",
+    "2026-08-13_component_sum": "14767.2299890518188014"
   },
   "spot_checks": {
     "2026-01-02/SCVL": {

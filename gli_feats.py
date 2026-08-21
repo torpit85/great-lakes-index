@@ -128,6 +128,79 @@ def _component_membership_ranges(root: Path, site_data: Path) -> dict[str, list[
     return dict(ranges)
 
 
+
+def _same_security_transition_map(
+    root: Path,
+    site_data: Path,
+) -> dict[tuple[str, str], str]:
+    """Map documented same-security ticker transitions to their prior ticker.
+
+    Historical ticker/name changes come from historical_company_names.csv.
+    Current identity transfers come from divisor_events.csv.  Genuine new
+    securities, removals, and later re-entries are intentionally excluded.
+    """
+    transitions: dict[tuple[str, str], str] = {}
+
+    def add(current: str, day: str, prior: str) -> None:
+        current = current.strip().upper()
+        prior = prior.strip().upper()
+        day = day.strip()[:10]
+        if not current or not prior or not day:
+            return
+        key = (current, day)
+        existing = transitions.get(key)
+        if existing is not None and existing != prior:
+            raise SystemExit(
+                f"Conflicting same-security transition for {key}: "
+                f"{existing} vs {prior}"
+            )
+        transitions[key] = prior
+
+    hp = site_data / "historical_company_names.csv"
+    if hp.exists():
+        with hp.open(newline="", encoding="utf-8-sig") as stream:
+            for row in csv.DictReader(stream):
+                event_type = (row.get("EventType") or "").strip().upper()
+                if event_type not in {
+                    "TICKER_CHANGE",
+                    "NAME_AND_TICKER_CHANGE",
+                }:
+                    continue
+                current = (row.get("Ticker") or "").strip()
+                prior = (row.get("PriorTicker") or "").strip()
+                day = (
+                    (row.get("EventDate") or "").strip()
+                    or (row.get("StartDate") or "").strip()
+                )
+                add(current, day, prior)
+
+    dp = root / "divisor_events.csv"
+    if dp.exists():
+        with dp.open(newline="", encoding="utf-8-sig") as stream:
+            for row in csv.DictReader(stream):
+                if (row.get("Type") or "").strip().lower() != "identity":
+                    continue
+
+                current = (row.get("Ticker") or "").strip().upper()
+                day = (row.get("Date") or "").strip()
+                note = (row.get("Note") or "").strip()
+
+                marker_text = " same-security identity transfer"
+                if marker_text not in note:
+                    continue
+
+                prefix = note.split(marker_text, 1)[0].strip()
+                if " to " not in prefix:
+                    continue
+
+                prior, noted_current = prefix.rsplit(" to ", 1)
+                if current and noted_current.strip().upper() != current:
+                    continue
+
+                add(current or noted_current, day, prior)
+
+    return transitions
+
 def _filter_components_to_membership(
     comp: pd.DataFrame,
     root: Path,
@@ -364,7 +437,11 @@ def _index_feats(idx: pd.DataFrame):
     return sections
 
 
-def _prepare_component_metrics(comp: pd.DataFrame, idx: pd.DataFrame):
+def _prepare_component_metrics(
+    comp: pd.DataFrame,
+    idx: pd.DataFrame,
+    transition_map: dict[tuple[str, str], str] | None = None,
+):
     comp=comp.copy().sort_values(['Ticker','Date']).reset_index(drop=True)
     session_map={d:i for i,d in enumerate(idx.Date)}
     comp['session_i']=comp.Date.map(session_map)
@@ -421,6 +498,44 @@ def _prepare_component_metrics(comp: pd.DataFrame, idx: pd.DataFrame):
         ),
         np.nan,
     )
+    # Breadth normally uses the same accepted clean return as component feats.
+    # At a documented same-security ticker transition, however, the new ticker's
+    # first membership row has no same-ticker prior close.  Bridge only those
+    # explicit identity continuations from the prior GLI session.
+    comp['breadth_ret']=comp.clean_ret.copy()
+    comp['breadth_bridge']=False
+
+    if transition_map:
+        close_lookup = {
+            (str(ticker).upper(), int(session_i)): float(close)
+            for ticker, session_i, close in zip(
+                comp.Ticker, comp.session_i, comp.Close
+            )
+            if pd.notna(session_i) and pd.notna(close)
+        }
+
+        missing = comp.index[comp.breadth_ret.isna()]
+        for i in missing:
+            ticker = str(comp.at[i, 'Ticker']).upper()
+            day = str(comp.at[i, 'Date'])[:10]
+            prior_ticker = transition_map.get((ticker, day))
+            if not prior_ticker:
+                continue
+
+            session_i = comp.at[i, 'session_i']
+            close = comp.at[i, 'Close']
+            if pd.isna(session_i) or pd.isna(close):
+                continue
+
+            prior_close = close_lookup.get(
+                (prior_ticker.upper(), int(session_i) - 1)
+            )
+            if prior_close is None or prior_close <= 0 or float(close) <= 0:
+                continue
+
+            comp.at[i, 'breadth_ret'] = float(close) / prior_close - 1.0
+            comp.at[i, 'breadth_bridge'] = True
+
     factor=(1+comp.clean_ret).where(comp.clean_ret.notna(),1.0)
     comp['perf_index']=factor.groupby(comp._tenure_id).cumprod()
     first_close=comp.groupby('_tenure_id').Close.transform('first')
@@ -602,9 +717,9 @@ def _volume_sections(comp,idx,label):
     sections.append(('Price + Volume Feats',r));return sections
 
 def _breadth_and_rare(comp,idx,label):
-    cc=comp.dropna(subset=['clean_ret']).copy()
-    cc['adv']=(cc.clean_ret>0).astype(int);cc['dec']=(cc.clean_ret<0).astype(int);cc['flat']=(cc.clean_ret==0).astype(int)
-    b=cc.groupby('Date').agg(adv=('adv','sum'),dec=('dec','sum'),flat=('flat','sum'),n=('Ticker','size')).reset_index();b['advp']=b.adv/b.n;b['decp']=b.dec/b.n
+    bcc=comp.dropna(subset=['breadth_ret']).copy()
+    bcc['adv']=(bcc.breadth_ret>0).astype(int);bcc['dec']=(bcc.breadth_ret<0).astype(int);bcc['flat']=(bcc.breadth_ret==0).astype(int)
+    b=bcc.groupby('Date').agg(adv=('adv','sum'),dec=('dec','sum'),flat=('flat','sum'),n=('Ticker','size')).reset_index();b['advp']=b.adv/b.n;b['decp']=b.dec/b.n
     idxret=idx.set_index('Date').Close.pct_change();b['idxret']=b.Date.map(idxret)
     r=[]
     for feat,col in [('Most advancing components in one session','adv'),('Most declining components in one session','dec')]:q=b.loc[b[col].idxmax()];r.append(_rec(feat,'GLI',f'{int(q[col])} components',q.Date))
@@ -621,6 +736,8 @@ def _breadth_and_rare(comp,idx,label):
     q=y.loc[y.adv_sessions.idxmax()];r.append(_rec('Most advancing GLI sessions in a calendar year','GLI',f'{int(q.adv_sessions)} sessions',str(q.name)));q=y.loc[y.decl_sessions.idxmax()];r.append(_rec('Most declining GLI sessions in a calendar year','GLI',f'{int(q.decl_sessions)} sessions',str(q.name)));q=y.loc[y.adv_pct.idxmax()];r.append(_rec('Highest percentage of advancing sessions in a calendar year','GLI',_fmt_num(q.adv_pct*100,2,suffix='%'),str(q.name)));q=y.loc[y.adv_pct.idxmin()];r.append(_rec('Lowest percentage of advancing sessions in a calendar year','GLI',_fmt_num(q.adv_pct*100,2,suffix='%'),str(q.name)))
     breadth=[('Breadth',r)]
 
+    # Rare/component-return feats retain the original clean-return methodology.
+    cc=comp.dropna(subset=['clean_ret']).copy()
     r=[]
     s=b[(b.idxret>0)&(b.dec>b.adv)]
     if len(s):q=s.loc[s.idxret.idxmax()];r.append(_rec('GLI advances despite a majority of components declining','GLI',_fmt_num(q.idxret*100,2,True,'%'),q.Date,f'{int(q.adv)} up / {int(q.dec)} down'))
@@ -1530,7 +1647,8 @@ def build(root:Path,site_data:Path,full_rows:list[dict[str,str]]):
     idx=idx.dropna(subset=['Date','Close']).sort_values('Date').reset_index(drop=True)
     raw_comp=_load_components(root,site_data)
     eligible_comp,membership_audit=_filter_components_to_membership(raw_comp,root,site_data)
-    comp=_prepare_component_metrics(eligible_comp,idx)
+    transition_map=_same_security_transition_map(root,site_data)
+    comp=_prepare_component_metrics(eligible_comp,idx,transition_map)
     cats=[]
     index_sections=_index_feats(idx);breadth,rare=_breadth_and_rare(comp,idx,label);index_sections.extend(breadth)
     cats.append({'id':'index','title':'Index Feats','sections':[{'title':t,'records':r} for t,r in index_sections]})
