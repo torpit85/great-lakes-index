@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
-  "generated_through": "2026-08-24",
-  "component_data_through": "2026-08-24",
+  "generated_through": "2026-08-25",
+  "component_data_through": "2026-08-25",
   "component_membership_filter": {
-    "raw_rows": 503866,
-    "eligible_rows": 503786,
+    "raw_rows": 503956,
+    "eligible_rows": 503876,
     "excluded_rows": 80,
     "excluded_tickers": [
       "BIG"
@@ -1513,7 +1513,7 @@
             {
               "feat": "Largest cumulative contribution over all GLI sessions",
               "holder": "LLY \u2014 Eli Lilly and Company",
-              "value": "+32.45 points",
+              "value": "+32.07 points",
               "date": "",
               "detail": "",
               "ticker": "LLY",
@@ -2180,7 +2180,7 @@
             {
               "feat": "Most sessions as the GLI\u2019s highest-volume component",
               "holder": "F \u2014 Ford Motor Company",
-              "value": "4,714 sessions",
+              "value": "4,715 sessions",
               "date": "",
               "detail": "",
               "ticker": "F",
@@ -2207,16 +2207,16 @@
             {
               "feat": "Most shares traded during one continuous GLI tenure",
               "holder": "F \u2014 Ford Motor Company",
-              "value": "292,817,450,152",
-              "date": "2026-08-24",
-              "detail": "2005-08-01 through 2026-08-24",
+              "value": "292,850,930,321",
+              "date": "2026-08-25",
+              "detail": "2005-08-01 through 2026-08-25",
               "ticker": "F",
               "raw": null
             },
             {
               "feat": "Most shares traded across all GLI tenures",
               "holder": "F \u2014 Ford Motor Company",
-              "value": "292,817,450,152",
+              "value": "292,850,930,321",
               "date": "",
               "detail": "",
               "ticker": "F",
@@ -2225,9 +2225,9 @@
             {
               "feat": "Highest average daily volume during one continuous GLI tenure",
               "holder": "F \u2014 Ford Motor Company",
-              "value": "55,259,002",
-              "date": "2026-08-24",
-              "detail": "2005-08-01 through 2026-08-24",
+              "value": "55,254,893",
+              "date": "2026-08-25",
+              "detail": "2005-08-01 through 2026-08-25",
               "ticker": "F",
               "raw": null
             },
@@ -2412,16 +2412,16 @@
             {
               "feat": "Longest continuous GLI tenure",
               "holder": "Multiple",
-              "value": "5,299 sessions",
-              "date": "2026-08-24",
-              "detail": "2005-08-01 through 2026-08-24; AEP, F, FITB, LKFN, MCD, SKY, SRCE, WHR",
+              "value": "5,300 sessions",
+              "date": "2026-08-25",
+              "detail": "2005-08-01 through 2026-08-25; AEP, F, FITB, LKFN, MCD, SKY, SRCE, WHR",
               "ticker": "",
               "raw": null
             },
             {
               "feat": "Most total sessions as a GLI component",
               "holder": "Multiple",
-              "value": "5,299 sessions",
+              "value": "5,300 sessions",
               "date": "",
               "detail": "AEP, F, FITB, LKFN, MCD, SKY, SRCE, WHR",
               "ticker": "",
@@ -2439,9 +2439,9 @@
             {
               "feat": "Oldest continuously active GLI component",
               "holder": "Multiple",
-              "value": "5,299 sessions",
+              "value": "5,300 sessions",
               "date": "2005-08-01",
-              "detail": "Active through 2026-08-24; AEP, F, FITB, LKFN, MCD, SKY, SRCE, WHR",
+              "detail": "Active through 2026-08-25; AEP, F, FITB, LKFN, MCD, SKY, SRCE, WHR",
               "ticker": "",
               "raw": null
             },
@@ -2449,7 +2449,7 @@
               "feat": "Original components still active",
               "holder": "Multiple",
               "value": "8 components",
-              "date": "2026-08-24",
+              "date": "2026-08-25",
               "detail": "AEP, F, FITB, LKFN, MCD, SKY, SRCE, WHR",
               "ticker": "",
               "raw": null
@@ -2593,8 +2593,8 @@
             {
               "feat": "Longest continuously represented corporate lineage",
               "holder": "Multiple",
-              "value": "7,693 calendar days",
-              "date": "2026-08-24",
+              "value": "7,694 calendar days",
+              "date": "2026-08-25",
               "detail": "Since 2005-08-01; AEP, F, FITB, LKFN, MCD, SKY, SRCE, WHR",
               "ticker": "",
               "raw": null
@@ -2602,8 +2602,8 @@
             {
               "feat": "Longest tenure under one ticker",
               "holder": "Multiple",
-              "value": "7,693 calendar days",
-              "date": "2026-08-24",
+              "value": "7,694 calendar days",
+              "date": "2026-08-25",
               "detail": "Since 2005-08-01; AEP, F, FITB, LKFN, MCD, SKY, SRCE, WHR",
               "ticker": "",
               "raw": null
@@ -2611,8 +2611,8 @@
             {
               "feat": "Longest tenure under one company name",
               "holder": "Multiple",
-              "value": "7,693 calendar days",
-              "date": "2026-08-24",
+              "value": "7,694 calendar days",
+              "date": "2026-08-25",
               "detail": "Since 2005-08-01; 1st Source Corporation, American Electric Power Company, Inc., Fifth Third Bancorp, Ford Motor Company, Lakeland Financial Corporation, McDonald's Corporation, Whirlpool Corporation",
               "ticker": "",
               "raw": null
@@ -2648,11 +2648,11 @@
             },
             {
               "feat": "Biggest gainer and biggest positive contributor on the same session",
-              "holder": "MPC \u2014 Marathon Petroleum Corporation",
-              "value": "702 sessions",
-              "date": "2026-08-11",
+              "holder": "CDW \u2014 CDW Corporation",
+              "value": "703 sessions",
+              "date": "2026-08-25",
               "detail": "Most recent qualifying session",
-              "ticker": "MPC",
+              "ticker": "CDW",
               "raw": null
             },
             {
@@ -2687,17 +2687,17 @@
               "holder": "ULTA \u2014 Ulta Beauty, Inc.",
               "value": "489 sessions",
               "date": "2026-08-24",
-              "detail": "Most recent: 173.1% of the index move",
+              "detail": "Most recent: 173.0% of the index move",
               "ticker": "ULTA",
               "raw": null
             },
             {
               "feat": "One component accounts for more than 50% of the GLI\u2019s daily decline",
-              "holder": "CMI \u2014 Cummins Inc.",
-              "value": "419 sessions",
-              "date": "2026-08-18",
-              "detail": "Most recent: 104.6% of the index move",
-              "ticker": "CMI",
+              "holder": "DE \u2014 Deere & Company",
+              "value": "420 sessions",
+              "date": "2026-08-25",
+              "detail": "Most recent: 51.1% of the index move",
+              "ticker": "DE",
               "raw": null
             },
             {
