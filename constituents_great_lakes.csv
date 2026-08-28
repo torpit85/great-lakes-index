@@ -104,3 +104,5 @@ MPLX,Y,2026-08-10,,Added effective 2026-08-10 as part of expansion to 90 compone
 TWI,Y,2026-08-10,,Added effective 2026-08-10 as part of expansion to 90 components
 VTR,Y,2026-08-10,,Added effective 2026-08-10 as part of expansion to 90 components
 ZBRA,Y,2026-08-10,,Added effective 2026-08-10 as part of expansion to 90 components
+BBWI,N,2021-08-03,2025-12-31,Corrected historical span: LB->BBWI same-security identity continuity effective 2021-08-03; removed in accepted 2026-01-02 history/live boundary reconciliation. BBWI later re-enters replacing GLDD effective 2026-04-01.
+VSCO,N,2021-12-13,2025-12-31,Corrected historical span: reconstructed immediate replacement for HRC effective 2021-12-13; removed in accepted 2026-01-02 history/live boundary reconciliation.

@@ -61,9 +61,31 @@ def read_constituents(path: Path) -> pd.DataFrame:
         .replace({"nan": "", "NaT": ""})
     )
     df = df[df["Ticker"].ne("") & df["Ticker"].str.lower().ne("nan")].copy()
-    if df["Ticker"].duplicated().any():
-        duplicates = sorted(df.loc[df["Ticker"].duplicated(), "Ticker"].unique())
-        raise ValueError(f"Duplicate constituent identities: {duplicates}")
+    # Returning identities may have multiple non-overlapping date-effective
+    # tenures. Reject only overlapping spans for the same ticker, because those
+    # would double-count the identity on at least one session.
+    duplicate_tickers = sorted(
+        df.loc[df["Ticker"].duplicated(keep=False), "Ticker"].unique()
+    )
+    for ticker in duplicate_tickers:
+        spans = []
+        group = df.loc[df["Ticker"].eq(ticker), ["StartDate", "EndDate"]]
+        for _, row in group.iterrows():
+            start = str(row["StartDate"]).strip() or LIVE_SERIES_START
+            end = str(row["EndDate"]).strip() or "9999-12-31"
+            if end < start:
+                raise ValueError(
+                    f"Invalid constituent span for {ticker}: {start} -> {end}"
+                )
+            spans.append((start, end))
+        spans.sort()
+        for previous, current in zip(spans, spans[1:]):
+            if current[0] <= previous[1]:
+                raise ValueError(
+                    f"Overlapping constituent identity spans for {ticker}: "
+                    f"{previous[0]} -> {previous[1]} overlaps "
+                    f"{current[0]} -> {current[1]}"
+                )
     return df.reset_index(drop=True)
 
 
