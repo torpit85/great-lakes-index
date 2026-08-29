@@ -21,38 +21,143 @@ LIVE_CHECKPOINT_SUM_CLOSE="14757.429955720901503"
 LIVE_CHECKPOINT_VOLUME="212752200"
 LIVE_CHECKPOINT_ROSTER="90"
 
-if ! "$PYTHON" - <<'PY'
-import sys
+readarray -t MARKET_STATE < <("$PYTHON" - <<'PY'
 from datetime import datetime
 from zoneinfo import ZoneInfo
+import pandas as pd
 import exchange_calendars as xcals
+
 calendar = xcals.get_calendar("XNYS")
 today = datetime.now(ZoneInfo("America/New_York")).date().isoformat()
-sys.exit(0 if calendar.is_session(today) else 1)
+is_session = bool(calendar.is_session(today))
+if is_session:
+    target = today
+else:
+    target = calendar.date_to_session(
+        pd.Timestamp(today), direction="previous"
+    ).date().isoformat()
+
+print(today)
+print("1" if is_session else "0")
+print(target)
 PY
-then
-  echo "$(date -Is) NYSE closed today; publishing latest available session." >> "$LOG"
+)
+
+NY_TODAY="${MARKET_STATE[0]}"
+NYSE_IS_SESSION="${MARKET_STATE[1]}"
+END_DATE="${MARKET_STATE[2]}"
+
+cd "$ROOT"
+echo "$(date -Is) run_gli_publish.sh fired; NY_DATE=$NY_TODAY TARGET_SESSION=$END_DATE" >> "$LOG"
+
+REUSE_LOCAL_LATEST=0
+
+if [[ "$NYSE_IS_SESSION" != "1" ]]; then
+  echo "$(date -Is) NYSE closed on $NY_TODAY; target session is $END_DATE." >> "$LOG"
+
+  if "$PYTHON" - "$END_DATE" <<'PY'
+from decimal import Decimal
+import csv, sys
+
+target = sys.argv[1]
+
+def pos(v):
+    try:
+        d = Decimal(str(v))
+        return d.is_finite() and d > 0
+    except Exception:
+        return False
+
+def nonneg(v):
+    try:
+        d = Decimal(str(v))
+        return d.is_finite() and d >= 0
+    except Exception:
+        return False
+
+with open("constituents_great_lakes.csv", newline="", encoding="utf-8-sig") as f:
+    constituents = list(csv.DictReader(f))
+
+def member_on(row, day):
+    start = (row.get("StartDate") or "").strip()
+    end = (row.get("EndDate") or "").strip()
+    return (not start or start <= day) and (not end or day <= end)
+
+active = sorted({
+    (row.get("Ticker") or "").strip().upper()
+    for row in constituents
+    if member_on(row, target) and (row.get("Ticker") or "").strip()
+})
+
+with open("gli_levels.csv", newline="", encoding="utf-8-sig") as f:
+    levels = list(csv.DictReader(f))
+if not levels or max(r["Date"] for r in levels) != target:
+    raise SystemExit(1)
+matches = [r for r in levels if r["Date"] == target]
+if len(matches) != 1:
+    raise SystemExit(1)
+level = matches[0]
+
+for field in ("GLI_Open","GLI_High","GLI_Low","GLI_Close","Divisor",
+              "SumOpen","SumHigh","SumLow","SumClose"):
+    if field not in level or not pos(level[field]):
+        raise SystemExit(1)
+if "TotalVolume" not in level or not nonneg(level["TotalVolume"]):
+    raise SystemExit(1)
+if int(Decimal(level["RowsLoaded"])) != len(active):
+    raise SystemExit(1)
+
+with open("gli_prices.csv", newline="", encoding="utf-8-sig") as f:
+    prices = list(csv.DictReader(f))
+if not prices or max(r["Date"] for r in prices) != target:
+    raise SystemExit(1)
+
+by_ticker = {}
+for r in prices:
+    if r["Date"] != target:
+        continue
+    t = (r.get("Ticker") or "").strip().upper()
+    if t not in active:
+        continue
+    if t in by_ticker:
+        raise SystemExit(1)
+    by_ticker[t] = r
+
+if set(by_ticker) != set(active):
+    raise SystemExit(1)
+
+for t, r in by_ticker.items():
+    if any(not pos(r.get(f)) for f in ("Open","High","Low","Close")):
+        raise SystemExit(1)
+    if not nonneg(r.get("Volume")):
+        raise SystemExit(1)
+print(f"LOCAL_LATEST_COMPLETE target={target} roster={len(active)} price_rows={len(by_ticker)}")
+PY
+  then
+    REUSE_LOCAL_LATEST=1
+    echo "$(date -Is) local target session $END_DATE is complete; skipping Yahoo refetch." >> "$LOG"
+  else
+    echo "$(date -Is) local target session $END_DATE is incomplete; attempting guarded Yahoo refetch." >> "$LOG"
+  fi
 fi
 
-echo "$(date -Is) run_gli_publish.sh fired" >> "$LOG"
-END_DATE="$(date +%F)"
-cd "$ROOT"
-
-"$PYTHON" great_lakes_index_PRO.py \
-  --tickers constituents_great_lakes.csv \
-  --accepted-chain GLI_2026_accepted_daily_close_chain.csv \
-  --accepted-ohlcv-chain GLI_2026_accepted_daily_ohlcv_chain.csv \
-  --live-checkpoint-levels "$LIVE_CHECKPOINT_LEVELS" \
-  --live-checkpoint-prices "$LIVE_CHECKPOINT_PRICES" \
-  --fetch yfinance \
-  --start 2025-12-31 \
-  --end "$END_DATE" \
-  --events divisor_events.csv \
-  --prices-out gli_prices.csv \
-  --out gli_levels.csv \
-  --db gli.sqlite \
-  --report-dir report \
-  --strict >> "$LOG" 2>&1
+if [[ "$REUSE_LOCAL_LATEST" != "1" ]]; then
+  "$PYTHON" great_lakes_index_PRO.py \
+    --tickers constituents_great_lakes.csv \
+    --accepted-chain GLI_2026_accepted_daily_close_chain.csv \
+    --accepted-ohlcv-chain GLI_2026_accepted_daily_ohlcv_chain.csv \
+    --live-checkpoint-levels "$LIVE_CHECKPOINT_LEVELS" \
+    --live-checkpoint-prices "$LIVE_CHECKPOINT_PRICES" \
+    --fetch yfinance \
+    --start 2025-12-31 \
+    --end "$END_DATE" \
+    --events divisor_events.csv \
+    --prices-out gli_prices.csv \
+    --out gli_levels.csv \
+    --db gli.sqlite \
+    --report-dir report \
+    --strict >> "$LOG" 2>&1
+fi
 
 "$PYTHON" - \
   "$ACCEPTED_DATE" "$ACCEPTED_CLOSE" "$ACCEPTED_DIVISOR" \
@@ -61,7 +166,8 @@ cd "$ROOT"
   "$LIVE_CHECKPOINT_LOW" "$LIVE_CHECKPOINT_CLOSE" \
   "$LIVE_CHECKPOINT_SUM_OPEN" "$LIVE_CHECKPOINT_SUM_HIGH" \
   "$LIVE_CHECKPOINT_SUM_LOW" "$LIVE_CHECKPOINT_SUM_CLOSE" \
-  "$LIVE_CHECKPOINT_VOLUME" "$LIVE_CHECKPOINT_ROSTER" <<'PY'
+  "$LIVE_CHECKPOINT_VOLUME" "$LIVE_CHECKPOINT_ROSTER" \
+  "$END_DATE" <<'PY'
 from decimal import Decimal
 import csv
 import sys
@@ -71,7 +177,8 @@ import sys
     checkpoint_open, checkpoint_high, checkpoint_low, checkpoint_close,
     checkpoint_sum_open, checkpoint_sum_high, checkpoint_sum_low,
     checkpoint_sum_close, checkpoint_volume, checkpoint_roster,
-) = sys.argv[1:15]
+    guard_date,
+) = sys.argv[1:16]
 with open("gli_levels.csv", newline="", encoding="utf-8") as stream:
     rows = {row["Date"]: row for row in csv.DictReader(stream)}
 if accepted_date not in rows:
@@ -116,8 +223,9 @@ with open("constituents_great_lakes.csv", newline="", encoding="utf-8") as strea
 # Membership is date-effective. Do not use the Active flag here: during a
 # staged transition, future additions may already be Active=Y and outgoing
 # members may already be Active=N while StartDate/EndDate remain authoritative.
-import datetime
-guard_date = datetime.date.today().isoformat()
+# Use the resolved NYSE target session rather than the host machine's
+# calendar date. This keeps membership guards aligned across time zones,
+# weekends, and exchange holidays.
 
 def roster_member_on(row, day):
     start = row.get("StartDate", "").strip()
@@ -199,6 +307,6 @@ grep -q "2005-08-01" "$ROOT/docs/data/gli_history.json"
 
 git add docs >> "$LOG" 2>&1
 if ! git diff --cached --quiet; then
-  git commit -m "GLI site update $(date +%F)" >> "$LOG" 2>&1
+  git commit -m "GLI site update $END_DATE" >> "$LOG" 2>&1
 fi
 git push >> "$LOG" 2>&1
