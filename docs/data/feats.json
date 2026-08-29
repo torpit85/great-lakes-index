@@ -2473,7 +2473,7 @@
               "holder": "Multiple",
               "value": "2 tenures",
               "date": "",
-              "detail": "DOW, PATK, SYK, WEC",
+              "detail": "BBWI, DOW, PATK, SYK, WEC",
               "ticker": "",
               "raw": null
             },
@@ -2488,11 +2488,11 @@
             },
             {
               "feat": "Most recent returning component",
-              "holder": "DOW \u2014 Dow Inc.",
-              "value": "396 sessions absent",
-              "date": "2019-04-02",
+              "holder": "BBWI \u2014 Bath & Body Works, Inc.",
+              "value": "61 sessions absent",
+              "date": "2026-04-01",
               "detail": "",
-              "ticker": "DOW",
+              "ticker": "BBWI",
               "raw": null
             },
             {
@@ -2506,11 +2506,11 @@
             },
             {
               "feat": "Shortest absence before returning",
-              "holder": "SYK \u2014 Stryker Corporation",
-              "value": "261 sessions",
-              "date": "2007-07-31",
+              "holder": "BBWI \u2014 Bath & Body Works, Inc.",
+              "value": "61 sessions",
+              "date": "2026-04-01",
               "detail": "",
-              "ticker": "SYK",
+              "ticker": "BBWI",
               "raw": null
             },
             {
@@ -2524,11 +2524,11 @@
             },
             {
               "feat": "Best first session after returning",
-              "holder": "DOW \u2014 Dow Inc.",
-              "value": "+2.05%",
-              "date": "2019-04-02",
+              "holder": "BBWI \u2014 Bath & Body Works, Inc.",
+              "value": "+4.15%",
+              "date": "2026-04-01",
               "detail": "",
-              "ticker": "DOW",
+              "ticker": "BBWI",
               "raw": null
             },
             {
