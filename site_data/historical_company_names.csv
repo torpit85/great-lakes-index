@@ -15,7 +15,7 @@ ANGI,2021-03-17,2025-12-31,Angi Inc.,ANGI,,historical corporate-name chronology,
 ANTM,2014-12-03,2022-06-27,"Anthem, Inc.",ELV,,GLI historical roster and company-name audit,,,,,,
 AOS,2019-04-24,2025-12-31,A. O. Smith Corporation,AOS,,GLI historical roster and company-name audit,,,,,,
 ASTM,2005-10-10,2007-11-29,"Aastrom Biosciences, Inc.",ASTM,Aastrom Biosciences,GLI historical roster and company-name audit,Aastrom Biosciences,,,,,
-ATGE,2017-05-24,2018-12-04,Adtalem Global Education Inc.,ATGE,,GLI historical roster and company-name audit,,,,,,
+ATGE,2017-05-24,2018-12-04,Adtalem Global Education Inc.,ATGE,,GLI historical roster and company-name audit,,2017-05-24,NAME_AND_TICKER_CHANGE,DV,,Verified same-security DV→ATGE name/ticker continuity.
 AXE,2008-10-07,2020-06-19,Anixter International Inc.,AXE,Anixter International,GLI historical roster and company-name audit,Anixter International,,,,,
 AXL,2007-01-19,2007-01-22,"American Axle & Manufacturing Holdings, Inc.",AXL,American Axle & Manufacturing,GLI historical roster and company-name audit,American Axle & Manufacturing,,,,,
 BA,2006-07-17,2025-12-31,The Boeing Company,BA,Boeing,GLI historical roster and company-name audit,Boeing,,,,,
@@ -46,7 +46,7 @@ CPWR,2005-10-10,2014-12-15,Compuware Corporation,CPWR,Compuware,GLI historical r
 CQB,2008-05-27,2013-02-12,"Chiquita Brands International, Inc.",CQB,Chiquita Brands International,GLI historical roster and company-name audit,Chiquita Brands International,,,,,
 CTB,2005-09-22,2006-07-06,Cooper Tire & Rubber Company,CTB,Cooper Tire & Rubber,GLI historical roster and company-name audit,Cooper Tire & Rubber,,,,,
 CTS,2005-08-31,2025-12-31,CTS Corporation,CTS,CTS Corp.,GLI historical roster and company-name audit,CTS Corp.,,,,,
-DBI,2019-04-02,2021-01-11,Designer Brands Inc.,DBI,,GLI historical roster and company-name audit,,,,,,
+DBI,2019-04-02,2021-01-11,Designer Brands Inc.,DBI,,GLI historical roster and company-name audit,,2019-04-02,NAME_AND_TICKER_CHANGE,DSW,,Accepted continuous DSW→DBI raw-price/security lineage.
 DE,2005-09-22,2025-12-31,Deere & Company,DE,Deere & Co.,GLI historical roster and company-name audit,Deere & Co.,,,,,
 DF,2005-08-01,2005-10-07,Dean Foods Company,DF,Dean Foods,GLI historical roster and company-name audit,Dean Foods,,,,,
 DFS,2011-12-27,2025-05-16,Discover Financial Services,DFS,,GLI historical roster and company-name audit,Discover Financial Services,,,,,
@@ -58,7 +58,7 @@ DSW,2005-08-01,2019-04-01,DSW Inc.,DBI,DSW,GLI historical roster and company-nam
 DV,2005-09-22,2017-05-23,DeVry Inc.,ATGE,DeVry,GLI historical roster and company-name audit,DeVry,,,,,
 DW,2005-08-01,2007-05-25,Drew Industries Incorporated,DW,Drew Industries,GLI historical roster and company-name audit,Drew Industries,,,,,
 DWDP,2017-09-01,2019-04-01,DowDuPont Inc.,DWDP,,GLI historical roster and company-name audit,,,,,,
-ELV,2022-06-28,2025-12-31,"Elevance Health, Inc.",ELV,,GLI historical roster and company-name audit,,,,,,
+ELV,2022-06-28,2025-12-31,"Elevance Health, Inc.",ELV,,GLI historical roster and company-name audit,,2022-06-28,NAME_AND_TICKER_CHANGE,ANTM,,Accepted same-security ANTM→ELV rekey; no reset solely for rekey.
 EMMS,2006-11-20,2007-01-18,Emmis Communications Corporation,EMMS,Emmis Communications,GLI historical roster and company-name audit,Emmis Communications,,,,,
 ESI,2005-09-22,2016-09-02,"ITT Educational Services, Inc.",ESI,ITT Educational Services,GLI historical roster and company-name audit,ITT Educational Services,,,,,
 ETN,2006-11-20,2012-11-30,Eaton Corporation,ETN,Eaton Corp.,historical corporate-name chronology,Eaton Corp.,,,,,
@@ -184,7 +184,7 @@ SUI,2005-10-10,2025-12-31,"Sun Communities, Inc.",SUI,Sun Communities,GLI histor
 SYK,2005-10-10,2006-07-14,Stryker Corporation,SYK,Stryker Corp.,GLI historical roster and company-name audit,Stryker Corp.,,,,,
 SYK,2007-07-31,2025-12-31,Stryker Corporation,SYK,Stryker Corp.,GLI historical roster and company-name audit,Stryker Corp.,,,,,
 SYNT,2005-10-10,2018-10-09,"Syntel, Inc.",SYNT,,GLI historical roster and company-name audit,"Syntel, Inc.",,,,,
-TCF,2019-08-01,2021-01-11,TCF Financial Corporation,TCF,,GLI historical roster and company-name audit,,,,,,
+TCF,2019-08-01,2021-01-11,TCF Financial Corporation,TCF,,GLI historical roster and company-name audit,,2019-08-01,NAME_AND_TICKER_CHANGE,CHFC,Chemical Financial Corporation,Verified same-security CHFC→TCF name/ticker continuity.
 TDC,2010-01-27,2025-12-31,Teradata Corporation,TDC,Teradata Corp.,GLI historical roster and company-name audit,Teradata Corp.,,,,,
 TDS,2016-11-08,2025-12-31,"Telephone and Data Systems, Inc.",TDS,,GLI historical roster and company-name audit,,,,,,
 THO,2009-04-09,2025-12-31,"THOR Industries, Inc.",THO,Thor Industries,GLI historical roster and company-name audit,Thor Industries,,,,,
@@ -202,7 +202,7 @@ ULTA,2016-03-08,2025-12-31,"Ulta Beauty, Inc.",ULTA,,GLI historical roster and c
 USG,2007-05-29,2019-04-23,USG Corporation,USG,USG Corp.,GLI historical roster and company-name audit,USG Corp.,,,,,
 VCI,2011-04-29,2014-02-04,"Valassis Communications, Inc.",VCI,,GLI historical roster and company-name audit,Valassis Communications Inc.,,,,,
 WAG,2006-11-20,2014-12-30,Walgreen Co.,WBA,Walgreen,GLI historical roster and company-name audit,Walgreen,,,,,
-WBA,2014-12-31,2025-08-27,"Walgreens Boots Alliance, Inc.",WBA,,GLI historical roster and company-name audit,,,,,,
+WBA,2014-12-31,2025-08-27,"Walgreens Boots Alliance, Inc.",WBA,,GLI historical roster and company-name audit,,2014-12-31,NAME_AND_TICKER_CHANGE,WAG,,Verified same-security WAG→WBA name/ticker continuity.
 WEC,2005-09-22,2006-03-06,Wisconsin Energy Corporation,WEC,Wisconsin Energy,historical corporate-name chronology,Wisconsin Energy,,,,,
 WEC,2013-12-20,2015-06-28,Wisconsin Energy Corporation,WEC,Wisconsin Energy,historical corporate-name chronology,Wisconsin Energy,,,,,
 WEC,2015-06-29,2025-12-31,"WEC Energy Group, Inc.",WEC,,historical corporate-name chronology,,,,,,
@@ -214,7 +214,7 @@ WNC,2020-06-22,2025-12-31,Wabash National Corporation,WNC,,GLI historical roster
 WWW,2005-10-10,2025-12-31,"Wolverine World Wide, Inc.",WWW,Wolverine Worldwide,GLI historical roster and company-name audit,Wolverine Worldwide,,,,,
 WWY,2005-08-01,2008-10-06,Wm. Wrigley Jr. Company,WWY,,GLI historical roster and company-name audit,Wm. Wrigley Jr. Company,,,,,
 XRIT,2007-01-19,2008-05-23,"X-Rite, Incorporated",XRIT,X-Rite,GLI historical roster and company-name audit,X-Rite,,,,,
-ZBH,2015-06-29,2025-12-31,"Zimmer Biomet Holdings, Inc.",ZBH,,GLI historical roster and company-name audit,,,,,,
+ZBH,2015-06-29,2025-12-31,"Zimmer Biomet Holdings, Inc.",ZBH,,GLI historical roster and company-name audit,,2015-06-29,NAME_AND_TICKER_CHANGE,ZMH,,Verified same-security ZMH→ZBH rekey; same listed security.
 ZEUS,2006-07-07,2025-12-31,"Olympic Steel, Inc.",ZEUS,Olympic Steel,GLI historical roster and company-name audit,Olympic Steel,,,,,
 ZMH,2005-08-31,2015-06-26,"Zimmer Holdings, Inc.",ZBH,Zimmer Holdings,GLI historical roster and company-name audit,Zimmer Holdings,,,,,
 BBWI,2021-08-03,2025-12-31,"Bath & Body Works, Inc.",LB_BBWI,,GLI accepted continuity repair,,2021-08-03,NAME_AND_TICKER_CHANGE,LB,"L Brands, Inc.",Same accepted GLI security lineage; LB continued as BBWI after the 2021 Victoria's Secret separation. This is not membership turnover.

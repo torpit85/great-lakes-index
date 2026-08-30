@@ -22,6 +22,7 @@ HIST_GZ = "component_ohlcv_history_2005_2025.csv.gz"
 EXPLICIT_COMPONENT_RETURN_RESETS = {
     ("ACV", "2006-11-17"),
     ("JCI", "2007-10-03"),
+    ("DWDP", "2017-09-01"),
 }
 
 
@@ -535,6 +536,17 @@ def _prepare_component_metrics(
 
             comp.at[i, 'breadth_ret'] = float(close) / prior_close - 1.0
             comp.at[i, 'breadth_bridge'] = True
+
+    # Genuine new components on GLI reset/reconstitution sessions have no
+    # same-ticker prior close.  After documented same-security bridges have
+    # had first priority, use that session's open-to-close move for breadth.
+    breadth_reset = (
+        comp.breadth_ret.isna()
+        & ~comp.continuous
+        & ((~comp.stable_divisor) | comp.explicit_component_reset)
+        & comp.oc_ret.notna()
+    )
+    comp.loc[breadth_reset, 'breadth_ret'] = comp.loc[breadth_reset, 'oc_ret']
 
     factor=(1+comp.clean_ret).where(comp.clean_ret.notna(),1.0)
     comp['perf_index']=factor.groupby(comp._tenure_id).cumprod()
