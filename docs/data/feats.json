@@ -3,8 +3,8 @@
   "generated_through": "2026-08-28",
   "component_data_through": "2026-08-28",
   "component_membership_filter": {
-    "raw_rows": 504226,
-    "eligible_rows": 504146,
+    "raw_rows": 509881,
+    "eligible_rows": 509801,
     "excluded_rows": 80,
     "excluded_tickers": [
       "BIG"
@@ -1130,7 +1130,7 @@
               "holder": "GLI",
               "value": "-1.20%",
               "date": "2019-08-30",
-              "detail": "58 up / 36 down",
+              "detail": "60 up / 37 down",
               "ticker": "",
               "raw": null
             },
@@ -1531,7 +1531,7 @@
             {
               "feat": "Most sessions as the largest negative contributor",
               "holder": "CME \u2014 CME Group Inc.",
-              "value": "450 sessions",
+              "value": "448 sessions",
               "date": "",
               "detail": "",
               "ticker": "CME",
@@ -2355,11 +2355,11 @@
             },
             {
               "feat": "Longest streak with both price and volume falling",
-              "holder": "ADM \u2014 Archer-Daniels-Midland Company",
-              "value": "5 sessions",
-              "date": "2017-03-07",
-              "detail": "2017-03-01 through 2017-03-07",
-              "ticker": "ADM",
+              "holder": "BERY \u2014 Berry Global Group, Inc.",
+              "value": "6 sessions",
+              "date": "2019-08-07",
+              "detail": "2019-07-31 through 2019-08-07",
+              "ticker": "BERY",
               "raw": null
             },
             {
@@ -2642,14 +2642,14 @@
               "holder": "GLI",
               "value": "-1.20%",
               "date": "2019-08-30",
-              "detail": "58 up / 36 down",
+              "detail": "60 up / 37 down",
               "ticker": "",
               "raw": null
             },
             {
               "feat": "Biggest gainer and biggest positive contributor on the same session",
               "holder": "DPZ \u2014 Domino's Pizza Inc",
-              "value": "707 sessions",
+              "value": "699 sessions",
               "date": "2026-08-28",
               "detail": "Most recent qualifying session",
               "ticker": "DPZ",
@@ -2658,7 +2658,7 @@
             {
               "feat": "Biggest decliner and biggest negative contributor on the same session",
               "holder": "GE \u2014 GE Aerospace",
-              "value": "675 sessions",
+              "value": "674 sessions",
               "date": "2026-08-19",
               "detail": "Most recent qualifying session",
               "ticker": "GE",
