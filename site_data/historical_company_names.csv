@@ -20,6 +20,7 @@ AXE,2008-10-07,2020-06-19,Anixter International Inc.,AXE,Anixter International,G
 AXL,2007-01-19,2007-01-22,"American Axle & Manufacturing Holdings, Inc.",AXL,American Axle & Manufacturing,GLI historical roster and company-name audit,American Axle & Manufacturing,,,,,
 BA,2006-07-17,2025-12-31,The Boeing Company,BA,Boeing,GLI historical roster and company-name audit,Boeing,,,,,
 BAX,2007-11-30,2025-12-31,Baxter International Inc.,BAX,Baxter International,GLI historical roster and company-name audit,Baxter International,,,,,
+BBWI,2021-08-03,2025-12-31,"Bath & Body Works, Inc.",LB_BBWI,,GLI accepted continuity repair,,2021-08-03,NAME_AND_TICKER_CHANGE,LB,"L Brands, Inc.",Same accepted GLI security lineage; LB continued as BBWI after the 2021 Victoria's Secret separation. This is not membership turnover.
 BC,2005-09-22,2006-07-06,Brunswick Corporation,BC,Brunswick Corp.,GLI historical roster and company-name audit,Brunswick Corp.,,,,,
 BEAM,2011-10-04,2014-04-30,Beam Inc.,BEAM,,GLI historical roster and company-name audit,"Beam, Inc.",,,,,
 BERY,2016-10-14,2025-04-29,"Berry Global Group, Inc.",BERY,,GLI historical roster and company-name audit,,,,,,
@@ -31,6 +32,7 @@ BMI,2010-12-22,2025-12-31,"Badger Meter, Inc.",BMI,,GLI historical roster and co
 BOBE,2005-08-01,2018-01-11,"Bob Evans Farms, Inc.",BOBE,Bob Evans Farms,GLI historical roster and company-name audit,Bob Evans Farms,,,,,
 BOT,2005-10-21,2007-07-12,"CBOT Holdings, Inc.",BOT,CBOT Holdings,GLI historical roster and company-name audit,CBOT Holdings,,,,,
 BOW,2005-09-22,2005-10-07,Bowater Incorporated,BOW,Bowater,GLI historical roster and company-name audit,Bowater,,,,,
+BWA,2016-09-06,2021-01-11,BorgWarner Inc.,BWA,BorgWarner,GLI historical roster and company-name audit,BorgWarner,2016-09-06,SECURITY_REPLACEMENT,JCI,"Johnson Controls, Inc.",JCI became ineligible after the 2016 Johnson Controls/Tyco combination placed the successor global headquarters outside the Great Lakes region; BorgWarner entered the GLI as the replacement.
 CARS,2018-01-12,2025-12-31,Cars.com Inc.,CARS,,GLI historical roster and company-name audit,,,,,,
 CAT,2006-02-06,2025-12-31,Caterpillar Inc.,CAT,,GLI historical roster and company-name audit,"Caterpillar, Inc.",,,,,
 CF,2005-08-12,2025-12-31,"CF Industries Holdings, Inc.",CF,CF Industries,GLI historical roster and company-name audit,CF Industries,,,,,
@@ -92,7 +94,6 @@ INGR,2012-06-04,2025-12-31,Ingredion Incorporated,INGREDION,"Ingredion Incorpora
 ITC,2014-12-16,2016-10-13,ITC Holdings Corp.,ITC,,GLI historical roster and company-name audit,,,,,,
 ITW,2006-11-20,2025-12-31,Illinois Tool Works Inc.,ITW,Illinois Tool Works,GLI historical roster and company-name audit,Illinois Tool Works,,,,,
 JCI,2005-09-22,2016-09-02,"Johnson Controls, Inc.",JCI,Johnson Controls,historical corporate-name chronology,Johnson Controls,,,,,
-JCI,2016-09-06,2021-01-11,Johnson Controls International plc,JCI,,historical corporate-name chronology,,,,,,
 JLL,2011-03-07,2025-12-31,Jones Lang LaSalle Incorporated,JLL,Jones Lang LaSalle Inc.,GLI historical roster and company-name audit,Jones Lang LaSalle Inc.,,,,,
 K,2005-08-31,2023-10-01,Kellogg Company,KELLANOVA,Kellogg,historical corporate-name chronology,Kellogg,,,,,
 K,2023-10-02,2025-12-10,Kellanova,KELLANOVA,,historical corporate-name chronology,,2023-10-02,NAME_CHANGE,K,Kellogg Company,Same security and ticker; company name changed to Kellanova.
@@ -201,6 +202,7 @@ UFPI,2020-04-01,2025-12-31,"UFP Industries, Inc.",UFPI,,historical corporate-nam
 ULTA,2016-03-08,2025-12-31,"Ulta Beauty, Inc.",ULTA,,GLI historical roster and company-name audit,,,,,,
 USG,2007-05-29,2019-04-23,USG Corporation,USG,USG Corp.,GLI historical roster and company-name audit,USG Corp.,,,,,
 VCI,2011-04-29,2014-02-04,"Valassis Communications, Inc.",VCI,,GLI historical roster and company-name audit,Valassis Communications Inc.,,,,,
+VSCO,2021-12-13,2025-12-31,Victoria's Secret & Co.,VSCO,,GLI accepted continuity repair,,,,,,
 WAG,2006-11-20,2014-12-30,Walgreen Co.,WBA,Walgreen,GLI historical roster and company-name audit,Walgreen,,,,,
 WBA,2014-12-31,2025-08-27,"Walgreens Boots Alliance, Inc.",WBA,,GLI historical roster and company-name audit,,2014-12-31,NAME_AND_TICKER_CHANGE,WAG,,Verified same-security WAG→WBA name/ticker continuity.
 WEC,2005-09-22,2006-03-06,Wisconsin Energy Corporation,WEC,Wisconsin Energy,historical corporate-name chronology,Wisconsin Energy,,,,,
@@ -217,5 +219,3 @@ XRIT,2007-01-19,2008-05-23,"X-Rite, Incorporated",XRIT,X-Rite,GLI historical ros
 ZBH,2015-06-29,2025-12-31,"Zimmer Biomet Holdings, Inc.",ZBH,,GLI historical roster and company-name audit,,2015-06-29,NAME_AND_TICKER_CHANGE,ZMH,,Verified same-security ZMH→ZBH rekey; same listed security.
 ZEUS,2006-07-07,2025-12-31,"Olympic Steel, Inc.",ZEUS,Olympic Steel,GLI historical roster and company-name audit,Olympic Steel,,,,,
 ZMH,2005-08-31,2015-06-26,"Zimmer Holdings, Inc.",ZBH,Zimmer Holdings,GLI historical roster and company-name audit,Zimmer Holdings,,,,,
-BBWI,2021-08-03,2025-12-31,"Bath & Body Works, Inc.",LB_BBWI,,GLI accepted continuity repair,,2021-08-03,NAME_AND_TICKER_CHANGE,LB,"L Brands, Inc.",Same accepted GLI security lineage; LB continued as BBWI after the 2021 Victoria's Secret separation. This is not membership turnover.
-VSCO,2021-12-13,2025-12-31,Victoria's Secret & Co.,VSCO,,GLI accepted continuity repair,,,,,,
