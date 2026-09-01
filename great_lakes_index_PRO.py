@@ -1026,6 +1026,47 @@ def main() -> int:
         .date().isoformat(),
     )
 
+    # Preserve previously validated live component bars.  A successful prior
+    # run wrote args.prices_out only after strict validation, so those sessions
+    # should not be re-fetched and replaced by a later incomplete Yahoo batch.
+    local_live_prices = empty_prices_frame()
+    if (
+        args.fetch == "yfinance"
+        and args.prices_out
+        and args.prices_out.exists()
+    ):
+        local_live_prices = normalize_prices_df(
+            pd.read_csv(args.prices_out)
+        )
+        local_live_prices = local_live_prices[
+            (local_live_prices["Date"] > checkpoint_cutoff)
+            & (local_live_prices["Date"] <= end_inclusive)
+        ].copy()
+
+        if not local_live_prices.empty:
+            for local_day, local_day_rows in local_live_prices.groupby(
+                "Date", sort=True
+            ):
+                active = active_tickers_for_date(
+                    constituents, local_day
+                )
+                _validate_live_day_rows(
+                    local_day_rows, active, local_day
+                )
+
+            local_cutoff = max(local_live_prices["Date"])
+            vendor_start = max(
+                vendor_start,
+                (
+                    pd.to_datetime(local_cutoff)
+                    + pd.Timedelta(days=1)
+                ).date().isoformat(),
+            )
+            print(
+                f"Reusing validated local live prices through "
+                f"{local_cutoff}; Yahoo fetch starts {vendor_start}."
+            )
+
     if args.fetch == "yfinance":
         end_exclusive = (
             pd.to_datetime(end_inclusive) + pd.Timedelta(days=1)
@@ -1043,6 +1084,20 @@ def main() -> int:
         vendor_prices = normalize_prices_df(pd.read_csv(args.prices))
     else:
         raise ValueError("Provide --prices or --fetch yfinance")
+
+    if args.fetch == "yfinance" and not local_live_prices.empty:
+        vendor_prices = pd.concat(
+            [vendor_prices, local_live_prices],
+            ignore_index=True,
+        )
+        vendor_prices = (
+            normalize_prices_df(vendor_prices)
+            .sort_values(["Date", "Ticker"])
+            .drop_duplicates(
+                subset=["Date", "Ticker"], keep="last"
+            )
+            .reset_index(drop=True)
+        )
 
     prices_df = overlay_live_checkpoint_prices(
         vendor_prices, checkpoint_price_rows
