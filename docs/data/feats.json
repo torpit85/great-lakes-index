@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
-  "generated_through": "2026-09-01",
-  "component_data_through": "2026-09-01",
+  "generated_through": "2026-09-02",
+  "component_data_through": "2026-09-02",
   "component_membership_filter": {
-    "raw_rows": 510061,
-    "eligible_rows": 508886,
+    "raw_rows": 510151,
+    "eligible_rows": 508976,
     "excluded_rows": 1175,
     "excluded_tickers": [
       "BIG",
@@ -2181,7 +2181,7 @@
             {
               "feat": "Most sessions as the GLI\u2019s highest-volume component",
               "holder": "F \u2014 Ford Motor Company",
-              "value": "4,721 sessions",
+              "value": "4,722 sessions",
               "date": "",
               "detail": "",
               "ticker": "F",
@@ -2208,16 +2208,16 @@
             {
               "feat": "Most shares traded during one continuous GLI tenure",
               "holder": "F \u2014 Ford Motor Company",
-              "value": "293,048,552,713",
-              "date": "2026-09-01",
-              "detail": "2005-08-01 through 2026-09-01",
+              "value": "293,106,735,713",
+              "date": "2026-09-02",
+              "detail": "2005-08-01 through 2026-09-02",
               "ticker": "F",
               "raw": null
             },
             {
               "feat": "Most shares traded across all GLI tenures",
               "holder": "F \u2014 Ford Motor Company",
-              "value": "293,048,552,713",
+              "value": "293,106,735,713",
               "date": "",
               "detail": "",
               "ticker": "F",
@@ -2226,9 +2226,9 @@
             {
               "feat": "Highest average daily volume during one continuous GLI tenure",
               "holder": "F \u2014 Ford Motor Company",
-              "value": "55,240,066",
-              "date": "2026-09-01",
-              "detail": "2005-08-01 through 2026-09-01",
+              "value": "55,240,621",
+              "date": "2026-09-02",
+              "detail": "2005-08-01 through 2026-09-02",
               "ticker": "F",
               "raw": null
             },
@@ -2413,16 +2413,16 @@
             {
               "feat": "Longest continuous GLI tenure",
               "holder": "Multiple",
-              "value": "5,305 sessions",
-              "date": "2026-09-01",
-              "detail": "2005-08-01 through 2026-09-01; AEP, F, FITB, LKFN, MCD, SKY, SRCE, WHR",
+              "value": "5,306 sessions",
+              "date": "2026-09-02",
+              "detail": "2005-08-01 through 2026-09-02; AEP, F, FITB, LKFN, MCD, SKY, SRCE, WHR",
               "ticker": "",
               "raw": null
             },
             {
               "feat": "Most total sessions as a GLI component",
               "holder": "Multiple",
-              "value": "5,305 sessions",
+              "value": "5,306 sessions",
               "date": "",
               "detail": "AEP, F, FITB, LKFN, MCD, SKY, SRCE, WHR",
               "ticker": "",
@@ -2440,9 +2440,9 @@
             {
               "feat": "Oldest continuously active GLI component",
               "holder": "Multiple",
-              "value": "5,305 sessions",
+              "value": "5,306 sessions",
               "date": "2005-08-01",
-              "detail": "Active through 2026-09-01; AEP, F, FITB, LKFN, MCD, SKY, SRCE, WHR",
+              "detail": "Active through 2026-09-02; AEP, F, FITB, LKFN, MCD, SKY, SRCE, WHR",
               "ticker": "",
               "raw": null
             },
@@ -2450,7 +2450,7 @@
               "feat": "Original components still active",
               "holder": "Multiple",
               "value": "8 components",
-              "date": "2026-09-01",
+              "date": "2026-09-02",
               "detail": "AEP, F, FITB, LKFN, MCD, SKY, SRCE, WHR",
               "ticker": "",
               "raw": null
@@ -2594,8 +2594,8 @@
             {
               "feat": "Longest continuously represented corporate lineage",
               "holder": "Multiple",
-              "value": "7,701 calendar days",
-              "date": "2026-09-01",
+              "value": "7,702 calendar days",
+              "date": "2026-09-02",
               "detail": "Since 2005-08-01; AEP, F, FITB, LKFN, MCD, SKY, SRCE, WHR",
               "ticker": "",
               "raw": null
@@ -2603,8 +2603,8 @@
             {
               "feat": "Longest tenure under one ticker",
               "holder": "Multiple",
-              "value": "7,701 calendar days",
-              "date": "2026-09-01",
+              "value": "7,702 calendar days",
+              "date": "2026-09-02",
               "detail": "Since 2005-08-01; AEP, F, FITB, LKFN, MCD, SKY, SRCE, WHR",
               "ticker": "",
               "raw": null
@@ -2612,8 +2612,8 @@
             {
               "feat": "Longest tenure under one company name",
               "holder": "Multiple",
-              "value": "7,701 calendar days",
-              "date": "2026-09-01",
+              "value": "7,702 calendar days",
+              "date": "2026-09-02",
               "detail": "Since 2005-08-01; 1st Source Corporation, American Electric Power Company, Inc., Fifth Third Bancorp, Ford Motor Company, Lakeland Financial Corporation, McDonald's Corporation, Whirlpool Corporation",
               "ticker": "",
               "raw": null
