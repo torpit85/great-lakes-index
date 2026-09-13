@@ -4,11 +4,10 @@
   "component_data_through": "2026-09-11",
   "component_membership_filter": {
     "raw_rows": 510691,
-    "eligible_rows": 509516,
-    "excluded_rows": 1175,
+    "eligible_rows": 510611,
+    "excluded_rows": 80,
     "excluded_tickers": [
-      "BIG",
-      "JCI"
+      "BIG"
     ]
   },
   "price_performance_filters": {
@@ -1131,7 +1130,7 @@
               "holder": "GLI",
               "value": "-1.21%",
               "date": "2019-08-30",
-              "detail": "59 up / 37 down",
+              "detail": "59 up / 38 down",
               "ticker": "",
               "raw": null
             },
@@ -2643,14 +2642,14 @@
               "holder": "GLI",
               "value": "-1.21%",
               "date": "2019-08-30",
-              "detail": "59 up / 37 down",
+              "detail": "59 up / 38 down",
               "ticker": "",
               "raw": null
             },
             {
               "feat": "Biggest gainer and biggest positive contributor on the same session",
               "holder": "DPZ \u2014 Domino's Pizza Inc",
-              "value": "699 sessions",
+              "value": "698 sessions",
               "date": "2026-08-28",
               "detail": "Most recent qualifying session",
               "ticker": "DPZ",
