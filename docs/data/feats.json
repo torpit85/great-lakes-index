@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
-  "generated_through": "2026-09-28",
-  "component_data_through": "2026-09-28",
+  "generated_through": "2026-09-29",
+  "component_data_through": "2026-09-29",
   "component_membership_filter": {
-    "raw_rows": 511681,
-    "eligible_rows": 511601,
+    "raw_rows": 511771,
+    "eligible_rows": 511691,
     "excluded_rows": 80,
     "excluded_tickers": [
       "BIG"
@@ -1567,9 +1567,9 @@
             {
               "feat": "Highest percentage of a calendar year\u2019s GLI gain attributable to one component",
               "holder": "CAT \u2014 Caterpillar, Inc.",
-              "value": "39.69%",
+              "value": "40.28%",
               "date": "2026",
-              "detail": "+9.65 component points vs +24.33 GLI points",
+              "detail": "+9.65 component points vs +23.97 GLI points",
               "ticker": "CAT",
               "raw": null
             }
@@ -2207,16 +2207,16 @@
             {
               "feat": "Most shares traded during one continuous GLI tenure",
               "holder": "F \u2014 Ford Motor Company",
-              "value": "293,939,406,920",
-              "date": "2026-09-28",
-              "detail": "2005-08-01 through 2026-09-28",
+              "value": "293,974,131,420",
+              "date": "2026-09-29",
+              "detail": "2005-08-01 through 2026-09-29",
               "ticker": "F",
               "raw": null
             },
             {
               "feat": "Most shares traded across all GLI tenures",
               "holder": "F \u2014 Ford Motor Company",
-              "value": "293,939,406,920",
+              "value": "293,974,131,420",
               "date": "",
               "detail": "",
               "ticker": "F",
@@ -2225,9 +2225,9 @@
             {
               "feat": "Highest average daily volume during one continuous GLI tenure",
               "holder": "F \u2014 Ford Motor Company",
-              "value": "55,220,629",
-              "date": "2026-09-28",
-              "detail": "2005-08-01 through 2026-09-28",
+              "value": "55,216,779",
+              "date": "2026-09-29",
+              "detail": "2005-08-01 through 2026-09-29",
               "ticker": "F",
               "raw": null
             },
@@ -2412,16 +2412,16 @@
             {
               "feat": "Longest continuous GLI tenure",
               "holder": "Multiple",
-              "value": "5,323 sessions",
-              "date": "2026-09-28",
-              "detail": "2005-08-01 through 2026-09-28; AEP, F, FITB, LKFN, MCD, SKY, SRCE, WHR",
+              "value": "5,324 sessions",
+              "date": "2026-09-29",
+              "detail": "2005-08-01 through 2026-09-29; AEP, F, FITB, LKFN, MCD, SKY, SRCE, WHR",
               "ticker": "",
               "raw": null
             },
             {
               "feat": "Most total sessions as a GLI component",
               "holder": "Multiple",
-              "value": "5,323 sessions",
+              "value": "5,324 sessions",
               "date": "",
               "detail": "AEP, F, FITB, LKFN, MCD, SKY, SRCE, WHR",
               "ticker": "",
@@ -2439,9 +2439,9 @@
             {
               "feat": "Oldest continuously active GLI component",
               "holder": "Multiple",
-              "value": "5,323 sessions",
+              "value": "5,324 sessions",
               "date": "2005-08-01",
-              "detail": "Active through 2026-09-28; AEP, F, FITB, LKFN, MCD, SKY, SRCE, WHR",
+              "detail": "Active through 2026-09-29; AEP, F, FITB, LKFN, MCD, SKY, SRCE, WHR",
               "ticker": "",
               "raw": null
             },
@@ -2449,7 +2449,7 @@
               "feat": "Original components still active",
               "holder": "Multiple",
               "value": "8 components",
-              "date": "2026-09-28",
+              "date": "2026-09-29",
               "detail": "AEP, F, FITB, LKFN, MCD, SKY, SRCE, WHR",
               "ticker": "",
               "raw": null
@@ -2593,8 +2593,8 @@
             {
               "feat": "Longest continuously represented corporate lineage",
               "holder": "Multiple",
-              "value": "7,728 calendar days",
-              "date": "2026-09-28",
+              "value": "7,729 calendar days",
+              "date": "2026-09-29",
               "detail": "Since 2005-08-01; AEP, F, FITB, LKFN, MCD, SKY, SRCE, WHR",
               "ticker": "",
               "raw": null
@@ -2602,8 +2602,8 @@
             {
               "feat": "Longest tenure under one ticker",
               "holder": "Multiple",
-              "value": "7,728 calendar days",
-              "date": "2026-09-28",
+              "value": "7,729 calendar days",
+              "date": "2026-09-29",
               "detail": "Since 2005-08-01; AEP, F, FITB, LKFN, MCD, SKY, SRCE, WHR",
               "ticker": "",
               "raw": null
@@ -2611,8 +2611,8 @@
             {
               "feat": "Longest tenure under one company name",
               "holder": "Multiple",
-              "value": "7,728 calendar days",
-              "date": "2026-09-28",
+              "value": "7,729 calendar days",
+              "date": "2026-09-29",
               "detail": "Since 2005-08-01; 1st Source Corporation, American Electric Power Company, Inc., Fifth Third Bancorp, Ford Motor Company, Lakeland Financial Corporation, McDonald's Corporation, Whirlpool Corporation",
               "ticker": "",
               "raw": null
@@ -2648,11 +2648,11 @@
             },
             {
               "feat": "Biggest gainer and biggest positive contributor on the same session",
-              "holder": "GNRC \u2014 Generac Holdings Inc.",
-              "value": "700 sessions",
-              "date": "2026-09-25",
+              "holder": "DPZ \u2014 Domino's Pizza Inc",
+              "value": "701 sessions",
+              "date": "2026-09-29",
               "detail": "Most recent qualifying session",
-              "ticker": "GNRC",
+              "ticker": "DPZ",
               "raw": null
             },
             {
@@ -2693,11 +2693,11 @@
             },
             {
               "feat": "One component accounts for more than 50% of the GLI\u2019s daily decline",
-              "holder": "PH \u2014 Parker-Hannifin Corporation",
-              "value": "415 sessions",
-              "date": "2026-09-14",
-              "detail": "Most recent: 301.4% of the index move",
-              "ticker": "PH",
+              "holder": "DE \u2014 Deere & Company",
+              "value": "416 sessions",
+              "date": "2026-09-29",
+              "detail": "Most recent: 73.2% of the index move",
+              "ticker": "DE",
               "raw": null
             },
             {
